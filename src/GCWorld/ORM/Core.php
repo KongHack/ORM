@@ -84,7 +84,7 @@ class Core
 			$this->fileWrite($fh, ' // '.$row['Type']."\n");
 		}
 		$this->fileWrite($fh,"\n");
-		$this->fileWrite($fh,'public static $dbInfo = array(');
+		$this->fileWrite($fh,'public static $dbInfo = array('."\n");
 		$this->fileBump($fh);
 
 		foreach($fields as $i => $row)
@@ -92,7 +92,7 @@ class Core
 			$this->fileWrite($fh, str_pad("'".$row['Field']."'",$max_var_name+2,' ')." => '".$row['Type'].($row['Comment']!=''?' - '.$row['Comment']:'')."',\n");
 		}
 		$this->fileDrop($fh);
-		$this->fileWrite($fh,")\n");
+		$this->fileWrite($fh,");\n");
 		
 		$this->fileDrop($fh);
 		$this->fileWrite($fh, "}\n\n");
