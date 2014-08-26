@@ -35,7 +35,7 @@ class ObjectForm
 		{
 			if(!property_exists($this->source, $key) && $key != 'caption')
 			{
-				throw new KH_Exception('Invalid Key - '.$key.'<br /><pre>'.print_r($this->keys,true).'</pre>');
+				throw new ORMException('Invalid Key - '.$key.'<br /><pre>'.print_r($this->keys,true).'</pre>');
 			}
 			$this->fields[] = array('key'=>$key, 'caption'=>$caption, 'type'=>$type, 'params'=>$params);
 		}

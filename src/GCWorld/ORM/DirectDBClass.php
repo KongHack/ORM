@@ -21,7 +21,7 @@ abstract class DirectDBClass
 			$defaults = $query->fetch();
 			if(!is_array($defaults))
 			{
-				throw new KH_Exception(get_class($this).' Construct Failed');
+				throw new ORMException(get_class($this).' Construct Failed');
 			}
 		}
 		if(is_array($defaults))
