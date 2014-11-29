@@ -12,6 +12,18 @@ abstract class DirectDBClass
 		$primary_name	= constant(get_class($this) . '::CLASS_PRIMARY');
 		$this->_common	= $common;
 		
+		
+		if(!is_object($this->_common))
+		{
+			debug_print_backtrace();
+			die('COMMON NOT FOUND<br>'.$table_name.'<br>'.$primary_name.'<br>'.$primary_id);
+		}
+		if(!is_object($this->_common->DB()))
+		{
+			debug_print_backtrace();
+			die('Database Not Defined<br>'.$table_name.'<br>'.$primary_name.'<br>'.$primary_id);
+		}
+		
 		if($primary_id != null)
 		{
 			$sql = 'SELECT * FROM '.$table_name.'
