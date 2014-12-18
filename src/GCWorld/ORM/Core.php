@@ -81,7 +81,7 @@ class Core
 		$this->fileWrite($fh, 'namespace GCWorld\\ORM\\Generated;'."\n\n");
 		$this->fileWrite($fh, 'use \\GCWorld\\ORM\\DirectDBClass AS dbc;'."\n\n");
 		$this->fileWrite($fh, 'use \\GCWorld\\ORM\\GeneratedInterface AS dbi;'."\n\n");
-		$this->fileWrite($fh, 'class '.$table_name." extends dbce implements dbi\n{\n");
+		$this->fileWrite($fh, 'class '.$table_name." extends dbc implements dbi\n{\n");
 		$this->fileBump($fh);
 		$this->fileWrite($fh, "CONST ".str_pad('CLASS_TABLE',$max_var_name,' ')."   = '$table_name';\n");
 		$this->fileWrite($fh, "CONST ".str_pad('CLASS_PRIMARY',$max_var_name,' ')."   = '$pk_name';\n\n");
