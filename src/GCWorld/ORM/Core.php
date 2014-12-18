@@ -12,14 +12,21 @@ class Core
 	protected $master_location		= null;
 	private $open_files				= array();
 	private $open_files_level		= array();
-	
+
+	/**
+	 * @param $namespace
+	 * @param $common
+	 */
 	public function __construct($namespace, $common)
 	{
 		$this->master_namespace = $namespace;
 		$this->master_common	= $common;
 		$this->master_location	= __DIR__;
 	}
-	
+
+	/**
+	 * @param $table_name
+	 */
 	public function generate($table_name)
 	{
 		$sql = 'SHOW FULL COLUMNS FROM '.$table_name;
@@ -73,7 +80,8 @@ class Core
 		$this->fileWrite($fh, "<?php\n");
 		$this->fileWrite($fh, 'namespace GCWorld\\ORM\\Generated;'."\n\n");
 		$this->fileWrite($fh, 'use \\GCWorld\\ORM\\DirectDBClass AS dbc;'."\n\n");
-		$this->fileWrite($fh, 'class '.$table_name." extends dbc \n{\n");
+		$this->fileWrite($fh, 'use \\GCWorld\\ORM\\GeneratedInterface AS dbi;'."\n\n");
+		$this->fileWrite($fh, 'class '.$table_name." extends dbce implements dbi\n{\n");
 		$this->fileBump($fh);
 		$this->fileWrite($fh, "CONST ".str_pad('CLASS_TABLE',$max_var_name,' ')."   = '$table_name';\n");
 		$this->fileWrite($fh, "CONST ".str_pad('CLASS_PRIMARY',$max_var_name,' ')."   = '$pk_name';\n\n");
@@ -97,8 +105,13 @@ class Core
 		$this->fileDrop($fh);
 		$this->fileWrite($fh, "}\n\n");
 		$this->fileClose($fh);
+		return true;
 	}
 
+	/**
+	 * @param $filename
+	 * @return mixed
+	 */
 	protected function fileOpen($filename)
 	{
 		$key = str_replace('.','',microtime(true));
@@ -106,22 +119,35 @@ class Core
 		$this->open_files_level[$key] = 0;
 		return $key;
 	}
-	
+
+	/**
+	 * @param $key
+	 * @param $string
+	 */
 	protected function fileWrite($key, $string)
 	{
 		fwrite($this->open_files[$key], str_repeat(' ',$this->open_files_level[$key]*4).$string);
 	}
-	
+
+	/**
+	 * @param $key
+	 */
 	protected function fileBump($key)
 	{
 		++$this->open_files_level[$key];
 	}
-	
+
+	/**
+	 * @param $key
+	 */
 	protected function fileDrop($key)
 	{
 		--$this->open_files_level[$key];
 	}
-	
+
+	/**
+	 * @param $key
+	 */
 	protected function fileClose($key)
 	{
 		fclose($this->open_files[$key]);
@@ -129,6 +155,9 @@ class Core
 		unset($this->open_files_level[$key]);
 	}
 
+	/**
+	 * @return object
+	 */
 	public function load(/* polymorphic args */)
 	{
 		$args = func_get_args();
@@ -145,6 +174,4 @@ class Core
 		return $module;
 		//$handler = call_user_func_array($class_name, $args);
 	}
-	
-
 }
