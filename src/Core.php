@@ -65,6 +65,12 @@ class Core
 		
 		//Let's get to generating.
 		$path = $this->master_location . DIRECTORY_SEPARATOR . 'Generated/';
+		$filename = $table_name.'.php';
+
+		// Note: The following block was used when PSR-0 auto-loading.
+		// This library has been converted to PSR-4, but I am leaving this code here in the event
+		// it's ever needed.
+		/*
 		$parts = explode('_',$table_name);
 		$filename = array_pop($parts).'.php';
 		foreach($parts as $folder)
@@ -72,10 +78,13 @@ class Core
 			$path .= $folder. DIRECTORY_SEPARATOR;
 		}
 		unset($parts);
+		*/
 		if(!is_dir($path))
 		{
 			mkdir($path, 0755, true);
 		}
+
+
 		$fh = $this->fileOpen($path.$filename);
 		$this->fileWrite($fh, "<?php\n");
 		$this->fileWrite($fh, 'namespace GCWorld\\ORM\\Generated;'."\n\n");

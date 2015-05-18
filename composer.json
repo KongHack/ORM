@@ -1,19 +1,16 @@
 {
-    "name": "GCWorld/ORM",
-    "description": "GCWorld Industries ORM",
-    "authors": [
-        {
-            "name": "GameCharmer",
-            "email": "admin@gamecharmer.com"
-        }
-    ],
-    "minimum-stability": "dev",
-    "require": {
-        "php": ">=5.4.0"
-    },
-    "autoload": {
-        "psr-0": {
-            "GCWorld": "src/"
-        }
+  "name": "gcworld/orm",
+  "description": "GCWorld Industries ORM",
+  "authors": [
+    {
+      "name": "GameCharmer",
+      "email": "admin@gamecharmer.com"
     }
+  ],
+  "require": {
+    "php": ">=5.4.0"
+  },
+  "autoload": {
+    "psr-4": {"GCWorld\\ORM\\": "src/"}
+  }
 }
