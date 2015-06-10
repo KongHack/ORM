@@ -56,7 +56,7 @@ abstract class DirectDBClass
 
 	public function set($key, $val)
 	{
-		if($this->$key != $val)
+		if($this->$key !== $val)
 		{
 			$this->$key = $val;
 			if(!in_array($key, $this->_changed))
