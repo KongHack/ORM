@@ -79,8 +79,7 @@ class Core
 		}
 		unset($parts);
 		*/
-		if(!is_dir($path))
-		{
+		if (!is_dir($path)) {
 			mkdir($path, 0755, true);
 		}
 
@@ -114,6 +113,33 @@ class Core
 		$this->fileDrop($fh);
 		$this->fileWrite($fh, "}\n\n");
 		$this->fileClose($fh);
+
+        //Create a trait version
+        $path = $this->master_location.DIRECTORY_SEPARATOR.'Generated/Traits/';
+        $filename = $table_name.'.php';
+        if (!is_dir($path)) {
+            mkdir($path, 0755, true);
+        }
+
+        $fh = $this->fileOpen($path.$filename);
+        $this->fileWrite($fh, "<?php\n");
+        $this->fileWrite($fh, 'namespace GCWorld\\ORM\\Generated;'."\n\n");
+        $this->fileWrite($fh, 'trait '.$table_name." \n{\n");
+        $this->fileBump($fh);
+
+        foreach($fields as $i => $row) {
+            if($row['Field']==$pk_name) {
+                continue;
+            }
+            $this->fileWrite($fh, 'public $'.str_pad($row['Field'],$max_var_name,' ').' = null;');
+            $this->fileWrite($fh, ' // '.$row['Type']."\n");
+        }
+        $this->fileWrite($fh,"\n");
+
+        $this->fileDrop($fh);
+        $this->fileWrite($fh, "}\n\n");
+        $this->fileClose($fh);
+
 		return true;
 	}
 
