@@ -123,7 +123,7 @@ class Core
 
         $fh = $this->fileOpen($path.$filename);
         $this->fileWrite($fh, "<?php\n");
-        $this->fileWrite($fh, 'namespace GCWorld\\ORM\\Generated;'."\n\n");
+        $this->fileWrite($fh, 'namespace GCWorld\\ORM\\Generated\\Traits;'."\n\n");
         $this->fileWrite($fh, 'trait '.$table_name." \n{\n");
         $this->fileBump($fh);
 
