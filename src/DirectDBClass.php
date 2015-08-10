@@ -7,8 +7,20 @@ abstract class DirectDBClass
      * @var \GCWorld\Interfaces\Common
      */
     protected $_common  = null;
+    /**
+     * @var array
+     */
     protected $_changed = array();
+    /**
+     * Set this to false in your class when you don't want to log changes
+     * @var bool
+     */
     protected $_audit   = true;
+
+    /**
+     * @var string
+     */
+    protected $myName = null;
 
     /**
      * @param      $common
@@ -18,9 +30,12 @@ abstract class DirectDBClass
      */
     public function __construct($common, $primary_id = null, $defaults = null)
     {
-        $table_name     = constant(get_class($this) . '::CLASS_TABLE');
-        $primary_name   = constant(get_class($this) . '::CLASS_PRIMARY');
-        $this->_common  = $common;
+        // Note, this was getting called a lot, so I've converted it to a variable
+        // Todo: Remove this note in a future release
+        $this->myName  = get_class($this);
+        $table_name    = constant($this->myName . '::CLASS_TABLE');
+        $primary_name  = constant($this->myName . '::CLASS_PRIMARY');
+        $this->_common = $common;
         
         
         if (!is_object($this->_common)) {
@@ -33,18 +48,41 @@ abstract class DirectDBClass
         }
         
         if ($primary_id != null) {
-            if (defined(get_class($this).'::SQL')) {
-                $sql = constant(get_class($this).'::SQL');
-            } else {
-                $sql = 'SELECT * FROM '.$table_name.'
-					WHERE '.$primary_name.' = :id';
+            // Determine if we have this in the cache.
+            if ($primary_id > 0) {
+                $redis = $this->_common->getCache();
+                if ($redis) {
+                    $json = $redis->hGet($this->myName, 'key_'.$primary_id);
+                    if (strlen($json) > 2) {
+                        $data = json_decode($json, true);
+                        $properties = array_keys(get_object_vars($this));
+                        foreach ($data as $k => $v) {
+                            if (in_array($k, $properties)) {
+                                $this->$k = $v;
+                            }
+                        }
+                        return;
+                    }
+                }
             }
 
-            $query = $this->_common->DB()->prepare($sql);
+            if (defined($this->myName.'::SQL')) {
+                $sql = constant($this->myName.'::SQL');
+            } else {
+                $sql = 'SELECT * FROM '.$table_name.' WHERE '.$primary_name.' = :id';
+            }
+
+            $query = $this->_common->getDatabase()->prepare($sql);
             $query->execute(array(':id'=>$primary_id));
             $defaults = $query->fetch();
             if (!is_array($defaults)) {
-                throw new ORMException(get_class($this).' Construct Failed');
+                throw new ORMException($this->myName.' Construct Failed');
+            }
+            if (!isset($redis)) {
+                $redis = $this->_common->getCache();
+            }
+            if ($redis) {
+                $redis->hSet($this->myName, 'key_'.$primary_id, json_encode($defaults));
             }
         }
         if (is_array($defaults)) {
@@ -85,8 +123,8 @@ abstract class DirectDBClass
      */
     public function save()
     {
-        $table_name         = constant(get_class($this) . '::CLASS_TABLE');
-        $primary_name   = constant(get_class($this) . '::CLASS_PRIMARY');
+        $table_name     = constant($this->myName . '::CLASS_TABLE');
+        $primary_name   = constant($this->myName . '::CLASS_PRIMARY');
 
         if (count($this->_changed) > 0) {
         /** @var \GCWorld\Database\Database $db */
@@ -130,6 +168,11 @@ abstract class DirectDBClass
 
                 $audit = new Audit($this->_common);
                 $audit->storeLog($table_name, $this->$primary_name, $memberID, $before, $after);
+            }
+
+            $redis = $this->_common->getCache();
+            if ($redis) {
+                $redis->hDel($this->myName, 'key_'.$this->$primary_name);
             }
 
             return true;
