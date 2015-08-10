@@ -42,7 +42,8 @@ abstract class DirectDBClass
             debug_print_backtrace();
             die('COMMON NOT FOUND<br>'.$table_name.'<br>'.$primary_name.'<br>'.$primary_id);
         }
-        if (!is_object($this->_common->getDatabase())) {
+        $db = $this->_common->getDatabase();
+        if (!is_object($db)) {
             debug_print_backtrace();
             die('Database Not Defined<br>'.$table_name.'<br>'.$primary_name.'<br>'.$primary_id);
         }
