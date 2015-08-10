@@ -1,0 +1,61 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "This file is @generated automatically"
+    ],
+    "hash": "35747a7bd44933152b94ba1dfb979e3c",
+    "packages": [
+        {
+            "name": "gcworld/interfaces",
+            "version": "2.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://gitlab.konghack.com/GCWorld/Interfaces.git",
+                "reference": "685d20b4b249baa9fa900fe5b7a760b79eab2d42"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "http://toran.konghack.com/repo/private/dists/gcworld/interfaces/2.0.0.0/685d20b4b249baa9fa900fe5b7a760b79eab2d42.zip",
+                "reference": "685d20b4b249baa9fa900fe5b7a760b79eab2d42",
+                "shasum": null,
+                "mirrors": [
+                    {
+                        "url": "http://toran.konghack.com/repo/private/dists/%package%/%version%/%reference%.%type%",
+                        "preferred": true
+                    }
+                ]
+            },
+            "require": {
+                "php": ">=5.4.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "GCWorld\\Interfaces\\": "src/"
+                }
+            },
+            "license": [
+                "proprietary"
+            ],
+            "authors": [
+                {
+                    "name": "GameCharmer",
+                    "email": "admin@gamecharmer.com"
+                }
+            ],
+            "description": "GCWorld Industries Interfaces",
+            "time": "2015-08-10 13:05:51"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": [],
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": {
+        "php": ">=5.4.0"
+    },
+    "platform-dev": []
+}

@@ -1,4 +1,9 @@
 {
+  "repositories": [
+    {"type": "composer", "url": "http://toran.konghack.com/app.php/repo/private/"},
+    {"type": "composer", "url": "http://toran.konghack.com/app.php/repo/packagist/"},
+    {"packagist": false}
+  ],
   "name": "gcworld/orm",
   "description": "GCWorld Industries ORM",
   "authors": [
@@ -8,6 +13,7 @@
     }
   ],
   "require": {
+    "gcworld/interfaces": "2.*",
     "php": ">=5.4.0"
   },
   "autoload": {

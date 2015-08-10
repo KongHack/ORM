@@ -6,6 +6,12 @@ abstract class DirectDBClass
 	protected $_common	= null;
 	protected $_changed	= array();
 
+    /**
+     * @param      $common
+     * @param null $primary_id
+     * @param null $defaults
+     * @throws \GCWorld\ORM\ORMException
+     */
 	public function __construct($common, $primary_id = null, $defaults = null)
 	{
 		$table_name		= constant(get_class($this) . '::CLASS_TABLE');
