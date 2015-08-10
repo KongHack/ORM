@@ -16,7 +16,12 @@
     "gcworld/interfaces": "2.*",
     "php": ">=5.4.0"
   },
+  "require-dev": {
+    "gcworld/database":"1.*",
+    "gcworld/common":"1.*"
+  },
   "autoload": {
     "psr-4": {"GCWorld\\ORM\\": "src/"}
-  }
+  },
+  "license":"GPL-3.0"
 }
