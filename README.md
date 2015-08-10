@@ -12,7 +12,7 @@ Features include
 Add native caching and cache busting
 
 ### Version
-1.3.0
+1.4.0
 
 ### Additional Information
 
