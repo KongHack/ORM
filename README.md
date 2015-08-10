@@ -7,9 +7,7 @@ Features include
   - Set / Get / Save functions.
   - Built in auditing
   - Audit User tracking via Common getUser() function
-
-### TODO
-Add native caching and cache busting
+  - Redis smart caching
 
 ### Version
 1.4.0
