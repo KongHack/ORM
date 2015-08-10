@@ -7,7 +7,7 @@ abstract class DirectDBClass
      * @var \GCWorld\Interfaces\Common
      */
     protected $_common  = null;
-    protected $_changed     = array();
+    protected $_changed = array();
     protected $_audit   = true;
 
     /**
@@ -18,7 +18,7 @@ abstract class DirectDBClass
      */
     public function __construct($common, $primary_id = null, $defaults = null)
     {
-        $table_name         = constant(get_class($this) . '::CLASS_TABLE');
+        $table_name     = constant(get_class($this) . '::CLASS_TABLE');
         $primary_name   = constant(get_class($this) . '::CLASS_PRIMARY');
         $this->_common  = $common;
         
@@ -33,8 +33,13 @@ abstract class DirectDBClass
         }
         
         if ($primary_id != null) {
-            $sql = 'SELECT * FROM '.$table_name.'
+            if (defined(get_class($this).'::SQL')) {
+                $sql = constant(get_class($this).'::SQL');
+            } else {
+                $sql = 'SELECT * FROM '.$table_name.'
 					WHERE '.$primary_name.' = :id';
+            }
+
             $query = $this->_common->DB()->prepare($sql);
             $query->execute(array(':id'=>$primary_id));
             $defaults = $query->fetch();
@@ -117,7 +122,7 @@ abstract class DirectDBClass
 
                 //Audit Here
                 $memberID = 0;
-                if(method_exists($this->_common, 'getUser')) {
+                if (method_exists($this->_common, 'getUser')) {
                     $user = $this->_common->getUser();
                     $user_primary = constant(get_class($user) . '::CLASS_PRIMARY');
                     $memberID = $user->$user_primary;
