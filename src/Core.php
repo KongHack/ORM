@@ -7,10 +7,10 @@ use \PDO;
 
 class Core
 {
-    protected $master_namespace         = '\\';
-    protected $master_common        = '\\';
+    protected $master_namespace     = '\\';
+    protected $master_common        = null;
     protected $master_location      = null;
-    private $open_files                 = array();
+    private $open_files             = array();
     private $open_files_level       = array();
 
     /**
@@ -30,7 +30,7 @@ class Core
     public function generate($table_name)
     {
         $sql = 'SHOW FULL COLUMNS FROM '.$table_name;
-        $query = $this->master_common->DB()->prepare($sql);
+        $query = $this->master_common->getDatabase()->prepare($sql);
         $query->execute();
         $fields = $query->fetchAll(PDO::FETCH_ASSOC);
 
