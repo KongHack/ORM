@@ -77,18 +77,20 @@ class Audit
         }
 
 
-        $sql = 'INSERT INTO '.$storeTable.'
+        if (count($A) > 0) {
+            $sql = 'INSERT INTO '.$storeTable.'
             (primary_id, member_id, log_before, log_after)
             VALUES
             (:pid, :mid, :logB, :logA)';
-        $query = $db->prepare($sql);
-        $query->execute(array(
-            ':pid'  => $primaryID,
-            ':mid'  => $memberID,
-            ':logB' => json_encode($B),
-            ':logA' => json_encode($A)
-        ));
-        $query->closeCursor();
+            $query = $db->prepare($sql);
+            $query->execute(array(
+                ':pid'  => $primaryID,
+                ':mid'  => $memberID,
+                ':logB' => json_encode($B),
+                ':logA' => json_encode($A)
+            ));
+            $query->closeCursor();
+        }
 
         return true;
     }
