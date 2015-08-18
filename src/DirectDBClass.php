@@ -4,7 +4,7 @@ namespace GCWorld\ORM;
 abstract class DirectDBClass
 {
     /**
-     * @var \GCWorld\Interfaces\Common
+     * @var \GCWorld\Common\Common
      */
     protected $_common  = null;
     /**
