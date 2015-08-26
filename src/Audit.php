@@ -84,8 +84,8 @@ class Audit
             (:pid, :mid, :logB, :logA)';
             $query = $db->prepare($sql);
             $query->execute(array(
-                ':pid'  => $primaryID,
-                ':mid'  => $memberID,
+                ':pid'  => intval($primaryID),
+                ':mid'  => intval($memberID),
                 ':logB' => json_encode($B),
                 ':logA' => json_encode($A)
             ));
