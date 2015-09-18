@@ -180,4 +180,16 @@ abstract class DirectDBClass
         }
         return false;
     }
+
+    /**
+     * Purges the current item from Redis
+     */
+    public function purgeCache()
+    {
+        $redis = $this->_common->getCache();
+        if ($redis) {
+            $primary_name  = constant($this->myName . '::CLASS_PRIMARY');
+            $redis->hDel($this->myName, 'key_'.$this->$primary_name);
+        }
+    }
 }
