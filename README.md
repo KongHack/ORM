@@ -10,7 +10,7 @@ Features include
   - Redis smart caching
 
 ### Version
-1.4.1.2
+1.4.2
 
 ### Additional Information
 
