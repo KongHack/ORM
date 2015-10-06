@@ -14,7 +14,7 @@ New Features in V2
   - Autoloading of common via config/config.ini
 
 ### Version
-2.0.0.0
+2.1.0
 
 ### Additional Information
 
