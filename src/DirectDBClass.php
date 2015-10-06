@@ -28,14 +28,13 @@ abstract class DirectDBClass
      * @param null $defaults
      * @throws \GCWorld\ORM\ORMException
      */
-    public function __construct($common, $primary_id = null, $defaults = null)
+    public function __construct($primary_id = null, $defaults = null)
     {
         $this->myName  = get_class($this);
         $table_name    = constant($this->myName . '::CLASS_TABLE');
         $primary_name  = constant($this->myName . '::CLASS_PRIMARY');
-        $this->_common = $common;
-        
-        
+        $this->_common = CommonLoader::getCommon();
+
         if (!is_object($this->_common)) {
             debug_print_backtrace();
             die('COMMON NOT FOUND<br>'.$table_name.'<br>'.$primary_name.'<br>'.$primary_id);
@@ -45,7 +44,13 @@ abstract class DirectDBClass
             debug_print_backtrace();
             die('Database Not Defined<br>'.$table_name.'<br>'.$primary_name.'<br>'.$primary_id);
         }
-        
+        if ($primary_id !== null && !is_scalar($primary_id)) {
+            throw new ORMException('Primary ID is not scalar');
+        }
+        if ($defaults !== null && !is_array($defaults)) {
+            throw new ORMException('Defaults Array is not an array');
+        }
+
         if ($primary_id != null) {
             // Determine if we have this in the cache.
             if ($primary_id > 0) {

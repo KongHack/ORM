@@ -10,7 +10,8 @@ Features include
   - Redis smart caching
 
 New Features in V2
-  - Multi-Primary key support! (Experimental)
+  - Multi-Primary key support!
+  - Autoloading of common via config/config.ini
 
 ### Version
 2.0.0.0

@@ -31,6 +31,9 @@ class CommonLoader
                 throw new Exception('Config File Not Found');
             }
             $config = parse_ini_file($file);
+            if (isset($config['config_path'])) {
+                $config = parse_ini_file($config['config_path']);
+            }
             if (!isset($config['common'])) {
                 throw new Exception('Config does not contain "common" value!');
             }

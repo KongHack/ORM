@@ -18,10 +18,17 @@
   },
   "require-dev": {
     "gcworld/database":"1.*",
-    "gcworld/common":"1.*"
+    "gcworld/common":"1.*",
+    "composer/composer": "1.0.*@dev",
+    "composer/installers": "1.0.*@dev"
   },
   "autoload": {
     "psr-4": {"GCWorld\\ORM\\": "src/"}
+  },
+  "scripts": {
+    "post-autoload-dump": [
+      "GCWorld\\ORM\\ComposerInstaller::setupConfig"
+    ]
   },
   "license":"GPL-3.0"
 }
