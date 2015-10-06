@@ -13,7 +13,7 @@ New Features in V2
   - Multi-Primary key support! (Experimental)
 
 ### Version
-1.4.2
+2.0.0.0
 
 ### Additional Information
 
