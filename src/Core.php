@@ -8,6 +8,7 @@ use \PDO;
 class Core
 {
     protected $master_namespace     = '\\';
+    /** @var \GCWorld\Common\Common */
     protected $master_common        = null;
     protected $master_location      = null;
     private $open_files             = array();
@@ -34,14 +35,18 @@ class Core
         $query->execute();
         $fields = $query->fetchAll(PDO::FETCH_ASSOC);
 
-        $pk_name = '';
-        $pk_count = 0;
-        $max_var_name   = 0;
-        $max_var_type   = 0;
+        $primaries = array();
+        $max_var_name = 0;
+        $max_var_type = 0;
+
+        $path = $this->master_location.DIRECTORY_SEPARATOR.'Generated/';
+        if (!is_dir($path)) {
+            mkdir($path, 0755, true);
+        }
+
         foreach ($fields as $i => $row) {
             if (strstr($row['Key'], 'PRI')) {
-                $pk_name = $row['Field'];
-                ++$pk_count;
+                $primaries[] = $row['Field'];
             }
             if (strlen($row['Field']) > $max_var_name) {
                 $max_var_name = strlen($row['Field']);
@@ -49,45 +54,39 @@ class Core
             if (strlen($row['Type']) > $max_var_type) {
                 $max_var_type = strlen($row['Type']);
             }
-            
+
         }
 
-        if ($pk_count != 1) {
-            return false;
-            //throw new Exception('Invalid Primary Key ('.$pk_count.')');
-        }
-        
-        
-        //Let's get to generating.
-        $path = $this->master_location . DIRECTORY_SEPARATOR . 'Generated/';
         $filename = $table_name.'.php';
+        $fh = $this->fileOpen($path.$filename);
 
-        // Note: The following block was used when PSR-0 auto-loading.
-        // This library has been converted to PSR-4, but I am leaving this code here in the event
-        // it's ever needed.
-        /*
-		$parts = explode('_',$table_name);
-		$filename = array_pop($parts).'.php';
-		foreach($parts as $folder)
-		{
-			$path .= $folder. DIRECTORY_SEPARATOR;
-		}
-		unset($parts);
-		*/
-        if (!is_dir($path)) {
-            mkdir($path, 0755, true);
+
+        if (count($primaries) < 1) {
+            return false;
         }
 
 
-        $fh = $this->fileOpen($path.$filename);
         $this->fileWrite($fh, "<?php\n");
         $this->fileWrite($fh, 'namespace GCWorld\\ORM\\Generated;'."\n\n");
-        $this->fileWrite($fh, 'use \\GCWorld\\ORM\\DirectDBClass AS dbc;'."\n\n");
-        $this->fileWrite($fh, 'use \\GCWorld\\ORM\\GeneratedInterface AS dbi;'."\n\n");
-        $this->fileWrite($fh, 'class '.$table_name." extends dbc implements dbi\n{\n");
-        $this->fileBump($fh);
-        $this->fileWrite($fh, "CONST ".str_pad('CLASS_TABLE', $max_var_name, ' ')."   = '$table_name';\n");
-        $this->fileWrite($fh, "CONST ".str_pad('CLASS_PRIMARY', $max_var_name, ' ')."   = '$pk_name';\n\n");
+        if (count($primaries) == 1) {
+            // Single PK Classes get a simple set of functions.
+            $this->fileWrite($fh, 'use \\GCWorld\\ORM\\DirectDBClass AS dbc;'."\n\n");
+            $this->fileWrite($fh, 'use \\GCWorld\\ORM\\GeneratedInterface AS dbi;'."\n\n");
+            $this->fileWrite($fh, 'class '.$table_name." extends dbc implements dbi\n{\n");
+            $this->fileBump($fh);
+            $this->fileWrite($fh, "CONST ".str_pad('CLASS_TABLE', $max_var_name, ' ')."   = '$table_name';\n");
+            $this->fileWrite($fh, "CONST ".str_pad('CLASS_PRIMARY', $max_var_name, ' ')."   = '".$primaries[0]."';\n\n");
+
+        } else {
+            // Multiple primary keys!!!
+            $this->fileWrite($fh, 'use \\GCWorld\\ORM\\DirectDBMultiClass AS dbc;'."\n\n");
+            $this->fileWrite($fh, 'use \\GCWorld\\ORM\\GeneratedMultiInterface AS dbi;'."\n\n");
+            $this->fileWrite($fh, 'class '.$table_name." extends dbc implements dbi\n{\n");
+            $this->fileBump($fh);
+            $this->fileWrite($fh, "CONST ".str_pad('CLASS_TABLE', $max_var_name, ' ')."   = '$table_name';\n");
+            $this->fileWrite($fh, "CONST ".str_pad('CLASS_PRIMARIES', $max_var_name, ' ')."   = ".var_export($primaries, true).";\n\n");
+
+        }
 
         foreach ($fields as $i => $row) {
             $this->fileWrite($fh, 'public $'.str_pad($row['Field'], $max_var_name, ' ').' = null;');
@@ -98,11 +97,15 @@ class Core
         $this->fileBump($fh);
 
         foreach ($fields as $i => $row) {
-            $this->fileWrite($fh, str_pad("'".$row['Field']."'", $max_var_name+2, ' ')." => '".$row['Type'].($row['Comment']!=''?' - '.$row['Comment']:'')."',\n");
+            $this->fileWrite($fh, str_pad(
+                "'".$row['Field']."'",
+                $max_var_name + 2,
+                ' '
+            )." => '".$row['Type'].($row['Comment'] != '' ? ' - '.$row['Comment'] : '')."',\n");
         }
         $this->fileDrop($fh);
         $this->fileWrite($fh, ");\n");
-        
+
         $this->fileDrop($fh);
         $this->fileWrite($fh, "}\n\n");
         $this->fileClose($fh);
@@ -121,7 +124,7 @@ class Core
         $this->fileBump($fh);
 
         foreach ($fields as $i => $row) {
-            if ($row['Field']==$pk_name) {
+            if (in_array($row['Field'], $primaries)) {
                 continue;
             }
             $this->fileWrite($fh, 'public $'.str_pad($row['Field'], $max_var_name, ' ').' = null;');
@@ -132,7 +135,6 @@ class Core
         $this->fileDrop($fh);
         $this->fileWrite($fh, "}\n\n");
         $this->fileClose($fh);
-
         return true;
     }
 

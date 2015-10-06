@@ -1,7 +1,7 @@
 <?php
 namespace GCWorld\ORM;
 
-abstract class DirectDBClass
+abstract class DirectDBMultiClass
 {
     /**
      * @var \GCWorld\Common\Common
@@ -15,7 +15,7 @@ abstract class DirectDBClass
      * Set this to false in your class when you don't want to log changes
      * @var bool
      */
-    protected $_audit   = true;
+    protected $_audit   = false;
 
     /**
      * @var string
@@ -28,63 +28,63 @@ abstract class DirectDBClass
      * @param null $defaults
      * @throws \GCWorld\ORM\ORMException
      */
-    public function __construct($common, $primary_id = null, $defaults = null)
+    public function __construct(...$keys)
     {
         $this->myName  = get_class($this);
         $table_name    = constant($this->myName . '::CLASS_TABLE');
-        $primary_name  = constant($this->myName . '::CLASS_PRIMARY');
-        $this->_common = $common;
-        
-        
+        $primaries     = constant($this->myName . '::CLASS_PRIMARIES');
+        $this->_common = CommonLoader::getCommon();
+
+
         if (!is_object($this->_common)) {
             debug_print_backtrace();
-            die('COMMON NOT FOUND<br>'.$table_name.'<br>'.$primary_name.'<br>'.$primary_id);
+            die('COMMON NOT FOUND<br>'.$table_name.'<br>'.var_export($primaries, true).'<br>'.var_export($keys, true));
         }
         $db = $this->_common->getDatabase();
         if (!is_object($db)) {
             debug_print_backtrace();
-            die('Database Not Defined<br>'.$table_name.'<br>'.$primary_name.'<br>'.$primary_id);
+            die('Database Not Defined<br>'.$table_name.'<br>'.var_export($primaries, true).'<br>'.var_export($keys, true));
         }
-        
-        if ($primary_id != null) {
+
+        if (count($keys) == count($primaries)) {
             // Determine if we have this in the cache.
-            if ($primary_id > 0) {
-                $redis = $this->_common->getCache();
-                if ($redis) {
-                    $json = $redis->hGet($this->myName, 'key_'.$primary_id);
-                    if (strlen($json) > 2) {
-                        $data = json_decode($json, true);
-                        $properties = array_keys(get_object_vars($this));
-                        foreach ($data as $k => $v) {
-                            if (in_array($k, $properties)) {
-                                $this->$k = $v;
-                            }
+
+            $redis = $this->_common->getCache();
+            if ($redis) {
+                $json = $redis->hGet($this->myName, 'key_'.implode('-', $keys));
+                if (strlen($json) > 2) {
+                    $data = json_decode($json, true);
+                    $properties = array_keys(get_object_vars($this));
+                    foreach ($data as $k => $v) {
+                        if (in_array($k, $properties)) {
+                            $this->$k = $v;
                         }
-                        return;
                     }
+                    return;
                 }
             }
 
-            if (defined($this->myName.'::SQL')) {
-                $sql = constant($this->myName.'::SQL');
-            } else {
-                $sql = 'SELECT * FROM '.$table_name.' WHERE '.$primary_name.' = :id';
+            $params = array();
+            $sql = 'SELECT * FROM '.$table_name.' WHERE ';
+            $sqlBlocks = array();
+            foreach ($primaries as $k => $primary) {
+                $sqlBlocks[] = ' '.$primary.' = :id_'.$k;
+                $params[':id_'] = $keys[$k];
             }
+            $sql .= implode(' AND ', $sqlBlocks);
 
             $query = $this->_common->getDatabase()->prepare($sql);
-            $query->execute(array(':id'=>$primary_id));
-            $defaults = $query->fetch();
-            if (!is_array($defaults)) {
+            $query->execute($params);
+            $data = $query->fetch();
+            if (!is_array($data)) {
                 throw new ORMException($this->myName.' Construct Failed');
             }
             if (!isset($redis)) {
                 $redis = $this->_common->getCache();
             }
             if ($redis) {
-                $redis->hSet($this->myName, 'key_'.$primary_id, json_encode($defaults));
+                $redis->hSet($this->myName, 'key_'.implode('-', $keys), json_encode($data));
             }
-        }
-        if (is_array($defaults)) {
             $properties = array_keys(get_object_vars($this));
             foreach ($defaults as $k => $v) {
                 if (in_array($k, $properties)) {
@@ -122,40 +122,38 @@ abstract class DirectDBClass
      */
     public function save()
     {
-        $table_name     = constant($this->myName . '::CLASS_TABLE');
-        $primary_name   = constant($this->myName . '::CLASS_PRIMARY');
+        $table_name = constant($this->myName . '::CLASS_TABLE');
+        $primaries  = constant($this->myName . '::CLASS_PRIMARIES');
 
         if (count($this->_changed) > 0) {
-        /** @var \GCWorld\Database\Database $db */
+            /** @var \GCWorld\Database\Database $db */
             $db = $this->_common->getDatabase();
 
             if ($this->_audit) {
-                $sql = 'SELECT * FROM '.$table_name.' WHERE '.$primary_name.' = :primary';
-                $query = $db->prepare($sql);
-                $query->execute(array(':primary'=>$this->$primary_name));
-                $before = $query->fetch();
-                $query->closeCursor();
+                // TODO: Build a multi-audit system.  Before goes here.
             }
 
+            $params = array();
             $sql = 'UPDATE '.$table_name.' SET ';
-            $params[':'.$primary_name] = $this->$primary_name;
             foreach ($this->_changed as $key) {
                 $sql .= $key.' = :'.$key.', ';
                 $params[':'.$key] = $this->$key;
             }
-            $sql = substr($sql, 0, -2);   //Remove last ', ';
-            $sql .= ' WHERE '.$primary_name.' = :'.$primary_name;
+            $sql = substr($sql, 0, -2).' WHERE ';   //Remove last ', ';
+            $sqlBlocks = array();
+            foreach ($primaries as $k => $primary) {
+                $sqlBlocks[] = ' '.$primary.' = :id_'.$k;
+                $params[':id_'] = $this->$primary;
+            }
+            $sql .= implode(' AND ', $sqlBlocks);
 
             $query = $db->prepare($sql);
             $query->execute($params);
             $query->closeCursor();
 
+            /*
             if ($this->_audit) {
-                $sql = 'SELECT * FROM '.$table_name.' WHERE '.$primary_name.' = :primary';
-                $query = $db->prepare($sql);
-                $query->execute(array(':primary'=>$this->$primary_name));
-                $after = $query->fetch();
-                $query->closeCursor();
+                // TODO: Build a multi-audit system.  After goes here.
 
                 //Audit Here
                 $memberID = 0;
@@ -167,7 +165,9 @@ abstract class DirectDBClass
 
                 $audit = new Audit($this->_common);
                 $audit->storeLog($table_name, $this->$primary_name, $memberID, $before, $after);
+
             }
+            */
 
             $this->purgeCache();
             return true;
@@ -182,8 +182,12 @@ abstract class DirectDBClass
     {
         $redis = $this->_common->getCache();
         if ($redis) {
-            $primary_name  = constant($this->myName . '::CLASS_PRIMARY');
-            $redis->hDel($this->myName, 'key_'.$this->$primary_name);
+            $primaries  = constant($this->myName . '::CLASS_PRIMARIES');
+            $keys = array();
+            foreach ($primaries as $pk) {
+                $keys[] = $this->$pk;
+            }
+            $redis->hDel($this->myName, 'key_'.implode($keys));
         }
     }
 }

@@ -4,7 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "1c2ba50049902a36898a40f7e74cfa8c",
+    "hash": "4cc5d6a39bd1e2b09f2dd0ce43c11ecb",
+    "content-hash": "c75a8bb8c4df9046f0cd756ba4c7c211",
     "packages": [
         {
             "name": "gcworld/interfaces",
@@ -51,16 +52,16 @@
     "packages-dev": [
         {
             "name": "gcworld/common",
-            "version": "1.0.1",
+            "version": "1.0.7.1",
             "source": {
                 "type": "git",
                 "url": "https://gitlab.konghack.com/GCWorld/Common.git",
-                "reference": "250b7fbb2dcdfcfd75df06424465c4569184f8bf"
+                "reference": "3609ce761489af37b35772907d21d0cafdf97712"
             },
             "dist": {
                 "type": "zip",
-                "url": "http://toran.konghack.com/repo/private/dists/gcworld/common/1.0.1.0/250b7fbb2dcdfcfd75df06424465c4569184f8bf.zip",
-                "reference": "250b7fbb2dcdfcfd75df06424465c4569184f8bf",
+                "url": "http://toran.konghack.com/repo/private/dists/gcworld/common/1.0.7.1/3609ce761489af37b35772907d21d0cafdf97712.zip",
+                "reference": "3609ce761489af37b35772907d21d0cafdf97712",
                 "shasum": null,
                 "mirrors": [
                     {
@@ -90,20 +91,20 @@
                 }
             ],
             "description": "GCWorld Industries Common",
-            "time": "2015-08-10 17:19:28"
+            "time": "2015-08-12 14:48:43"
         },
         {
             "name": "gcworld/database",
-            "version": "1.1.1.4",
+            "version": "1.2.0.1",
             "source": {
                 "type": "git",
                 "url": "https://gitlab.konghack.com/GCWorld/Database.git",
-                "reference": "d5a4e69605f3b9ef26f9513cd6f6bbbc755b7c73"
+                "reference": "c0bf02a600f0a385e7fb9682d747d73ff821ea01"
             },
             "dist": {
                 "type": "zip",
-                "url": "http://toran.konghack.com/repo/private/dists/gcworld/database/1.1.1.4/d5a4e69605f3b9ef26f9513cd6f6bbbc755b7c73.zip",
-                "reference": "d5a4e69605f3b9ef26f9513cd6f6bbbc755b7c73",
+                "url": "http://toran.konghack.com/repo/private/dists/gcworld/database/1.2.0.1/c0bf02a600f0a385e7fb9682d747d73ff821ea01.zip",
+                "reference": "c0bf02a600f0a385e7fb9682d747d73ff821ea01",
                 "shasum": null,
                 "mirrors": [
                     {
@@ -132,7 +133,7 @@
                 }
             ],
             "description": "GCWorld Industries Database",
-            "time": "2015-08-04 17:40:51"
+            "time": "2015-09-29 14:10:08"
         }
     ],
     "aliases": [],
@@ -141,7 +142,7 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=5.4.0"
+        "php": ">=5.6.0"
     },
     "platform-dev": []
 }

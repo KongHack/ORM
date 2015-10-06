@@ -9,6 +9,9 @@ Features include
   - Audit User tracking via Common getUser() function
   - Redis smart caching
 
+New Features in V2
+  - Multi-Primary key support! (Experimental)
+
 ### Version
 1.4.2
 
