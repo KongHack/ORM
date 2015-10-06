@@ -11,7 +11,7 @@ Features include
 
 New Features in V2
   - Multi-Primary key support!
-  - Autoloading of common via config/config.ini
+  - Auto-loading of common via config file
 
 ### Version
 2.1.0
