@@ -109,8 +109,23 @@ abstract class DirectDBClass
     }
 
     /**
+     * @param array $fields
+     * @return array
+     */
+    public function getArray(array $fields)
+    {
+        $return = [];
+        foreach ($fields as $k) {
+            $return[$k] = $this->$k;
+        }
+        return $return;
+    }
+
+
+    /**
      * @param $key
      * @param $val
+     * @return $this
      */
     public function set($key, $val)
     {
@@ -120,6 +135,19 @@ abstract class DirectDBClass
                 $this->_changed[] = $key;
             }
         }
+        return $this;
+    }
+
+    /**
+     * @param array $data
+     * @return $this
+     */
+    public function setArray(array $data)
+    {
+        foreach ($data as $k => $v) {
+            $this->set($k, $v);
+        }
+        return $this;
     }
 
     /**
