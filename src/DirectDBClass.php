@@ -8,6 +8,28 @@ abstract class DirectDBClass
      */
     protected $_common  = null;
     /**
+     * Set this in the event your class needs a non-standard DB.
+     * @var null|string
+     */
+    protected $_dbName  = null;
+
+    /**
+     * Set this in the event your class needs a non-standard Cache.
+     * @var null|string
+     */
+    protected $_cacheName = null;
+
+    /**
+     * @var \GCWorld\Database\Database
+     */
+    protected $_db      = null;
+
+    /**
+     * @var \Redis|bool
+     */
+    protected $_cache   = null;
+
+    /**
      * @var array
      */
     protected $_changed = array();
@@ -39,11 +61,14 @@ abstract class DirectDBClass
             debug_print_backtrace();
             die('COMMON NOT FOUND<br>'.$table_name.'<br>'.$primary_name.'<br>'.$primary_id);
         }
-        $db = $this->_common->getDatabase();
-        if (!is_object($db)) {
+
+        $this->_db     = $this->_common->getDatabase($this->_dbName);
+        if (!is_object($this->_db)) {
             debug_print_backtrace();
             die('Database Not Defined<br>'.$table_name.'<br>'.$primary_name.'<br>'.$primary_id);
         }
+        $this->_cache  = $this->_common->getCache($this->_cacheName);
+
         if ($primary_id !== null && !is_scalar($primary_id)) {
             throw new ORMException('Primary ID is not scalar');
         }
@@ -54,9 +79,8 @@ abstract class DirectDBClass
         if ($primary_id != null) {
             // Determine if we have this in the cache.
             if ($primary_id > 0) {
-                $redis = $this->_common->getCache();
-                if ($redis) {
-                    $json = $redis->hGet($this->myName, 'key_'.$primary_id);
+                if ($this->_cache) {
+                    $json = $this->_cache->hGet($this->myName, 'key_'.$primary_id);
                     if (strlen($json) > 2) {
                         $data = json_decode($json, true);
                         $properties = array_keys(get_object_vars($this));
@@ -76,7 +100,7 @@ abstract class DirectDBClass
                 $sql = 'SELECT * FROM '.$table_name.' WHERE '.$primary_name.' = :id';
             }
 
-            $query = $this->_common->getDatabase()->prepare($sql);
+            $query = $this->_db->prepare($sql);
             $query->execute(array(':id'=>$primary_id));
             $defaults = $query->fetch();
             if (!is_array($defaults)) {
@@ -160,7 +184,7 @@ abstract class DirectDBClass
 
         if (count($this->_changed) > 0) {
         /** @var \GCWorld\Database\Database $db */
-            $db = $this->_common->getDatabase();
+            $db = $this->_db;
 
             if ($this->_audit) {
                 $sql = 'SELECT * FROM '.$table_name.' WHERE '.$primary_name.' = :primary';
@@ -213,10 +237,9 @@ abstract class DirectDBClass
      */
     public function purgeCache()
     {
-        $redis = $this->_common->getCache();
-        if ($redis) {
+        if ($this->_cache) {
             $primary_name  = constant($this->myName . '::CLASS_PRIMARY');
-            $redis->hDel($this->myName, 'key_'.$this->$primary_name);
+            $this->_cache->hDel($this->myName, 'key_'.$this->$primary_name);
         }
     }
 }
