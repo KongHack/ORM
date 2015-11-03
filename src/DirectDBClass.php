@@ -25,6 +25,12 @@ abstract class DirectDBClass
     protected $_db      = null;
 
     /**
+     * Set to false if you want to omit this object from your memory cache all together.
+     * @var bool
+     */
+    protected $_canCache = true;
+
+    /**
      * @var \Redis|bool
      */
     protected $_cache   = null;
@@ -76,7 +82,7 @@ abstract class DirectDBClass
             throw new ORMException('Defaults Array is not an array');
         }
 
-        if ($primary_id != null) {
+        if ($this->_canCache && $primary_id != null) {
             // Determine if we have this in the cache.
             if ($primary_id > 0) {
                 if ($this->_cache) {
@@ -106,11 +112,13 @@ abstract class DirectDBClass
             if (!is_array($defaults)) {
                 throw new ORMException($this->myName.' Construct Failed');
             }
-            if (!isset($redis)) {
-                $redis = $this->_common->getCache();
-            }
-            if ($redis) {
-                $redis->hSet($this->myName, 'key_'.$primary_id, json_encode($defaults));
+            if ($this->_canCache) {
+                if (!isset($redis)) {
+                    $redis = $this->_common->getCache();
+                }
+                if ($redis) {
+                    $redis->hSet($this->myName, 'key_'.$primary_id, json_encode($defaults));
+                }
             }
         }
         if (is_array($defaults)) {
@@ -237,7 +245,7 @@ abstract class DirectDBClass
      */
     public function purgeCache()
     {
-        if ($this->_cache) {
+        if ($this->_canCache && $this->_cache) {
             $primary_name  = constant($this->myName . '::CLASS_PRIMARY');
             $this->_cache->hDel($this->myName, 'key_'.$this->$primary_name);
         }
