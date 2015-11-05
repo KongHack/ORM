@@ -52,16 +52,14 @@ class Audit
      * @param array $after
      * @return bool
      */
-    public function storeLog($table, $primaryID, $memberID, $before, $after)
+    public function storeLog($table, $primaryID, $memberID, array $before, array $after)
     {
         if (!$this->enable) {
             return false;
         }
-        if ($primaryID < 1) {
-            return false;
-        }
-        if (!$before || !$after) {
-            return false;
+
+        if (empty($primaryID)) {
+            throw new \Exception('AUDIT LOG:: Invalid Primary ID Passed');
         }
 
         $storeTable = $this->prefix.$table;
