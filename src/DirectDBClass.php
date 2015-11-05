@@ -191,8 +191,11 @@ abstract class DirectDBClass
         $primary_name   = constant($this->myName . '::CLASS_PRIMARY');
 
         if (count($this->_changed) > 0) {
-        /** @var \GCWorld\Database\Database $db */
-            $db = $this->_db;
+            /** @var \GCWorld\Database\Database $db */
+            $db     = $this->_db;
+            $before = [];
+            $after  = [];
+
 
             if ($this->_audit) {
                 $sql = 'SELECT * FROM '.$table_name.' WHERE '.$primary_name.' = :primary';

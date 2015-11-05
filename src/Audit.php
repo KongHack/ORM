@@ -57,6 +57,12 @@ class Audit
         if (!$this->enable) {
             return false;
         }
+        if ($primaryID < 1) {
+            return false;
+        }
+        if (!$before || !$after) {
+            return false;
+        }
 
         $storeTable = $this->prefix.$table;
         $db = $this->common->getDatabase($this->database);
