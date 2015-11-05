@@ -14,7 +14,7 @@ New Features in V2
   - Auto-loading of common via config file
 
 ### Version
-2.2.0
+2.2.1
 
 ### Additional Information
 
