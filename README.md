@@ -15,7 +15,7 @@ New Features in V2
   - Insertable type single-key objects (using on duplicate key update)
 
 ### Version
-2.2.1
+2.3.0
 
 ### Additional Information
 
