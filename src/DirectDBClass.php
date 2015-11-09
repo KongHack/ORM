@@ -8,6 +8,7 @@ abstract class DirectDBClass
      */
     protected $_common  = null;
     /**
+     *
      * Set this in the event your class needs a non-standard DB.
      * @var null|string
      */
@@ -46,9 +47,23 @@ abstract class DirectDBClass
     protected $_audit   = true;
 
     /**
+     * Setting this to true will enable insert on duplicate key update features.
+     * This also includes not throwing an error on 0 id construct.
+     * @var bool
+     */
+    protected $_canInsert = false;
+
+    /**
+     * Used for reference and to reduce constant check calls
      * @var string
      */
     protected $myName = null;
+
+    /**
+     * Here for reference, will be created in child objects automatically
+     * @var array
+     */
+    public static $dbInfo = [];
 
     /**
      * @param      $common
@@ -95,11 +110,13 @@ abstract class DirectDBClass
                                 $this->$k = $v;
                             }
                         }
+
                         return;
                     }
                 }
             }
-
+        }
+        if ($primary_id != null) {
             if (defined($this->myName.'::SQL')) {
                 $sql = constant($this->myName.'::SQL');
             } else {
@@ -110,14 +127,17 @@ abstract class DirectDBClass
             $query->execute(array(':id'=>$primary_id));
             $defaults = $query->fetch();
             if (!is_array($defaults)) {
-                throw new ORMException($this->myName.' Construct Failed');
-            }
-            if ($this->_canCache) {
-                if (!isset($redis)) {
-                    $redis = $this->_common->getCache();
+                if (!$this->_canInsert) {
+                    throw new ORMException($this->myName.' Construct Failed');
                 }
-                if ($redis) {
-                    $redis->hSet($this->myName, 'key_'.$primary_id, json_encode($defaults));
+            } else {
+                if ($this->_canCache) {
+                    if (!isset($redis)) {
+                        $redis = $this->_common->getCache($this->_cacheName);
+                    }
+                    if ($redis) {
+                        $redis->hSet($this->myName, 'key_'.$primary_id, json_encode($defaults));
+                    }
                 }
             }
         }
@@ -196,7 +216,7 @@ abstract class DirectDBClass
             $before = [];
             $after  = [];
 
-
+            // ============================================================================== Audit
             if ($this->_audit) {
                 $sql = 'SELECT * FROM '.$table_name.' WHERE '.$primary_name.' = :primary';
                 $query = $db->prepare($sql);
@@ -205,19 +225,43 @@ abstract class DirectDBClass
                 $query->closeCursor();
             }
 
-            $sql = 'UPDATE '.$table_name.' SET ';
-            $params[':'.$primary_name] = $this->$primary_name;
-            foreach ($this->_changed as $key) {
-                $sql .= $key.' = :'.$key.', ';
-                $params[':'.$key] = $this->$key;
+            // ============================================================================== Write Logic
+            if ($this->_canInsert) {
+                $fields = array_keys(self::$dbInfo);
+                if (!in_array($primary_name, $fields)) {
+                    $fields[] = $primary_name;
+                }
+                $params = [];
+                $sql = 'INSERT INTO '.$table_name.' ('.implode(', ', $fields).') VALUES (:'.implode(', :', $fields).')
+                        ON DUPLICATE KEY UPDATE ';
+                foreach ($fields as $field) {
+                    $params[':'.$field] = ($this->$field==null?'':$this->$field);
+                    if ($field == $primary_name) {
+                        continue;
+                    }
+                    $sql .= "$field = VALUES($field), \n";
+                }
+                $sql = rtrim($sql, ", \n");
+                $query = $this->_db->prepare($sql);
+                $query->execute($params);
+                $query->closeCursor();
+
+            } else {
+                $sql = 'UPDATE '.$table_name.' SET ';
+                $params[':'.$primary_name] = $this->$primary_name;
+                foreach ($this->_changed as $key) {
+                    $sql .= $key.' = :'.$key.', ';
+                    $params[':'.$key] = $this->$key;
+                }
+                $sql = substr($sql, 0, -2);   //Remove last ', ';
+                $sql .= ' WHERE '.$primary_name.' = :'.$primary_name;
+
+                $query = $db->prepare($sql);
+                $query->execute($params);
+                $query->closeCursor();
             }
-            $sql = substr($sql, 0, -2);   //Remove last ', ';
-            $sql .= ' WHERE '.$primary_name.' = :'.$primary_name;
 
-            $query = $db->prepare($sql);
-            $query->execute($params);
-            $query->closeCursor();
-
+            // ============================================================================== Audit
             if ($this->_audit) {
                 $sql = 'SELECT * FROM '.$table_name.' WHERE '.$primary_name.' = :primary';
                 $query = $db->prepare($sql);
@@ -233,8 +277,11 @@ abstract class DirectDBClass
                     $memberID = $user->$user_primary;
                 }
 
-                $audit = new Audit($this->_common);
-                $audit->storeLog($table_name, $this->$primary_name, $memberID, $before, $after);
+                // The is_array check solves issues with canInsert style objects
+                if (is_array($before) && is_array($after)) {
+                    $audit = new Audit($this->_common);
+                    $audit->storeLog($table_name, $this->$primary_name, $memberID, $before, $after);
+                }
             }
 
             $this->purgeCache();

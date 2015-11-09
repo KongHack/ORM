@@ -12,6 +12,7 @@ Features include
 New Features in V2
   - Multi-Primary key support!
   - Auto-loading of common via config file
+  - Insertable type single-key objects (using on duplicate key update)
 
 ### Version
 2.2.1
