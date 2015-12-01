@@ -16,7 +16,7 @@ New Features in V2
   - DBInterface for keeping DirectDB systems in line and universal
 
 ### Version
-2.3.0
+2.4.0
 
 ### Additional Information
 
