@@ -1,7 +1,7 @@
 <?php
 namespace GCWorld\ORM;
 
-abstract class DirectDBClass
+abstract class DirectDBClass implements DBInterface
 {
     /**
      * @var \GCWorld\Common\Common
@@ -299,5 +299,14 @@ abstract class DirectDBClass
             $primary_name  = constant($this->myName . '::CLASS_PRIMARY');
             $this->_cache->hDel($this->myName, 'key_'.$this->$primary_name);
         }
+    }
+
+    /**
+     * Gets the field keys from the dbInfo array.
+     * @return array
+     */
+    public function getFieldKeys()
+    {
+        return array_keys(self::$dbInfo);
     }
 }

@@ -13,6 +13,7 @@ New Features in V2
   - Multi-Primary key support!
   - Auto-loading of common via config file
   - Insertable type single-key objects (using on duplicate key update)
+  - DBInterface for keeping DirectDB systems in line and universal
 
 ### Version
 2.3.0

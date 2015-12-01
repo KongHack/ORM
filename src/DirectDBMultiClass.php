@@ -1,7 +1,7 @@
 <?php
 namespace GCWorld\ORM;
 
-abstract class DirectDBMultiClass
+abstract class DirectDBMultiClass implements DBInterface
 {
     /**
      * @var \GCWorld\Common\Common
@@ -21,6 +21,12 @@ abstract class DirectDBMultiClass
      * @var string
      */
     protected $myName = null;
+
+    /**
+     * Here for reference, will be created in child objects automatically
+     * @var array
+     */
+    public static $dbInfo = [];
 
     /**
      * @param      $common
@@ -189,5 +195,14 @@ abstract class DirectDBMultiClass
             }
             $redis->hDel($this->myName, 'key_'.implode($keys));
         }
+    }
+
+    /**
+     * Gets the field keys from the dbInfo array.
+     * @return array
+     */
+    public function getFieldKeys()
+    {
+        return array_keys(self::$dbInfo);
     }
 }
