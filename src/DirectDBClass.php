@@ -232,19 +232,34 @@ abstract class DirectDBClass implements DBInterface
                     $fields[] = $primary_name;
                 }
                 $params = [];
-                $sql = 'INSERT INTO '.$table_name.' ('.implode(', ', $fields).') VALUES (:'.implode(', :', $fields).')
+                if (count($fields) > 1) {    // 1 being the primary key
+                    $sql = 'INSERT INTO '.$table_name.' ('.implode(', ', $fields).') VALUES (:'.implode(', :', $fields).')
                         ON DUPLICATE KEY UPDATE ';
-                foreach ($fields as $field) {
-                    $params[':'.$field] = ($this->$field==null?'':$this->$field);
-                    if ($field == $primary_name) {
-                        continue;
+                    foreach ($fields as $field) {
+                        $params[':'.$field] = ($this->$field == null ? '' : $this->$field);
+                        if ($field == $primary_name) {
+                            continue;
+                        }
+                        $sql .= "$field = VALUES($field), \n";
                     }
-                    $sql .= "$field = VALUES($field), \n";
+                    $sql = rtrim($sql, ", \n");
+                    $query = $this->_db->prepare($sql);
+                    $query->execute($params);
+                    $query->closeCursor();
+                } else {
+                    $sql = 'INSERT IGNORE INTO '.$table_name.' ('.implode(', ', $fields).') VALUES (:'.implode(', :', $fields).')';
+                    foreach ($fields as $field) {
+                        $params[':'.$field] = ($this->$field == null ? '' : $this->$field);
+                        if ($field == $primary_name) {
+                            continue;
+                        }
+                        $sql .= "$field = VALUES($field), \n";
+                    }
+                    $sql = rtrim($sql, ", \n");
+                    $query = $this->_db->prepare($sql);
+                    $query->execute($params);
+                    $query->closeCursor();
                 }
-                $sql = rtrim($sql, ", \n");
-                $query = $this->_db->prepare($sql);
-                $query->execute($params);
-                $query->closeCursor();
 
             } else {
                 $sql = 'UPDATE '.$table_name.' SET ';
