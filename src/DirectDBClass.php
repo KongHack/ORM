@@ -322,6 +322,6 @@ abstract class DirectDBClass implements DBInterface
      */
     public function getFieldKeys()
     {
-        return array_keys(self::$dbInfo);
+        return array_keys(static::$dbInfo);
     }
 }
