@@ -227,7 +227,7 @@ abstract class DirectDBClass implements DBInterface
 
             // ============================================================================== Write Logic
             if ($this->_canInsert) {
-                $fields = array_keys(self::$dbInfo);
+                $fields = array_keys(static::$dbInfo);
                 if (!in_array($primary_name, $fields)) {
                     $fields[] = $primary_name;
                 }
