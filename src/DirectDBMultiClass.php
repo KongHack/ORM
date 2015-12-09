@@ -160,18 +160,6 @@ abstract class DirectDBMultiClass implements DBInterface
             /*
             if ($this->_audit) {
                 // TODO: Build a multi-audit system.  After goes here.
-
-                //Audit Here
-                $memberID = 0;
-                if (method_exists($this->_common, 'getUser')) {
-                    $user = $this->_common->getUser();
-                    $user_primary = constant(get_class($user) . '::CLASS_PRIMARY');
-                    $memberID = $user->$user_primary;
-                }
-
-                $audit = new Audit($this->_common);
-                $audit->storeLog($table_name, $this->$primary_name, $memberID, $before, $after);
-
             }
             */
 
