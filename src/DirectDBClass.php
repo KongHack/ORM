@@ -288,8 +288,18 @@ abstract class DirectDBClass implements DBInterface
                 $memberID = 0;
                 if (method_exists($this->_common, 'getUser')) {
                     $user = $this->_common->getUser();
-                    $user_primary = constant(get_class($user) . '::CLASS_PRIMARY');
-                    $memberID = $user->$user_primary;
+                    if (defined(get_class($user).'::CLASS_PRIMARY')) {
+                        $user_primary = constant(get_class($user).'::CLASS_PRIMARY');
+                        if (property_exists($user, $user_primary)) {
+                            $memberID = $user->$user_primary;
+                        } elseif (method_exists($user, 'get')) {
+                            try {
+                                $memberID = $user->get($user_primary);
+                            } catch (\Exception $e) {
+                                // Silently fail.
+                            }
+                        }
+                    }
                 }
 
                 // The is_array check solves issues with canInsert style objects
