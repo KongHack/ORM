@@ -89,8 +89,12 @@ class Core
         }
 
         foreach ($fields as $i => $row) {
+            $type = (stristr($row['Type'],'int') ? 'int   ' : 'string');
+            $this->fileWrite($fh, "\n".'/**'."\n");
+            $this->fileWrite($fh, '* @dbinfo '.$row['Type']."\n");
+            $this->fileWrite($fh, '* @var '.$type."\n");
+            $this->fileWrite($fh, '*/'."\n");
             $this->fileWrite($fh, 'public $'.str_pad($row['Field'], $max_var_name, ' ').' = null;');
-            $this->fileWrite($fh, ' // '.$row['Type']."\n");
         }
         $this->fileWrite($fh, "\n");
         $this->fileWrite($fh, 'public static $dbInfo = array('."\n");
