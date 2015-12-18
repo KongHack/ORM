@@ -97,6 +97,10 @@ class Core
             $this->fileWrite($fh, 'public $'.str_pad($row['Field'], $max_var_name, ' ').' = null;');
         }
         $this->fileWrite($fh, "\n");
+        $this->fileWrite($fh, '/**'."\n");
+        $this->fileWrite($fh, '* Contains an array of all fields and the database notation for field type'."\n");
+        $this->fileWrite($fh, '* @var array'."\n");
+        $this->fileWrite($fh, '*/'."\n");
         $this->fileWrite($fh, 'public static $dbInfo = array('."\n");
         $this->fileBump($fh);
 
