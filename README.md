@@ -16,7 +16,7 @@ The GCWorld ORM builds extensible classes used for selecting and updating object
   - DBInterface for keeping DirectDB systems in line and universal
 
 ### Version
-2.4.3
+2.4.4
 
 ###### Todo
 - Upgrade audit system to function in the DirectDBMultiClass
