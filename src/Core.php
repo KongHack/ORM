@@ -159,7 +159,7 @@ class Core
                 $name = str_replace('_','',ucwords($row['Field'], '_'));
                 $this->fileWrite($fh, '/**'."\n");
                 $this->fileWrite($fh, '* @param mixed $value'."\n");
-                $this->fileWrite($fh, '* @return this'."\n");
+                $this->fileWrite($fh, '* @return $this'."\n");
                 $this->fileWrite($fh, '*/'."\n");
                 $this->fileWrite($fh, 'public function set'.$name.'($value) {'."\n");
                 $this->fileBump($fh);
