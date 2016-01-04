@@ -14,6 +14,8 @@ The GCWorld ORM builds extensible classes used for selecting and updating object
   - Auto-loading of common via config file
   - Insertable type single-key objects (using on duplicate key update)
   - DBInterface for keeping DirectDB systems in line and universal
+  - Support for auto-generation of getters/setters
+  - Custom definition of variable visibility
 
 ### Version
 2.4.4
