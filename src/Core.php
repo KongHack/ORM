@@ -14,6 +14,9 @@ class Core
     private $open_files             = array();
     private $open_files_level       = array();
 
+    protected $get_set_funcs        = true;
+    protected $var_visibility       = 'public';
+
     /**
      * @param $namespace
      * @param $common
@@ -23,6 +26,30 @@ class Core
         $this->master_namespace = $namespace;
         $this->master_common    = $common;
         $this->master_location  = __DIR__;
+
+        // Attempt loading from a config.ini
+        $file = rtrim(dirname(__FILE__), DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR;
+        $file .= 'config'.DIRECTORY_SEPARATOR.'config.ini';
+        if (!file_exists($file)) {
+            throw new Exception('Config File Not Found');
+        }
+        $config = parse_ini_file($file);
+        if (isset($config['config_path'])) {
+            $config = parse_ini_file($config['config_path']);
+        }
+        if (!isset($config['common'])) {
+            throw new Exception('Config does not contain "common" value!');
+        }
+
+        if(isset($config['get_set_funcs'])) {
+            if($config['get_set_funcs'] == 'false') {
+                $this->get_set_funcs = false;
+            }
+        }
+        if(isset($config['var_visibility']) && in_array($config['var_visibility'],['public','protected'])) {
+            $this->var_visibility = $config['var_visibility'];
+        }
+
     }
 
     /**
@@ -94,7 +121,7 @@ class Core
             $this->fileWrite($fh, '* @dbinfo '.$row['Type']."\n");
             $this->fileWrite($fh, '* @var '.$type."\n");
             $this->fileWrite($fh, '*/'."\n");
-            $this->fileWrite($fh, 'public $'.str_pad($row['Field'], $max_var_name, ' ').' = null;');
+            $this->fileWrite($fh, $this->var_visibility.' $'.str_pad($row['Field'], $max_var_name, ' ').' = null;');
         }
         $this->fileWrite($fh, "\n");
         $this->fileWrite($fh, '/**'."\n");
@@ -113,6 +140,34 @@ class Core
         }
         $this->fileDrop($fh);
         $this->fileWrite($fh, ");\n");
+
+        if ($this->get_set_funcs) {
+            $this->fileWrite($fh,"\n");
+
+            foreach ($fields as $i => $row) {
+                $name = str_replace('_','',ucwords($row['Field'], '_'));
+
+                //TODO: Add doc block
+                $this->fileWrite($fh, 'public function get'.$name.'() {'."\n");
+                $this->fileBump($fh);
+                $this->fileWrite($fh, 'return $this->get(\''.$row['Field']."');\n");
+                $this->fileDrop($fh);
+                $this->fileWrite($fh, "}\n\n");
+            }
+
+            foreach ($fields as $i => $row) {
+                $name = str_replace('_','',ucwords($row['Field'], '_'));
+                $this->fileWrite($fh, '/**'."\n");
+                $this->fileWrite($fh, '* @param mixed $value'."\n");
+                $this->fileWrite($fh, '* @return this'."\n");
+                $this->fileWrite($fh, '*/'."\n");
+                $this->fileWrite($fh, 'public function set'.$name.'($value) {'."\n");
+                $this->fileBump($fh);
+                $this->fileWrite($fh, 'return $this->set(\''.$row['Field'].'\', \'$value\');'."\n");
+                $this->fileDrop($fh);
+                $this->fileWrite($fh, "}\n\n");
+            }
+        }
 
         $this->fileDrop($fh);
         $this->fileWrite($fh, "}\n\n");
@@ -135,7 +190,7 @@ class Core
             if (in_array($row['Field'], $primaries)) {
                 continue;
             }
-            $this->fileWrite($fh, 'public $'.str_pad($row['Field'], $max_var_name, ' ').' = null;');
+            $this->fileWrite($fh, $this->var_visibility.' $'.str_pad($row['Field'], $max_var_name, ' ').' = null;');
             $this->fileWrite($fh, ' // '.$row['Type']."\n");
         }
         $this->fileWrite($fh, "\n");
