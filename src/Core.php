@@ -27,19 +27,8 @@ class Core
         $this->master_common    = $common;
         $this->master_location  = __DIR__;
 
-        // Attempt loading from a config.ini
-        $file = rtrim(dirname(__FILE__), DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR;
-        $file .= 'config'.DIRECTORY_SEPARATOR.'config.ini';
-        if (!file_exists($file)) {
-            throw new Exception('Config File Not Found');
-        }
-        $config = parse_ini_file($file);
-        if (isset($config['config_path'])) {
-            $config = parse_ini_file($config['config_path']);
-        }
-        if (!isset($config['common'])) {
-            throw new Exception('Config does not contain "common" value!');
-        }
+        $cConfig = new Config();
+        $config = $cConfig->getConfig();
 
         if(isset($config['get_set_funcs'])) {
             if($config['get_set_funcs'] == 'false') {
@@ -49,7 +38,6 @@ class Core
         if(isset($config['var_visibility']) && in_array($config['var_visibility'],['public','protected'])) {
             $this->var_visibility = $config['var_visibility'];
         }
-
     }
 
     /**

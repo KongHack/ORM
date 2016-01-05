@@ -25,18 +25,9 @@ class CommonLoader
     {
         if (self::$common == null) {
             // Attempt loading from a config.ini
-            $file = rtrim(dirname(__FILE__), DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR;
-            $file .= 'config'.DIRECTORY_SEPARATOR.'config.ini';
-            if (!file_exists($file)) {
-                throw new Exception('Config File Not Found');
-            }
-            $config = parse_ini_file($file);
-            if (isset($config['config_path'])) {
-                $config = parse_ini_file($config['config_path']);
-            }
-            if (!isset($config['common'])) {
-                throw new Exception('Config does not contain "common" value!');
-            }
+            $cConfig = new Config();
+            $config = $cConfig->getConfig();
+
             /** @var \GCWorld\Common\Common $class */
             $class = $config['common'];
             $obj = $class::getInstance();
