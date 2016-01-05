@@ -6,10 +6,10 @@ class ObjectForm
     protected $source   = null;
     protected $action   = null;
     protected $method   = null;
-    protected $keys         = array();
+    protected $keys     = array();
     protected $fields   = array();
     protected $hidden   = array();
-    protected $ckeditor     = false;
+    protected $CKEditor = false;
 
     public $submit      = 'Submit';
 
@@ -136,7 +136,7 @@ class ObjectForm
                 echo '</div>';
                 break;
             
-            case 'ckeditor':
+            case 'CKEditor':
                 echo '<div>';
                 echo '<textarea name="',$field['key'],'" id="',$field['key'],'" style="width:400px; height:150px;">',$this->source->$field['key'],'</textarea>
 					'.(isset($field['params']['caption'])?$field['params']['caption']:'');

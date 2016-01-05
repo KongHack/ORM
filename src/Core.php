@@ -30,12 +30,12 @@ class Core
         $cConfig = new Config();
         $config = $cConfig->getConfig();
 
-        if(isset($config['get_set_funcs'])) {
-            if($config['get_set_funcs'] == 'false') {
+        if (isset($config['get_set_funcs'])) {
+            if ($config['get_set_funcs'] == 'false') {
                 $this->get_set_funcs = false;
             }
         }
-        if(isset($config['var_visibility']) && in_array($config['var_visibility'],['public','protected'])) {
+        if (isset($config['var_visibility']) && in_array($config['var_visibility'], ['public','protected'])) {
             $this->var_visibility = $config['var_visibility'];
         }
     }
@@ -104,7 +104,7 @@ class Core
         }
 
         foreach ($fields as $i => $row) {
-            $type = (stristr($row['Type'],'int') ? 'int   ' : 'string');
+            $type = (stristr($row['Type'], 'int') ? 'int   ' : 'string');
             $this->fileWrite($fh, "\n".'/**'."\n");
             $this->fileWrite($fh, '* @dbinfo '.$row['Type']."\n");
             $this->fileWrite($fh, '* @var '.$type."\n");
@@ -130,10 +130,10 @@ class Core
         $this->fileWrite($fh, ");\n");
 
         if ($this->get_set_funcs) {
-            $this->fileWrite($fh,"\n");
+            $this->fileWrite($fh, "\n");
 
             foreach ($fields as $i => $row) {
-                $name = str_replace('_','',ucwords($row['Field'], '_'));
+                $name = str_replace('_', '', ucwords($row['Field'], '_'));
 
                 //TODO: Add doc block
                 $this->fileWrite($fh, 'public function get'.$name.'() {'."\n");
@@ -144,7 +144,7 @@ class Core
             }
 
             foreach ($fields as $i => $row) {
-                $name = str_replace('_','',ucwords($row['Field'], '_'));
+                $name = str_replace('_', '', ucwords($row['Field'], '_'));
                 $this->fileWrite($fh, '/**'."\n");
                 $this->fileWrite($fh, '* @param mixed $value'."\n");
                 $this->fileWrite($fh, '* @return $this'."\n");
