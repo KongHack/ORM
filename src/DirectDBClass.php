@@ -288,7 +288,7 @@ abstract class DirectDBClass implements DBInterface
                 $memberID = 0;
                 if (method_exists($this->_common, 'getUser')) {
                     $user = $this->_common->getUser();
-                    if (defined(get_class($user).'::CLASS_PRIMARY')) {
+                    if (is_object($user) && defined(get_class($user).'::CLASS_PRIMARY')) {
                         $user_primary = constant(get_class($user).'::CLASS_PRIMARY');
                         if (property_exists($user, $user_primary)) {
                             $memberID = $user->$user_primary;
