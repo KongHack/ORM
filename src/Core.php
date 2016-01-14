@@ -151,7 +151,7 @@ class Core
                 $this->fileWrite($fh, '*/'."\n");
                 $this->fileWrite($fh, 'public function set'.$name.'($value) {'."\n");
                 $this->fileBump($fh);
-                $this->fileWrite($fh, 'return $this->set(\''.$row['Field'].'\', \'$value\');'."\n");
+                $this->fileWrite($fh, 'return $this->set(\''.$row['Field'].'\', $value);'."\n");
                 $this->fileDrop($fh);
                 $this->fileWrite($fh, "}\n\n");
             }
