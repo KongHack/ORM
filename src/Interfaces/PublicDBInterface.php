@@ -1,7 +1,7 @@
 <?php
-namespace GCWorld\ORM;
+namespace GCWorld\ORM\Interfaces;
 
-interface DBInterface
+interface PublicDBInterface
 {
     public function set($key, $val);
     public function get($key);

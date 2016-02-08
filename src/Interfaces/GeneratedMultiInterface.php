@@ -1,5 +1,5 @@
 <?php
-namespace GCWorld\ORM;
+namespace GCWorld\ORM\Interfaces;
 
 interface GeneratedMultiInterface
 {

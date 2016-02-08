@@ -85,18 +85,31 @@ class Core
         $this->fileWrite($fh, 'namespace GCWorld\\ORM\\Generated;'."\n\n");
         if (count($primaries) == 1) {
             // Single PK Classes get a simple set of functions.
-            $this->fileWrite($fh, 'use \\GCWorld\\ORM\\DirectDBClass AS dbc;'."\n\n");
-            $this->fileWrite($fh, 'use \\GCWorld\\ORM\\GeneratedInterface AS dbi;'."\n\n");
-            $this->fileWrite($fh, 'class '.$table_name." extends dbc implements dbi\n{\n");
+            if($this->get_set_funcs) {
+                $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Abstracts\\DirectSingle AS dbc;'."\n\n");
+                $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Interfaces\\ProtectedDBInterface as dbd;'."\n\n");
+            } else {
+                $this->fileWrite($fh, 'use \\GCWorld\\ORM\\DirectDBClass AS dbc;'."\n\n");
+                $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Interfaces\\PublicDBInterface as dbd;'."\n\n");
+            }
+
+            $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Interfaces\\GeneratedInterface AS dbi;'."\n\n");
+            $this->fileWrite($fh, 'class '.$table_name." extends dbc implements dbi, dbd\n{\n");
             $this->fileBump($fh);
             $this->fileWrite($fh, "CONST ".str_pad('CLASS_TABLE', $max_var_name, ' ')."   = '$table_name';\n");
             $this->fileWrite($fh, "CONST ".str_pad('CLASS_PRIMARY', $max_var_name, ' ')."   = '".$primaries[0]."';\n\n");
 
         } else {
             // Multiple primary keys!!!
-            $this->fileWrite($fh, 'use \\GCWorld\\ORM\\DirectDBMultiClass AS dbc;'."\n\n");
-            $this->fileWrite($fh, 'use \\GCWorld\\ORM\\GeneratedMultiInterface AS dbi;'."\n\n");
-            $this->fileWrite($fh, 'class '.$table_name." extends dbc implements dbi\n{\n");
+            if($this->get_set_funcs) {
+                $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Abstracts\\DirectMulti AS dbc;'."\n\n");
+                $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Interfaces\\ProtectedDBInterface as dbd;'."\n\n");
+            } else {
+                $this->fileWrite($fh, 'use \\GCWorld\\ORM\\DirectDBMultiClass AS dbc;'."\n\n");
+                $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Interfaces\\PublicDBInterface as dbd;'."\n\n");
+            }
+            $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Interfaces\\GeneratedMultiInterface AS dbi;'."\n\n");
+            $this->fileWrite($fh, 'class '.$table_name." extends dbc implements dbi, dbd\n{\n");
             $this->fileBump($fh);
             $this->fileWrite($fh, "CONST ".str_pad('CLASS_TABLE', $max_var_name, ' ')."   = '$table_name';\n");
             $this->fileWrite($fh, "CONST ".str_pad('CLASS_PRIMARIES', $max_var_name, ' ')."   = ".var_export($primaries, true).";\n\n");
@@ -130,8 +143,6 @@ class Core
         $this->fileWrite($fh, ");\n");
 
         if ($this->get_set_funcs) {
-            $this->fileWrite($fh, "\n");
-
             foreach ($fields as $i => $row) {
                 $name = str_replace('_', '', ucwords($row['Field'], '_'));
 
