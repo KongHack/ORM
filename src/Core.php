@@ -86,11 +86,11 @@ class Core
         if (count($primaries) == 1) {
             // Single PK Classes get a simple set of functions.
             if($this->get_set_funcs) {
-                $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Abstracts\\DirectSingle AS dbc;'."\n\n");
-                $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Interfaces\\ProtectedDBInterface as dbd;'."\n\n");
+                $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Abstracts\\DirectSingle AS dbc;'."\n");
+                $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Interfaces\\ProtectedDBInterface as dbd;'."\n");
             } else {
-                $this->fileWrite($fh, 'use \\GCWorld\\ORM\\DirectDBClass AS dbc;'."\n\n");
-                $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Interfaces\\PublicDBInterface as dbd;'."\n\n");
+                $this->fileWrite($fh, 'use \\GCWorld\\ORM\\DirectDBClass AS dbc;'."\n");
+                $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Interfaces\\PublicDBInterface as dbd;'."\n");
             }
 
             $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Interfaces\\GeneratedInterface AS dbi;'."\n\n");
@@ -102,24 +102,25 @@ class Core
         } else {
             // Multiple primary keys!!!
             if($this->get_set_funcs) {
-                $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Abstracts\\DirectMulti AS dbc;'."\n\n");
-                $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Interfaces\\ProtectedDBInterface as dbd;'."\n\n");
+                $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Abstracts\\DirectMulti AS dbc;'."\n");
+                $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Interfaces\\ProtectedDBInterface as dbd;'."\n");
             } else {
-                $this->fileWrite($fh, 'use \\GCWorld\\ORM\\DirectDBMultiClass AS dbc;'."\n\n");
-                $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Interfaces\\PublicDBInterface as dbd;'."\n\n");
+                $this->fileWrite($fh, 'use \\GCWorld\\ORM\\DirectDBMultiClass AS dbc;'."\n");
+                $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Interfaces\\PublicDBInterface as dbd;'."\n");
             }
             $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Interfaces\\GeneratedMultiInterface AS dbi;'."\n\n");
             $this->fileWrite($fh, 'class '.$table_name." extends dbc implements dbi, dbd\n{\n");
             $this->fileBump($fh);
             $this->fileWrite($fh, "CONST ".str_pad('CLASS_TABLE', $max_var_name, ' ')."   = '$table_name';\n");
-            $this->fileWrite($fh, "CONST ".str_pad('CLASS_PRIMARIES', $max_var_name, ' ')."   = ".var_export($primaries, true).";\n\n");
+            $this->fileWrite($fh, "CONST ".str_pad('CLASS_PRIMARIES', $max_var_name, ' ')."   = ".var_export($primaries, true).";\n");
 
         }
 
         foreach ($fields as $i => $row) {
             $type = (stristr($row['Type'], 'int') ? 'int   ' : 'string');
-            $this->fileWrite($fh, "\n".'/**'."\n");
-            $this->fileWrite($fh, '* @dbinfo '.$row['Type']."\n");
+            $this->fileWrite($fh,"\n\n");
+            $this->fileWrite($fh, '/**'."\n");
+            $this->fileWrite($fh, '* @db-info '.$row['Type']."\n");
             $this->fileWrite($fh, '* @var '.$type."\n");
             $this->fileWrite($fh, '*/'."\n");
             $this->fileWrite($fh, $this->var_visibility.' $'.str_pad($row['Field'], $max_var_name, ' ').' = null;');
@@ -189,8 +190,13 @@ class Core
             if (in_array($row['Field'], $primaries)) {
                 continue;
             }
+            $type = (stristr($row['Type'], 'int') ? 'int   ' : 'string');
+            $this->fileWrite($fh,"\n\n");
+            $this->fileWrite($fh, '/**'."\n");
+            $this->fileWrite($fh, '* @db-info '.$row['Type']."\n");
+            $this->fileWrite($fh, '* @var '.$type."\n");
+            $this->fileWrite($fh, '*/'."\n");
             $this->fileWrite($fh, $this->var_visibility.' $'.str_pad($row['Field'], $max_var_name, ' ').' = null;');
-            $this->fileWrite($fh, ' // '.$row['Type']."\n");
         }
         $this->fileWrite($fh, "\n");
 
