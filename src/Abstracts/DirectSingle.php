@@ -291,15 +291,22 @@ abstract class DirectSingle {
                 $memberID = 0;
                 if (method_exists($this->_common, 'getUser')) {
                     $user = $this->_common->getUser();
-                    if (is_object($user) && defined(get_class($user).'::CLASS_PRIMARY')) {
-                        $user_primary = constant(get_class($user).'::CLASS_PRIMARY');
-                        if (property_exists($user, $user_primary)) {
-                            $memberID = $user->$user_primary;
-                        } elseif (method_exists($user, 'get')) {
-                            try {
-                                $memberID = $user->get($user_primary);
-                            } catch (\Exception $e) {
-                                // Silently fail.
+                    if(is_object($user)) {
+                        // getRealMemberID
+                        if(method_exists($user, 'getRealMemberId')) {
+                            $memberID = $user->getRealMemberId();
+                        } elseif (method_exists($user, 'getMemberId')) {
+                            $memberID = $user->getMemberId();
+                        } elseif (defined(get_class($user).'::CLASS_PRIMARY')) {
+                            $user_primary = constant(get_class($user).'::CLASS_PRIMARY');
+                            if (property_exists($user, $user_primary)) {
+                                $memberID = $user->$user_primary;
+                            } elseif (method_exists($user, 'get')) {
+                                try {
+                                    $memberID = $user->get($user_primary);
+                                } catch (\Exception $e) {
+                                    // Silently fail.
+                                }
                             }
                         }
                     }
