@@ -31,10 +31,12 @@ abstract class DirectMulti {
     public static $dbInfo = [];
 
     /**
-     * @param      $common
-     * @param null $primary_id
-     * @param null $defaults
-     * @throws \GCWorld\ORM\ORMException
+     * DirectMulti constructor.
+     *
+     * NOTE: Only pass in IDs as arguments, not an array!
+     *
+     * @param array ...$keys
+     * @throws ORMException
      */
     public function __construct(...$keys)
     {
@@ -94,7 +96,7 @@ abstract class DirectMulti {
                 $redis->hSet($this->myName, 'key_'.implode('-', $keys), json_encode($data));
             }
             $properties = array_keys(get_object_vars($this));
-            foreach ($defaults as $k => $v) {
+            foreach ($data as $k => $v) {
                 if (in_array($k, $properties)) {
                     $this->$k = $v;
                 }
