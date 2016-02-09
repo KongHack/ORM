@@ -145,7 +145,7 @@ class Core
 
         if ($this->get_set_funcs) {
             foreach ($fields as $i => $row) {
-                $name = str_replace('_', '', ucwords($row['Field'], '_'));
+                $name = FieldName::nameConversion($row['Field']);
 
                 //TODO: Add doc block
                 $this->fileWrite($fh, 'public function get'.$name.'() {'."\n");
@@ -156,7 +156,8 @@ class Core
             }
 
             foreach ($fields as $i => $row) {
-                $name = str_replace('_', '', ucwords($row['Field'], '_'));
+                $name = FieldName::nameConversion($row['Field']);
+
                 $this->fileWrite($fh, '/**'."\n");
                 $this->fileWrite($fh, '* @param mixed $value'."\n");
                 $this->fileWrite($fh, '* @return $this'."\n");
