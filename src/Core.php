@@ -7,15 +7,15 @@ use \PDO;
 
 class Core
 {
-    protected $master_namespace     = '\\';
+    protected $master_namespace = '\\';
     /** @var \GCWorld\Common\Common */
-    protected $master_common        = null;
-    protected $master_location      = null;
-    private $open_files             = array();
-    private $open_files_level       = array();
+    protected $master_common    = null;
+    protected $master_location  = null;
+    private   $open_files       = array();
+    private   $open_files_level = array();
 
-    protected $get_set_funcs        = true;
-    protected $var_visibility       = 'public';
+    protected $get_set_funcs  = true;
+    protected $var_visibility = 'public';
 
     /**
      * @param $namespace
@@ -28,14 +28,14 @@ class Core
         $this->master_location  = __DIR__;
 
         $cConfig = new Config();
-        $config = $cConfig->getConfig();
+        $config  = $cConfig->getConfig();
 
         if (isset($config['get_set_funcs'])) {
             if ($config['get_set_funcs'] == 'false') {
                 $this->get_set_funcs = false;
             }
         }
-        if (isset($config['var_visibility']) && in_array($config['var_visibility'], ['public','protected'])) {
+        if (isset($config['var_visibility']) && in_array($config['var_visibility'], ['public', 'protected'])) {
             $this->var_visibility = $config['var_visibility'];
         }
     }
@@ -45,12 +45,12 @@ class Core
      */
     public function generate($table_name)
     {
-        $sql = 'SHOW FULL COLUMNS FROM '.$table_name;
+        $sql   = 'SHOW FULL COLUMNS FROM '.$table_name;
         $query = $this->master_common->getDatabase()->prepare($sql);
         $query->execute();
         $fields = $query->fetchAll(PDO::FETCH_ASSOC);
 
-        $primaries = array();
+        $primaries    = array();
         $max_var_name = 0;
         $max_var_type = 0;
 
@@ -73,7 +73,7 @@ class Core
         }
 
         $filename = $table_name.'.php';
-        $fh = $this->fileOpen($path.$filename);
+        $fh       = $this->fileOpen($path.$filename);
 
 
         if (count($primaries) < 1) {
@@ -85,7 +85,7 @@ class Core
         $this->fileWrite($fh, 'namespace GCWorld\\ORM\\Generated;'."\n\n");
         if (count($primaries) == 1) {
             // Single PK Classes get a simple set of functions.
-            if($this->get_set_funcs) {
+            if ($this->get_set_funcs) {
                 $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Abstracts\\DirectSingle AS dbc;'."\n");
                 $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Interfaces\\ProtectedDBInterface as dbd;'."\n");
             } else {
@@ -97,11 +97,12 @@ class Core
             $this->fileWrite($fh, 'class '.$table_name." extends dbc implements dbi, dbd\n{\n");
             $this->fileBump($fh);
             $this->fileWrite($fh, "CONST ".str_pad('CLASS_TABLE', $max_var_name, ' ')."   = '$table_name';\n");
-            $this->fileWrite($fh, "CONST ".str_pad('CLASS_PRIMARY', $max_var_name, ' ')."   = '".$primaries[0]."';\n\n");
+            $this->fileWrite($fh,
+                "CONST ".str_pad('CLASS_PRIMARY', $max_var_name, ' ')."   = '".$primaries[0]."';\n\n");
 
         } else {
             // Multiple primary keys!!!
-            if($this->get_set_funcs) {
+            if ($this->get_set_funcs) {
                 $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Abstracts\\DirectMulti AS dbc;'."\n");
                 $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Interfaces\\ProtectedDBInterface as dbd;'."\n");
             } else {
@@ -112,13 +113,14 @@ class Core
             $this->fileWrite($fh, 'class '.$table_name." extends dbc implements dbi, dbd\n{\n");
             $this->fileBump($fh);
             $this->fileWrite($fh, "CONST ".str_pad('CLASS_TABLE', $max_var_name, ' ')."   = '$table_name';\n");
-            $this->fileWrite($fh, "CONST ".str_pad('CLASS_PRIMARIES', $max_var_name, ' ')."   = ".var_export($primaries, true).";\n");
+            $this->fileWrite($fh,
+                "CONST ".str_pad('CLASS_PRIMARIES', $max_var_name, ' ')."   = ".var_export($primaries, true).";\n");
 
         }
 
         foreach ($fields as $i => $row) {
             $type = (stristr($row['Type'], 'int') ? 'int   ' : 'string');
-            $this->fileWrite($fh,"\n\n");
+            $this->fileWrite($fh, "\n\n");
             $this->fileWrite($fh, '/**'."\n");
             $this->fileWrite($fh, '* @db-info '.$row['Type']."\n");
             $this->fileWrite($fh, '* @var '.$type."\n");
@@ -135,10 +137,10 @@ class Core
 
         foreach ($fields as $i => $row) {
             $this->fileWrite($fh, str_pad(
-                "'".$row['Field']."'",
-                $max_var_name + 2,
-                ' '
-            )." => '".$row['Type'].($row['Comment'] != '' ? ' - '.$row['Comment'] : '')."',\n");
+                    "'".$row['Field']."'",
+                    $max_var_name + 2,
+                    ' '
+                )." => '".$row['Type'].($row['Comment'] != '' ? ' - '.$row['Comment'] : '')."',\n");
         }
         $this->fileDrop($fh);
         $this->fileWrite($fh, ");\n");
@@ -175,7 +177,7 @@ class Core
         $this->fileClose($fh);
 
         //Create a trait version
-        $path = $this->master_location.DIRECTORY_SEPARATOR.'Generated/Traits/';
+        $path     = $this->master_location.DIRECTORY_SEPARATOR.'Generated/Traits/';
         $filename = $table_name.'.php';
         if (!is_dir($path)) {
             mkdir($path, 0755, true);
@@ -192,7 +194,7 @@ class Core
                 continue;
             }
             $type = (stristr($row['Type'], 'int') ? 'int   ' : 'string');
-            $this->fileWrite($fh,"\n\n");
+            $this->fileWrite($fh, "\n\n");
             $this->fileWrite($fh, '/**'."\n");
             $this->fileWrite($fh, '* @db-info '.$row['Type']."\n");
             $this->fileWrite($fh, '* @var '.$type."\n");
@@ -201,9 +203,22 @@ class Core
         }
         $this->fileWrite($fh, "\n");
 
+        if ($this->get_set_funcs || $this->var_visibility == 'protected') {
+            foreach ($fields as $i => $row) {
+                $name = FieldName::nameConversion($row['Field']);
+                //TODO: Add doc block
+                $this->fileWrite($fh, 'public function get'.$name.'() {'."\n");
+                $this->fileBump($fh);
+                $this->fileWrite($fh, 'return $this->'.$row['Field'].");\n");
+                $this->fileDrop($fh);
+                $this->fileWrite($fh, "}\n\n");
+            }
+        }
+
         $this->fileDrop($fh);
         $this->fileWrite($fh, "}\n\n");
         $this->fileClose($fh);
+
         return true;
     }
 
@@ -213,9 +228,10 @@ class Core
      */
     protected function fileOpen($filename)
     {
-        $key = str_replace('.', '', microtime(true));
-        $this->open_files[$key] = fopen($filename, 'w');
+        $key                          = str_replace('.', '', microtime(true));
+        $this->open_files[$key]       = fopen($filename, 'w');
         $this->open_files_level[$key] = 0;
+
         return $key;
     }
 
@@ -225,7 +241,7 @@ class Core
      */
     protected function fileWrite($key, $string)
     {
-        fwrite($this->open_files[$key], str_repeat(' ', $this->open_files_level[$key]*4).$string);
+        fwrite($this->open_files[$key], str_repeat(' ', $this->open_files_level[$key] * 4).$string);
     }
 
     /**
@@ -259,16 +275,17 @@ class Core
      */
     public function load()
     {
-        $args = func_get_args();
+        $args       = func_get_args();
         $class_name = '\\GCWorld\\ORM\\Generated\\'.$args[0];
-        
+
         if (!class_exists($class_name)) {
             die('Invalid Class: '.$class_name);
         }
         $args[0] = $this->master_common;
-        
+
         $reflectionClass = new ReflectionClass($class_name);
-        $module = $reflectionClass->newInstanceArgs($args);
+        $module          = $reflectionClass->newInstanceArgs($args);
+
         return $module;
         //$handler = call_user_func_array($class_name, $args);
     }
