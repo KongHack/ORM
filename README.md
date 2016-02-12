@@ -18,7 +18,7 @@ The GCWorld ORM builds extensible classes used for selecting and updating object
   - Custom definition of variable visibility
 
 ### Version
-2.5.3
+2.5.4
 
 ###### Todo
 - Upgrade audit system to function in the DirectDBMultiClass
