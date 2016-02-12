@@ -205,6 +205,9 @@ class Core
 
         if ($this->get_set_funcs || $this->var_visibility == 'protected') {
             foreach ($fields as $i => $row) {
+                if (in_array($row['Field'], $primaries)) {
+                    continue;
+                }
                 $name = FieldName::nameConversion($row['Field']);
                 //TODO: Add doc block
                 $this->fileWrite($fh, 'public function get'.$name.'() {'."\n");
