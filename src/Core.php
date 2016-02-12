@@ -213,6 +213,7 @@ class Core
                 $this->fileDrop($fh);
                 $this->fileWrite($fh, "}\n\n");
             }
+            $this->fileWrite($fh, "\n");
         }
 
         $this->fileDrop($fh);
