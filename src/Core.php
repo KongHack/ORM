@@ -209,7 +209,7 @@ class Core
                 //TODO: Add doc block
                 $this->fileWrite($fh, 'public function get'.$name.'() {'."\n");
                 $this->fileBump($fh);
-                $this->fileWrite($fh, 'return $this->'.$row['Field'].");\n");
+                $this->fileWrite($fh, 'return $this->'.$row['Field'].";\n");
                 $this->fileDrop($fh);
                 $this->fileWrite($fh, "}\n\n");
             }
