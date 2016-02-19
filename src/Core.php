@@ -103,7 +103,7 @@ class Core
             }
 
             $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Interfaces\\GeneratedInterface AS dbi;'."\n\n");
-            $this->fileWrite($fh, 'class '.$table_name." extends dbc implements dbi, dbd".($this->json_serialize?", JsonSerializable":'')."\n{\n");
+            $this->fileWrite($fh, 'class '.$table_name." extends dbc implements dbi, dbd".($this->json_serialize?", \JsonSerializable":'')."\n{\n");
             $this->fileBump($fh);
             $this->fileWrite($fh, "CONST ".str_pad('CLASS_TABLE', $max_var_name, ' ')."   = '$table_name';\n");
             $this->fileWrite($fh,
@@ -189,8 +189,12 @@ class Core
             $this->fileBump($fh);
             foreach($fields as $i => $row) {
                 $fName = $row['Field'];
-                $name = FieldName::getterName($fName);
-                $this->fileWrite($fh, "'$fName' => ".'$this->'.$name.'(),'."\n");
+                if($this->get_set_funcs) {
+                    $name = FieldName::getterName($fName);
+                    $this->fileWrite($fh, "'$fName' => ".'$this->'.$name.'(),'."\n");
+                } else {
+                    $this->fileWrite($fh, "'$fName' => ".'$this->'.$fName.','."\n");
+                }
             }
             $this->fileDrop($fh);
             $this->fileWrite($fh,'];'."\n");
