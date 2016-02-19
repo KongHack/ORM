@@ -39,6 +39,9 @@ class Core
         if (isset($config['var_visibility']) && in_array($config['var_visibility'], ['public', 'protected'])) {
             $this->var_visibility = $config['var_visibility'];
         }
+        if (isset($config['json_serialize']) && $config['json_serialize'] == 'false') {
+            $this->json_serialize = false;
+        }
     }
 
     /**
