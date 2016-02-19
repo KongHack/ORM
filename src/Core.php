@@ -16,6 +16,7 @@ class Core
 
     protected $get_set_funcs  = true;
     protected $var_visibility = 'public';
+    protected $json_serialize = true;
 
     /**
      * @param $namespace
@@ -83,6 +84,11 @@ class Core
 
         $this->fileWrite($fh, "<?php\n");
         $this->fileWrite($fh, 'namespace GCWorld\\ORM\\Generated;'."\n\n");
+
+        if($this->json_serialize) {
+            $this->fileWrite($fh, 'use \\GCWorld\\ORM\\FieldName;'."\n");
+        }
+
         if (count($primaries) == 1) {
             // Single PK Classes get a simple set of functions.
             if ($this->get_set_funcs) {
@@ -94,7 +100,7 @@ class Core
             }
 
             $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Interfaces\\GeneratedInterface AS dbi;'."\n\n");
-            $this->fileWrite($fh, 'class '.$table_name." extends dbc implements dbi, dbd\n{\n");
+            $this->fileWrite($fh, 'class '.$table_name." extends dbc implements dbi, dbd".($this->json_serialize?", JsonSerializable":'')."\n{\n");
             $this->fileBump($fh);
             $this->fileWrite($fh, "CONST ".str_pad('CLASS_TABLE', $max_var_name, ' ')."   = '$table_name';\n");
             $this->fileWrite($fh,
@@ -171,6 +177,26 @@ class Core
                 $this->fileWrite($fh, "}\n\n");
             }
         }
+
+        if($this->json_serialize) {
+            $this->fileWrite($fh, 'public function jsonSerialize() {'."\n");
+            $this->fileBump($fh);
+
+            $this->fileWrite($fh, 'return ['."\n");
+            $this->fileBump($fh);
+            foreach($fields as $i => $row) {
+                $fName = $row['Field'];
+                $name = FieldName::getterName($fName);
+                $this->fileWrite($fh, "'$fName' => ".'$this->'.$name.'(),'."\n");
+            }
+            $this->fileDrop($fh);
+            $this->fileWrite($fh,'];'."\n");
+
+            $this->fileDrop($fh);
+            $this->fileWrite($fh,"}\n");
+        }
+
+
 
         $this->fileDrop($fh);
         $this->fileWrite($fh, "}\n\n");
