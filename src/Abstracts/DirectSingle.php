@@ -3,19 +3,21 @@ namespace GCWorld\ORM\Abstracts;
 
 use GCWorld\ORM\Audit;
 use GCWorld\ORM\CommonLoader;
+use GCWorld\ORM\Config;
 use GCWorld\ORM\ORMException;
 
-abstract class DirectSingle {
-        /**
+abstract class DirectSingle
+{
+    /**
      * @var \GCWorld\Common\Common
      */
-    protected $_common  = null;
+    protected $_common = null;
     /**
      *
      * Set this in the event your class needs a non-standard DB.
      * @var null|string
      */
-    protected $_dbName  = null;
+    protected $_dbName = null;
 
     /**
      * Set this in the event your class needs a non-standard Cache.
@@ -26,7 +28,7 @@ abstract class DirectSingle {
     /**
      * @var \GCWorld\Database\Database
      */
-    protected $_db      = null;
+    protected $_db = null;
 
     /**
      * Set to false if you want to omit this object from your memory cache all together.
@@ -37,7 +39,7 @@ abstract class DirectSingle {
     /**
      * @var \Redis|bool
      */
-    protected $_cache   = null;
+    protected $_cache = null;
 
     /**
      * @var array
@@ -47,7 +49,7 @@ abstract class DirectSingle {
      * Set this to false in your class when you don't want to log changes
      * @var bool
      */
-    protected $_audit   = true;
+    protected $_audit = true;
 
     /**
      * Setting this to true will enable insert on duplicate key update features.
@@ -77,8 +79,8 @@ abstract class DirectSingle {
     public function __construct($primary_id = null, $defaults = null)
     {
         $this->myName  = get_class($this);
-        $table_name    = constant($this->myName . '::CLASS_TABLE');
-        $primary_name  = constant($this->myName . '::CLASS_PRIMARY');
+        $table_name    = constant($this->myName.'::CLASS_TABLE');
+        $primary_name  = constant($this->myName.'::CLASS_PRIMARY');
         $this->_common = CommonLoader::getCommon();
 
         if (!is_object($this->_common)) {
@@ -86,12 +88,12 @@ abstract class DirectSingle {
             die('COMMON NOT FOUND<br>'.$table_name.'<br>'.$primary_name.'<br>'.$primary_id);
         }
 
-        $this->_db     = $this->_common->getDatabase($this->_dbName);
+        $this->_db = $this->_common->getDatabase($this->_dbName);
         if (!is_object($this->_db)) {
             debug_print_backtrace();
             die('Database Not Defined<br>'.$table_name.'<br>'.$primary_name.'<br>'.$primary_id);
         }
-        $this->_cache  = $this->_common->getCache($this->_cacheName);
+        $this->_cache = $this->_common->getCache($this->_cacheName);
 
         if ($primary_id !== null && !is_scalar($primary_id)) {
             throw new ORMException('Primary ID is not scalar');
@@ -106,7 +108,7 @@ abstract class DirectSingle {
                 if ($this->_cache) {
                     $json = $this->_cache->hGet($this->myName, 'key_'.$primary_id);
                     if (strlen($json) > 2) {
-                        $data = json_decode($json, true);
+                        $data       = json_decode($json, true);
                         $properties = array_keys(get_object_vars($this));
                         foreach ($data as $k => $v) {
                             if (in_array($k, $properties)) {
@@ -119,7 +121,7 @@ abstract class DirectSingle {
                 }
             }
         }
-        if ($primary_id != null) {
+        if ($primary_id !== null) {
             if (defined($this->myName.'::SQL')) {
                 $sql = constant($this->myName.'::SQL');
             } else {
@@ -127,10 +129,18 @@ abstract class DirectSingle {
             }
 
             $query = $this->_db->prepare($sql);
-            $query->execute(array(':id'=>$primary_id));
+            $query->execute(array(':id' => $primary_id));
             $defaults = $query->fetch();
             if (!is_array($defaults)) {
                 if (!$this->_canInsert) {
+                    $cConfig = new Config();
+                    $config  = $cConfig->getConfig();
+                    if (!isset($config['enable_backtrace']) || $config['enable_backtrace'] == 'true') {
+                        debug_print_backtrace();
+                        if (function_exists('d')) {
+                            d(func_get_args());
+                        }
+                    }
                     throw new ORMException($this->myName.' Construct Failed');
                 }
             } else {
@@ -173,6 +183,7 @@ abstract class DirectSingle {
         foreach ($fields as $k) {
             $return[$k] = $this->$k;
         }
+
         return $return;
     }
 
@@ -190,6 +201,7 @@ abstract class DirectSingle {
                 $this->_changed[] = $key;
             }
         }
+
         return $this;
     }
 
@@ -202,6 +214,7 @@ abstract class DirectSingle {
         foreach ($data as $k => $v) {
             $this->set($k, $v);
         }
+
         return $this;
     }
 
@@ -210,8 +223,8 @@ abstract class DirectSingle {
      */
     public function save()
     {
-        $table_name     = constant($this->myName . '::CLASS_TABLE');
-        $primary_name   = constant($this->myName . '::CLASS_PRIMARY');
+        $table_name   = constant($this->myName.'::CLASS_TABLE');
+        $primary_name = constant($this->myName.'::CLASS_PRIMARY');
 
         if (count($this->_changed) > 0) {
             /** @var \GCWorld\Database\Database $db */
@@ -221,9 +234,9 @@ abstract class DirectSingle {
 
             // ============================================================================== Audit
             if ($this->_audit) {
-                $sql = 'SELECT * FROM '.$table_name.' WHERE '.$primary_name.' = :primary';
+                $sql   = 'SELECT * FROM '.$table_name.' WHERE '.$primary_name.' = :primary';
                 $query = $db->prepare($sql);
-                $query->execute(array(':primary'=>$this->$primary_name));
+                $query->execute(array(':primary' => $this->$primary_name));
                 $before = $query->fetch();
                 $query->closeCursor();
             }
@@ -245,12 +258,13 @@ abstract class DirectSingle {
                         }
                         $sql .= "$field = VALUES($field), \n";
                     }
-                    $sql = rtrim($sql, ", \n");
+                    $sql   = rtrim($sql, ", \n");
                     $query = $this->_db->prepare($sql);
                     $query->execute($params);
                     $query->closeCursor();
                 } else {
-                    $sql = 'INSERT IGNORE INTO '.$table_name.' ('.implode(', ', $fields).') VALUES (:'.implode(', :', $fields).')';
+                    $sql = 'INSERT IGNORE INTO '.$table_name.' ('.implode(', ', $fields).') VALUES (:'.implode(', :',
+                            $fields).')';
                     foreach ($fields as $field) {
                         $params[':'.$field] = ($this->$field == null ? '' : $this->$field);
                         if ($field == $primary_name) {
@@ -258,14 +272,14 @@ abstract class DirectSingle {
                         }
                         $sql .= "$field = VALUES($field), \n";
                     }
-                    $sql = rtrim($sql, ", \n");
+                    $sql   = rtrim($sql, ", \n");
                     $query = $this->_db->prepare($sql);
                     $query->execute($params);
                     $query->closeCursor();
                 }
 
             } else {
-                $sql = 'UPDATE '.$table_name.' SET ';
+                $sql                       = 'UPDATE '.$table_name.' SET ';
                 $params[':'.$primary_name] = $this->$primary_name;
                 foreach ($this->_changed as $key) {
                     $sql .= $key.' = :'.$key.', ';
@@ -281,9 +295,9 @@ abstract class DirectSingle {
 
             // ============================================================================== Audit
             if ($this->_audit) {
-                $sql = 'SELECT * FROM '.$table_name.' WHERE '.$primary_name.' = :primary';
+                $sql   = 'SELECT * FROM '.$table_name.' WHERE '.$primary_name.' = :primary';
                 $query = $db->prepare($sql);
-                $query->execute(array(':primary'=>$this->$primary_name));
+                $query->execute(array(':primary' => $this->$primary_name));
                 $after = $query->fetch();
                 $query->closeCursor();
 
@@ -291,9 +305,9 @@ abstract class DirectSingle {
                 $memberID = 0;
                 if (method_exists($this->_common, 'getUser')) {
                     $user = $this->_common->getUser();
-                    if(is_object($user)) {
+                    if (is_object($user)) {
                         // getRealMemberID
-                        if(method_exists($user, 'getRealMemberId')) {
+                        if (method_exists($user, 'getRealMemberId')) {
                             $memberID = $user->getRealMemberId();
                         } elseif (method_exists($user, 'getMemberId')) {
                             $memberID = $user->getMemberId();
@@ -302,9 +316,9 @@ abstract class DirectSingle {
                             if (property_exists($user, $user_primary)) {
                                 $memberID = $user->$user_primary;
                             } elseif (method_exists($user, 'get')) {
-                                try {
+                                try{
                                     $memberID = $user->get($user_primary);
-                                } catch (\Exception $e) {
+                                } catch(\Exception $e){
                                     // Silently fail.
                                 }
                             }
@@ -320,8 +334,10 @@ abstract class DirectSingle {
             }
 
             $this->purgeCache();
+
             return true;
         }
+
         return false;
     }
 
@@ -331,7 +347,7 @@ abstract class DirectSingle {
     public function purgeCache()
     {
         if ($this->_canCache && $this->_cache) {
-            $primary_name  = constant($this->myName . '::CLASS_PRIMARY');
+            $primary_name = constant($this->myName.'::CLASS_PRIMARY');
             $this->_cache->hDel($this->myName, 'key_'.$this->$primary_name);
         }
     }
