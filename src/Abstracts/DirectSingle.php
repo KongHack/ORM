@@ -135,7 +135,7 @@ abstract class DirectSingle
                 if (!$this->_canInsert) {
                     $cConfig = new Config();
                     $config  = $cConfig->getConfig();
-                    if (!isset($config['enable_backtrace']) || $config['enable_backtrace'] == 'true') {
+                    if (isset($config['enable_backtrace']) && $config['enable_backtrace']) {
                         debug_print_backtrace();
                         if (function_exists('d')) {
                             d(func_get_args());

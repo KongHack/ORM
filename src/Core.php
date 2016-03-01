@@ -32,14 +32,14 @@ class Core
         $config  = $cConfig->getConfig();
 
         if (isset($config['get_set_funcs'])) {
-            if ($config['get_set_funcs'] == 'false') {
+            if (!$config['get_set_funcs']) {
                 $this->get_set_funcs = false;
             }
         }
         if (isset($config['var_visibility']) && in_array($config['var_visibility'], ['public', 'protected'])) {
             $this->var_visibility = $config['var_visibility'];
         }
-        if (isset($config['json_serialize']) && $config['json_serialize'] == 'false') {
+        if (isset($config['json_serialize']) && !$config['json_serialize']) {
             $this->json_serialize = false;
         }
     }
