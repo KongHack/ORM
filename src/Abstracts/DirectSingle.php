@@ -261,6 +261,7 @@ abstract class DirectSingle
                     $sql   = rtrim($sql, ", \n");
                     $query = $this->_db->prepare($sql);
                     $query->execute($params);
+                    $this->$primary_name = $this->_db->lastInsertId();
                     $query->closeCursor();
                 } else {
                     $sql = 'INSERT IGNORE INTO '.$table_name.' ('.implode(', ', $fields).') VALUES (:'.implode(', :',
@@ -275,6 +276,7 @@ abstract class DirectSingle
                     $sql   = rtrim($sql, ", \n");
                     $query = $this->_db->prepare($sql);
                     $query->execute($params);
+                    $this->$primary_name = $this->_db->lastInsertId();
                     $query->closeCursor();
                 }
 
