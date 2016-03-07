@@ -253,7 +253,7 @@ abstract class DirectSingle
                         ON DUPLICATE KEY UPDATE ';
                     foreach ($fields as $field) {
                         $params[':'.$field] = ($this->$field == null ? '' : $this->$field);
-                        if ($field == $primary_name) {
+                        if ($field == $primary_name && !self::AUTO_INCREMENT) {
                             continue;
                         }
                         $sql .= "$field = VALUES($field), \n";
@@ -268,7 +268,7 @@ abstract class DirectSingle
                             $fields).')';
                     foreach ($fields as $field) {
                         $params[':'.$field] = ($this->$field == null ? '' : $this->$field);
-                        if ($field == $primary_name) {
+                        if ($field == $primary_name && !self::AUTO_INCREMENT) {
                             continue;
                         }
                         $sql .= "$field = VALUES($field), \n";

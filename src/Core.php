@@ -54,9 +54,10 @@ class Core
         $query->execute();
         $fields = $query->fetchAll(PDO::FETCH_ASSOC);
 
-        $primaries    = array();
-        $max_var_name = 0;
-        $max_var_type = 0;
+        $auto_increment = false;
+        $primaries      = [];
+        $max_var_name   = 0;
+        $max_var_type   = 0;
 
         $path = $this->master_location.DIRECTORY_SEPARATOR.'Generated/';
         if (!is_dir($path)) {
@@ -73,7 +74,9 @@ class Core
             if (strlen($row['Type']) > $max_var_type) {
                 $max_var_type = strlen($row['Type']);
             }
-
+            if(substr($row['Extra'],'auto_increment')) {
+                $auto_increment = true;
+            }
         }
 
         $filename = $table_name.'.php';
@@ -126,6 +129,12 @@ class Core
                 "CONST ".str_pad('CLASS_PRIMARIES', $max_var_name, ' ')."   = ".var_export($primaries, true).";\n");
 
         }
+        if($auto_increment) {
+            $this->fileWrite($fh, 'CONST AUTO_INCREMENT = true;');
+        } else {
+            $this->fileWrite($fh, 'CONST AUTO_INCREMENT = false;');
+        }
+
 
         foreach ($fields as $i => $row) {
             $type = (stristr($row['Type'], 'int') ? 'int   ' : 'string');
