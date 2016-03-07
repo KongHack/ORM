@@ -74,7 +74,7 @@ class Core
             if (strlen($row['Type']) > $max_var_type) {
                 $max_var_type = strlen($row['Type']);
             }
-            if(substr($row['Extra'],'auto_increment')) {
+            if(strstr($row['Extra'],'auto_increment')) {
                 $auto_increment = true;
             }
         }
