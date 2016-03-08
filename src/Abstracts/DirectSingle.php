@@ -243,7 +243,8 @@ abstract class DirectSingle
 
             // ============================================================================== Write Logic
             if ($this->_canInsert) {
-                $fields = array_keys(static::$dbInfo);
+                $auto_increment = constant($this->myName.'::CLASS_PRIMARY');
+                $fields         = array_keys(static::$dbInfo);
                 if (!in_array($primary_name, $fields)) {
                     $fields[] = $primary_name;
                 }
@@ -253,7 +254,7 @@ abstract class DirectSingle
                         ON DUPLICATE KEY UPDATE ';
                     foreach ($fields as $field) {
                         $params[':'.$field] = ($this->$field == null ? '' : $this->$field);
-                        if ($field == $primary_name && !self::AUTO_INCREMENT) {
+                        if ($field == $primary_name && !$auto_increment) {
                             continue;
                         }
                         $sql .= "$field = VALUES($field), \n";
@@ -268,7 +269,7 @@ abstract class DirectSingle
                             $fields).')';
                     foreach ($fields as $field) {
                         $params[':'.$field] = ($this->$field == null ? '' : $this->$field);
-                        if ($field == $primary_name && !self::AUTO_INCREMENT) {
+                        if ($field == $primary_name && !$auto_increment) {
                             continue;
                         }
                         $sql .= "$field = VALUES($field), \n";
