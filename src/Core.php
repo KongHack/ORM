@@ -129,12 +129,8 @@ class Core
                 "CONST ".str_pad('CLASS_PRIMARIES', $max_var_name, ' ')."   = ".var_export($primaries, true).";\n");
 
         }
-        if($auto_increment) {
-            $this->fileWrite($fh, 'CONST AUTO_INCREMENT = true;');
-        } else {
-            $this->fileWrite($fh, 'CONST AUTO_INCREMENT = false;');
-        }
 
+        $this->fileWrite($fh, 'CONST AUTO_INCREMENT = '.($auto_increment?'true':'false').";\n");
 
         foreach ($fields as $i => $row) {
             $type = (stristr($row['Type'], 'int') ? 'int   ' : 'string');
