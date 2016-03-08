@@ -110,7 +110,7 @@ class Core
             $this->fileBump($fh);
             $this->fileWrite($fh, "CONST ".str_pad('CLASS_TABLE', $max_var_name, ' ')."   = '$table_name';\n");
             $this->fileWrite($fh,
-                "CONST ".str_pad('CLASS_PRIMARY', $max_var_name, ' ')."   = '".$primaries[0]."';\n\n");
+                "CONST ".str_pad('CLASS_PRIMARY', $max_var_name, ' ')."   = '".$primaries[0]."';\n");
 
         } else {
             // Multiple primary keys!!!
@@ -130,7 +130,7 @@ class Core
 
         }
 
-        $this->fileWrite($fh, 'CONST AUTO_INCREMENT = '.($auto_increment?'true':'false').";\n");
+        $this->fileWrite($fh, 'CONST '.str_pad('AUTO_INCREMENT', $max_var_name, ' ').' = '.($auto_increment?'true':'false').";\n");
 
         foreach ($fields as $i => $row) {
             $type = (stristr($row['Type'], 'int') ? 'int   ' : 'string');
