@@ -130,7 +130,7 @@ class Core
 
         }
 
-        $this->fileWrite($fh, 'CONST '.str_pad('AUTO_INCREMENT', $max_var_name, ' ').' = '.($auto_increment?'true':'false').";\n");
+        $this->fileWrite($fh, 'CONST '.str_pad('AUTO_INCREMENT', $max_var_name, ' ').'   = '.($auto_increment?'true':'false').";\n");
 
         foreach ($fields as $i => $row) {
             $type = (stristr($row['Type'], 'int') ? 'int   ' : 'string');
