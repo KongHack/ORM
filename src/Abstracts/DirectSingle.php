@@ -277,7 +277,10 @@ abstract class DirectSingle
                     $sql   = rtrim($sql, ", \n");
                     $query = $this->_db->prepare($sql);
                     $query->execute($params);
-                    $this->$primary_name = $this->_db->lastInsertId();
+                    $newId = $this->_db->lastInsertId();
+                    if($newId > 0) {
+                        $this->$primary_name = $newId;
+                    }
                     $query->closeCursor();
                 }
 
