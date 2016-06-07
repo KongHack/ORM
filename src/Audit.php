@@ -18,9 +18,9 @@ class Audit
         /** @var array $audit */
         $audit = $common->getConfig('audit');
         if (is_array($audit)) {
-            $this->enable = $audit['enable'];
+            $this->enable   = $audit['enable'];
             $this->database = $audit['database'];
-            $this->prefix = $audit['prefix'];
+            $this->prefix   = $audit['prefix'];
         }
     }
 
@@ -46,16 +46,16 @@ class Audit
 
     /**
      * @param string $table
-     * @param int $primaryID
-     * @param int $memberID
-     * @param array $before
-     * @param array $after
-     * @return bool
+     * @param int    $primaryID
+     * @param int    $memberID
+     * @param array  $before
+     * @param array  $after
+     * @return int
      */
     public function storeLog($table, $primaryID, $memberID, array $before, array $after)
     {
         if (!$this->enable) {
-            return false;
+            return 0;
         }
 
         if (empty($primaryID)) {
@@ -63,6 +63,7 @@ class Audit
         }
 
         $storeTable = $this->prefix.$table;
+        /** @var \GCWorld\Database\Database $db */
         $db = $this->common->getDatabase($this->database);
         if (!$db->tableExists($storeTable)) {
             $this->createTable($storeTable);
@@ -80,9 +81,8 @@ class Audit
             }
         }
 
-
         if (count($A) > 0) {
-            $sql = 'INSERT INTO '.$storeTable.'
+            $sql   = 'INSERT INTO '.$storeTable.'
             (primary_id, member_id, log_before, log_after)
             VALUES
             (:pid, :mid, :logB, :logA)';
@@ -94,8 +94,10 @@ class Audit
                 ':logA' => json_encode($A)
             ));
             $query->closeCursor();
+
+            return $db->lastInsertId();
         }
 
-        return true;
+        return 0;
     }
 }
