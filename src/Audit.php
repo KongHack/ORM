@@ -3,6 +3,8 @@ namespace GCWorld\ORM;
 
 class Audit
 {
+    const DATA_MODEL_VERSION = 1;
+
     /** @var \GCWorld\Common\Common */
     private $common   = null;
     private $database = 'default';
@@ -22,26 +24,6 @@ class Audit
             $this->database = $audit['database'];
             $this->prefix   = $audit['prefix'];
         }
-    }
-
-    /**
-     * @param $tableName
-     */
-    private function createTable($tableName)
-    {
-        $sql = '
-        CREATE TABLE IF NOT EXISTS `'.$tableName.'` (
-          `log_id` int(11) NOT NULL AUTO_INCREMENT,
-          `primary_id` int(11) NOT NULL,
-          `member_id` int(11) NOT NULL DEFAULT \'0\',
-          `log_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-          `log_before` longtext COLLATE utf8_bin NOT NULL,
-          `log_after` longtext COLLATE utf8_bin NOT NULL,
-          PRIMARY KEY (`log_id`),
-          KEY `primary_id` (`primary_id`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
-        ';
-        $this->common->getDatabase($this->database)->exec($sql);
     }
 
     /**
@@ -65,13 +47,12 @@ class Audit
         $storeTable = $this->prefix.$table;
         /** @var \GCWorld\Database\Database $db */
         $db = $this->common->getDatabase($this->database);
-        if (!$db->tableExists($storeTable)) {
-            $this->createTable($storeTable);
-        }
+
+        $this->handleTable($storeTable);
 
         //Determine only things changed.
-        $A = array();
-        $B = array();
+        $A = [];
+        $B = [];
 
         // KISS
         foreach ($before as $k => $v) {
@@ -83,21 +64,74 @@ class Audit
 
         if (count($A) > 0) {
             $sql   = 'INSERT INTO '.$storeTable.'
-            (primary_id, member_id, log_before, log_after)
+            (primary_id, member_id, log_request_uri, log_before, log_after)
             VALUES
-            (:pid, :mid, :logB, :logA)';
+            (:pid, :mid, :uri, :logB, :logA)';
             $query = $db->prepare($sql);
-            $query->execute(array(
+            $query->execute([
                 ':pid'  => intval($primaryID),
                 ':mid'  => intval($memberID),
+                ':uri'  => (isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : $this->get_topmost_script()),
                 ':logB' => json_encode($B),
                 ':logA' => json_encode($A)
-            ));
+            ]);
             $query->closeCursor();
 
             return $db->lastInsertId();
         }
 
         return 0;
+    }
+
+
+    private function handleTable($tableName)
+    {
+        $db = $this->common->getDatabase($this->database);
+
+        if(!$db->tableExists($tableName)) {
+            $source = file_get_contents($this->getDataModelDirectory().'source.sql');
+            $sql = str_replace('__REPLACE__', $tableName, $source);
+            $db->exec($sql);
+            $db->setTableComment($tableName,'0');
+        }
+        $version = intval($db->getTableComment($tableName));
+        if($version < self::DATA_MODEL_VERSION) {
+            $versionFiles = glob($this->getDataModelDirectory().'revisions'.DIRECTORY_SEPARATOR.'*.sql');
+            sort($versionFiles);
+            foreach($versionFiles as $file) {
+                $tmp = explode(DIRECTORY_SEPARATOR, $file);
+                $fileName = array_pop($tmp);
+                $tmp = explode('.',$fileName);
+                $fileNumber = intval($tmp[0]);
+                unset($tmp);
+
+                if($fileNumber > $version) {
+                    $model = file_get_contents($file);
+                    $sql = str_replace('__REPLACE__', $tableName, $model);
+                    $db->exec($sql);
+                    $db->setTableComment($tableName,$fileNumber);
+                }
+            }
+        }
+    }
+
+    /**
+     * @return string
+     */
+    private function getDataModelDirectory()
+    {
+        $base  = rtrim(__DIR__,DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR;
+        $base .= 'datamodel'.DIRECTORY_SEPARATOR.'audit'.DIRECTORY_SEPARATOR;
+        return $base;
+    }
+
+    /**
+     * More Info: http://stackoverflow.com/questions/1318608/php-get-parent-script-name
+     * @return mixed
+     */
+    private function get_topmost_script() {
+        $backtrace = debug_backtrace( defined("DEBUG_BACKTRACE_IGNORE_ARGS") ? DEBUG_BACKTRACE_IGNORE_ARGS : FALSE);
+        $top_frame = array_pop($backtrace);
+        return $top_frame['file'];
     }
 }
