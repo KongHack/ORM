@@ -148,7 +148,7 @@ abstract class DirectSingle
                     if (!isset($redis)) {
                         $redis = $this->_common->getCache($this->_cacheName);
                     }
-                    if ($redis) {
+                    if ($redis && $primary_id > 0) {
                         $redis->hSet($this->myName, 'key_'.$primary_id, json_encode($defaults));
                     }
                 }
