@@ -10,6 +10,13 @@ class Audit
     private $database = 'default';
     private $prefix   = '_Audit_';
 
+    // Loaded via storeLog
+    protected $table = null;
+    protected $primaryId = null;
+    protected $memberId = null;
+    protected $before = [];
+    protected $after  = [];
+
     /**
      * @param \GCWorld\Interfaces\Common $common
      */
@@ -36,6 +43,13 @@ class Audit
      */
     public function storeLog($table, $primaryID, $memberID, array $before, array $after)
     {
+        $this->table = $table;
+        $this->primaryId = $primaryID;
+        $this->memberId = $memberID;
+        $this->before = $before;
+        $this->after = $after;
+
+
         if (!$this->enable) {
             return 0;
         }
@@ -83,7 +97,9 @@ class Audit
         return 0;
     }
 
-
+    /**
+     * @param $tableName
+     */
     private function handleTable($tableName)
     {
         $db = $this->common->getDatabase($this->database);
@@ -134,4 +150,45 @@ class Audit
         $top_frame = array_pop($backtrace);
         return $top_frame['file'];
     }
+
+    /**
+     * @return null|string
+     */
+    public function getTable()
+    {
+        return $this->table;
+    }
+
+    /**
+     * @return null|integer
+     */
+    public function getPrimaryId()
+    {
+        return $this->primaryId;
+    }
+
+    /**
+     * @return null|integer
+     */
+    public function getMemberId()
+    {
+        return $this->memberId;
+    }
+
+    /**
+     * @return array
+     */
+    public function getBefore()
+    {
+        return $this->before;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAfter()
+    {
+        return $this->after;
+    }
+    
 }

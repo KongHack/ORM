@@ -44,12 +44,19 @@ abstract class DirectSingle
     /**
      * @var array
      */
-    protected $_changed = array();
+    protected $_changed = [];
+    
     /**
      * Set this to false in your class when you don't want to log changes
      * @var bool
      */
     protected $_audit = true;
+
+    /**
+     * The last audit object will be set to this upon audit completion
+     * @var Audit|null
+     */
+    protected $_lastAuditObject = null;
 
     /**
      * Setting this to true will enable insert on duplicate key update features.
@@ -339,6 +346,7 @@ abstract class DirectSingle
                 if (is_array($before) && is_array($after)) {
                     $audit = new Audit($this->_common);
                     $audit->storeLog($table_name, $this->$primary_name, $memberID, $before, $after);
+                    $this->_lastAuditObject = $audit;
                 }
             }
 

@@ -3,16 +3,23 @@
 
 
 
+## 2.7.2
+ - @GameCharmer improve the auditing system for DirectSingle
+
+
 ## 2.7.1
- - @GameCharmer Prevent
+ - @GameCharmer Prevent (something got cut off?)
+
 
 ## 2.5.5
  - @GameCharmer **New Config Value:** get_set_funcs (Toggle auto-generation of getters/setters)
  - @GameCharmer **New Config Value:** var_visibility (Define public/protected state of generated properties)
 
+
 ## 2.4.4
  - @GameCharmer Implement Doc Blocks on DBInfo array
  - @GameCharmer Implement Doc Blocks on generated properties
+
 
 ## 2.4.3
 - @GameCharmer Start of changelog tracking
