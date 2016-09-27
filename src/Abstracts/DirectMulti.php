@@ -199,4 +199,12 @@ abstract class DirectMulti {
     {
         return array_keys(self::$dbInfo);
     }
+    
+    /**
+     * @return bool
+     */
+    public function _hasChanged()
+    {
+        return (count($this->_changed) > 0);
+    }
 }

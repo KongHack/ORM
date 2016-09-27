@@ -377,4 +377,12 @@ abstract class DirectSingle
     {
         return array_keys(static::$dbInfo);
     }
+
+    /**
+     * @return bool
+     */
+    public function _hasChanged()
+    {
+        return (count($this->_changed) > 0);
+    }
 }
