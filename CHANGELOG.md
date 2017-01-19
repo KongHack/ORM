@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 
+
+## 2.7.4
+ - @GameCharmer Updated Composer
+
+
 ## 2.7.3
  - @GameCharmer added the _hasChanged function to both abstract classes
 
