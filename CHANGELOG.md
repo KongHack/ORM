@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## 2.8.0
+ - @GameCharmer Use Default Option
+ - @GameCharmer Updated Composer
+
+
 ## 2.7.4
  - @GameCharmer Updated Composer
 
