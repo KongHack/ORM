@@ -17,6 +17,7 @@ class Core
     protected $get_set_funcs  = true;
     protected $var_visibility = 'public';
     protected $json_serialize = true;
+    protected $use_defaults   = true;
 
     /**
      * @param $namespace
@@ -41,6 +42,9 @@ class Core
         }
         if (isset($config['json_serialize']) && !$config['json_serialize']) {
             $this->json_serialize = false;
+        }
+        if (isset($config['use_defaults']) && !$config['use_defaults']) {
+            $this->use_defaults = false;
         }
     }
 
@@ -139,7 +143,11 @@ class Core
             $this->fileWrite($fh, '* @db-info '.$row['Type']."\n");
             $this->fileWrite($fh, '* @var '.$type."\n");
             $this->fileWrite($fh, '*/'."\n");
-            $this->fileWrite($fh, $this->var_visibility.' $'.str_pad($row['Field'], $max_var_name, ' ').' = null;');
+            if($this->use_defaults) {
+                $this->fileWrite($fh, $this->var_visibility.' $'.str_pad($row['Field'], $max_var_name, ' ').' = '.var_export($row['Default'],true).';');
+            } else {
+                $this->fileWrite($fh, $this->var_visibility.' $'.str_pad($row['Field'], $max_var_name, ' ').' = null;');
+            }
         }
         $this->fileWrite($fh, "\n");
         $this->fileWrite($fh, '/**'."\n");
@@ -237,7 +245,11 @@ class Core
             $this->fileWrite($fh, '* @db-info '.$row['Type']."\n");
             $this->fileWrite($fh, '* @var '.$type."\n");
             $this->fileWrite($fh, '*/'."\n");
-            $this->fileWrite($fh, $this->var_visibility.' $'.str_pad($row['Field'], $max_var_name, ' ').' = null;');
+            if($this->use_defaults) {
+                $this->fileWrite($fh, $this->var_visibility.' $'.str_pad($row['Field'], $max_var_name, ' ').' = '.var_export($row['Default'], true).';');
+            } else {
+                $this->fileWrite($fh, $this->var_visibility.' $'.str_pad($row['Field'], $max_var_name, ' ').' = null;');
+            }
         }
         $this->fileWrite($fh, "\n");
 
