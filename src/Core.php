@@ -359,6 +359,8 @@ class Core
             if ($row['Null'] == 'NO') {
                 $default = $this->defaultData($row['Type']);
             }
+        } elseif (strtoupper($default) == 'CURRENT_TIMESTAMP') {
+            $default = '0000-00-00 00:00:00';
         }
 
         if (is_numeric($default)) {

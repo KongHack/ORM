@@ -5,8 +5,13 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## 2.8.1.3
+ - @GameCharmer compensate for "CURRENT_TIMESTAMP" as a default value
+
+
 ## 2.8.1.2
  - @GameCharmer cleanup echos and spacing
+
 
 ## 2.8.1.1
  - @GameCharmer strip out data type parameters when type checking (ex. BIGINT(20) UNSIGNED becomes just BIGINT)
