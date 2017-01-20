@@ -13,10 +13,10 @@ class Core
     private   $open_files       = [];
     private   $open_files_level = [];
 
-    protected $get_set_funcs  = true;
-    protected $var_visibility = 'public';
-    protected $json_serialize = true;
-    protected $use_defaults   = true;
+    protected $get_set_funcs          = true;
+    protected $var_visibility         = 'public';
+    protected $json_serialize         = true;
+    protected $use_defaults           = true;
     protected $defaults_override_null = true;
 
     /**
@@ -83,7 +83,7 @@ class Core
             if (strlen($row['Type']) > $max_var_type) {
                 $max_var_type = strlen($row['Type']);
             }
-            if(strstr($row['Extra'],'auto_increment')) {
+            if (strstr($row['Extra'], 'auto_increment')) {
                 $auto_increment = true;
             }
         }
@@ -100,7 +100,7 @@ class Core
         $this->fileWrite($fh, "<?php\n");
         $this->fileWrite($fh, 'namespace GCWorld\\ORM\\Generated;'."\n\n");
 
-        if($this->json_serialize) {
+        if ($this->json_serialize) {
             $this->fileWrite($fh, 'use \\GCWorld\\ORM\\FieldName;'."\n");
         }
 
@@ -115,7 +115,8 @@ class Core
             }
 
             $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Interfaces\\GeneratedInterface AS dbi;'."\n\n");
-            $this->fileWrite($fh, 'class '.$table_name." extends dbc implements dbi, dbd".($this->json_serialize?", \JsonSerializable":'')."\n{\n");
+            $this->fileWrite($fh,
+                'class '.$table_name." extends dbc implements dbi, dbd".($this->json_serialize ? ", \JsonSerializable" : '')."\n{\n");
             $this->fileBump($fh);
             $this->fileWrite($fh, "CONST ".str_pad('CLASS_TABLE', $max_var_name, ' ')."   = '$table_name';\n");
             $this->fileWrite($fh,
@@ -139,7 +140,8 @@ class Core
 
         }
 
-        $this->fileWrite($fh, 'CONST '.str_pad('AUTO_INCREMENT', $max_var_name, ' ').'   = '.($auto_increment?'true':'false').";\n");
+        $this->fileWrite($fh,
+            'CONST '.str_pad('AUTO_INCREMENT', $max_var_name, ' ').'   = '.($auto_increment ? 'true' : 'false').";\n");
 
         foreach ($fields as $i => $row) {
             $type = (stristr($row['Type'], 'int') ? 'int   ' : 'string');
@@ -148,8 +150,9 @@ class Core
             $this->fileWrite($fh, '* @db-info '.$row['Type']."\n");
             $this->fileWrite($fh, '* @var '.$type."\n");
             $this->fileWrite($fh, '*/'."\n");
-            if($this->use_defaults) {
-                $this->fileWrite($fh, $this->var_visibility.' $'.str_pad($row['Field'], $max_var_name, ' ').' = '.$this->formatDefault($row).';');
+            if ($this->use_defaults) {
+                $this->fileWrite($fh, $this->var_visibility.' $'.str_pad($row['Field'], $max_var_name,
+                        ' ').' = '.$this->formatDefault($row).';');
             } else {
                 $this->fileWrite($fh, $this->var_visibility.' $'.str_pad($row['Field'], $max_var_name, ' ').' = null;');
             }
@@ -199,15 +202,15 @@ class Core
             }
         }
 
-        if($this->json_serialize) {
+        if ($this->json_serialize) {
             $this->fileWrite($fh, 'public function jsonSerialize() {'."\n");
             $this->fileBump($fh);
 
             $this->fileWrite($fh, 'return ['."\n");
             $this->fileBump($fh);
-            foreach($fields as $i => $row) {
+            foreach ($fields as $i => $row) {
                 $fName = $row['Field'];
-                if($this->get_set_funcs) {
+                if ($this->get_set_funcs) {
                     $name = FieldName::getterName($fName);
                     $this->fileWrite($fh, "'$fName' => ".'$this->'.$name.'(),'."\n");
                 } else {
@@ -215,12 +218,11 @@ class Core
                 }
             }
             $this->fileDrop($fh);
-            $this->fileWrite($fh,'];'."\n");
+            $this->fileWrite($fh, '];'."\n");
 
             $this->fileDrop($fh);
-            $this->fileWrite($fh,"}\n");
+            $this->fileWrite($fh, "}\n");
         }
-
 
 
         $this->fileDrop($fh);
@@ -250,8 +252,9 @@ class Core
             $this->fileWrite($fh, '* @db-info '.$row['Type']."\n");
             $this->fileWrite($fh, '* @var '.$type."\n");
             $this->fileWrite($fh, '*/'."\n");
-            if($this->use_defaults) {
-                $this->fileWrite($fh, $this->var_visibility.' $'.str_pad($row['Field'], $max_var_name, ' ').' = '.$this->formatDefault($row).';');
+            if ($this->use_defaults) {
+                $this->fileWrite($fh, $this->var_visibility.' $'.str_pad($row['Field'], $max_var_name,
+                        ' ').' = '.$this->formatDefault($row).';');
             } else {
                 $this->fileWrite($fh, $this->var_visibility.' $'.str_pad($row['Field'], $max_var_name, ' ').' = null;');
             }
@@ -352,23 +355,20 @@ class Core
     private function formatDefault($row)
     {
         $default = $row['Default'];
-        if($default === NULL) {
-            if($row['Null'] == 'NO') {
+        if ($default === null) {
+            if ($row['Null'] == 'NO') {
                 $default = $this->defaultData($row['Type']);
             }
         }
 
-        //echo '- Default: '.$default.PHP_EOL;
-
-        if(is_numeric($default)) {
-            if(strstr($default,'.')) {
-        //        echo'-- Float'.PHP_EOL;
+        if (is_numeric($default)) {
+            if (strstr($default, '.')) {
                 return floatval($default);
             }
-        //    echo'-- Int'.PHP_EOL;
+
             return intval($default);
         }
-        //echo'-- String'.PHP_EOL;
+
         return var_export($default, true);
     }
 
@@ -376,10 +376,8 @@ class Core
     {
         $type = strtoupper($type);
         $pos  = strpos($type, '(');
-        if($pos > 0) {
-            echo '- before: '.$type.PHP_EOL;
-            $type = substr($type,0,$pos);
-            echo '- after: '.$type.PHP_EOL;
+        if ($pos > 0) {
+            $type = substr($type, 0, $pos);
         }
 
         switch ($type) {
