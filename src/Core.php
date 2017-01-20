@@ -374,7 +374,15 @@ class Core
 
     private function defaultData($type)
     {
-        switch(strtoupper($type)) {
+        $type = strtoupper($type);
+        $pos  = strpos($type, '(');
+        if($pos > 0) {
+            echo '- before: '.$type.PHP_EOL;
+            $type = substr($type,0,$pos);
+            echo '- after: '.$type.PHP_EOL;
+        }
+
+        switch ($type) {
             case 'INTEGER':
             case 'TINYINT':
             case 'SMALLINT':

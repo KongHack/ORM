@@ -5,9 +5,14 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## 2.8.1.1
+ - @GameCharmer strip out data type parameters when type checking (ex. BIGINT(20) UNSIGNED becomes just BIGINT)
+
+
 ## 2.8.1
  - @GameCharmer defaults_override_null Option
  - @GameCharmer added a config documentation file & updated the readme
+
 
 ## 2.8.0
  - @GameCharmer Use Default Option
