@@ -9,6 +9,7 @@ The GCWorld ORM builds extensible classes used for selecting and updating object
   - Built in auditing
   - Audit User tracking via Common getUser() function
   - Redis smart caching
+  - Read More About The Config Options [HERE](docs/Config.md)
 
 
 ##### New Features in V2
@@ -19,14 +20,17 @@ The GCWorld ORM builds extensible classes used for selecting and updating object
  - DBInterface for keeping DirectDB systems in line and universal
  - Support for auto-generation of getters/setters
  - Custom definition of variable visibility
- - Use Default Option
+ - Use Default Option (with a null override thing!)
+
 
 ### Version
-2.8.0
+2.8.1
+
 
 ###### Todo
 - Upgrade audit system to function in the DirectDBMultiClass
 - Upgrade audit system to handle non-integer primary keys
+- Add more docblocks to generated scripts
 
 
 ### Additional Information

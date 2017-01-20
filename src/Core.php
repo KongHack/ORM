@@ -2,7 +2,6 @@
 namespace GCWorld\ORM;
 
 use \ReflectionClass;
-use \Exception;
 use \PDO;
 
 class Core
@@ -11,13 +10,14 @@ class Core
     /** @var \GCWorld\Common\Common */
     protected $master_common    = null;
     protected $master_location  = null;
-    private   $open_files       = array();
-    private   $open_files_level = array();
+    private   $open_files       = [];
+    private   $open_files_level = [];
 
     protected $get_set_funcs  = true;
     protected $var_visibility = 'public';
     protected $json_serialize = true;
     protected $use_defaults   = true;
+    protected $defaults_override_null = true;
 
     /**
      * @param $namespace
@@ -46,10 +46,15 @@ class Core
         if (isset($config['use_defaults']) && !$config['use_defaults']) {
             $this->use_defaults = false;
         }
+        if (isset($config['defaults_override_null']) && !$config['defaults_override_null']) {
+            $this->defaults_override_null = false;
+        }
     }
 
     /**
      * @param $table_name
+     * @return bool
+     * @throws \Exception
      */
     public function generate($table_name)
     {
@@ -144,7 +149,7 @@ class Core
             $this->fileWrite($fh, '* @var '.$type."\n");
             $this->fileWrite($fh, '*/'."\n");
             if($this->use_defaults) {
-                $this->fileWrite($fh, $this->var_visibility.' $'.str_pad($row['Field'], $max_var_name, ' ').' = '.var_export($row['Default'],true).';');
+                $this->fileWrite($fh, $this->var_visibility.' $'.str_pad($row['Field'], $max_var_name, ' ').' = '.$this->formatDefault($row).';');
             } else {
                 $this->fileWrite($fh, $this->var_visibility.' $'.str_pad($row['Field'], $max_var_name, ' ').' = null;');
             }
@@ -154,7 +159,7 @@ class Core
         $this->fileWrite($fh, '* Contains an array of all fields and the database notation for field type'."\n");
         $this->fileWrite($fh, '* @var array'."\n");
         $this->fileWrite($fh, '*/'."\n");
-        $this->fileWrite($fh, 'public static $dbInfo = array('."\n");
+        $this->fileWrite($fh, 'public static $dbInfo = ['."\n");
         $this->fileBump($fh);
 
         foreach ($fields as $i => $row) {
@@ -165,7 +170,7 @@ class Core
                 )." => '".$row['Type'].($row['Comment'] != '' ? ' - '.$row['Comment'] : '')."',\n");
         }
         $this->fileDrop($fh);
-        $this->fileWrite($fh, ");\n");
+        $this->fileWrite($fh, "];\n");
 
         if ($this->get_set_funcs) {
             foreach ($fields as $i => $row) {
@@ -246,7 +251,7 @@ class Core
             $this->fileWrite($fh, '* @var '.$type."\n");
             $this->fileWrite($fh, '*/'."\n");
             if($this->use_defaults) {
-                $this->fileWrite($fh, $this->var_visibility.' $'.str_pad($row['Field'], $max_var_name, ' ').' = '.var_export($row['Default'], true).';');
+                $this->fileWrite($fh, $this->var_visibility.' $'.str_pad($row['Field'], $max_var_name, ' ').' = '.$this->formatDefault($row).';');
             } else {
                 $this->fileWrite($fh, $this->var_visibility.' $'.str_pad($row['Field'], $max_var_name, ' ').' = null;');
             }
@@ -342,5 +347,85 @@ class Core
 
         return $module;
         //$handler = call_user_func_array($class_name, $args);
+    }
+
+    private function formatDefault($row)
+    {
+        $default = $row['Default'];
+        if($default === NULL) {
+            if($row['Null'] == 'NO') {
+                $default = $this->defaultData($row['Type']);
+            }
+        }
+
+        //echo '- Default: '.$default.PHP_EOL;
+
+        if(is_numeric($default)) {
+            if(strstr($default,'.')) {
+        //        echo'-- Float'.PHP_EOL;
+                return floatval($default);
+            }
+        //    echo'-- Int'.PHP_EOL;
+            return intval($default);
+        }
+        //echo'-- String'.PHP_EOL;
+        return var_export($default, true);
+    }
+
+    private function defaultData($type)
+    {
+        switch(strtoupper($type)) {
+            case 'INTEGER':
+            case 'TINYINT':
+            case 'SMALLINT':
+            case 'MEDIUMINT':
+            case 'INT':
+            case 'BIGINT':
+                return 0;
+
+            case 'DECIMAL':
+            case 'FLOAT':
+            case 'DOUBLE':
+            case 'REAL':
+            case 'BIT':
+            case 'BOOLEAN':
+            case 'SERIAL':
+            case 'NUMERIC':
+            case 'YEAR':
+                return 0.0;
+
+            case 'DATE':
+                return '0000-00-00';
+
+            case 'DATETIME':
+            case 'TIMESTAMP':
+                return '0000-00-00 00:00:00';
+
+            case 'TIME':
+                return '00:00:00';
+
+            case 'CHAR':
+            case 'VARCHAR':
+            case 'TINYTEXT':
+            case 'TEXT':
+            case 'MEDIUMTEXT':
+            case 'LONGTEXT':
+            case 'BINARY':
+            case 'VARBINARY':
+            case 'TINYBLOB':
+            case 'MEDIUMBLOB':
+            case 'BLOB':
+            case 'LONGBLOB':
+            case 'ENUM':
+            case 'SET':
+                return '';
+
+            case 'JSON':
+                return '{}';  // Probably not necessary, but hey, stay safe
+
+        }
+
+        // Ignoring geometry, because fuck that.
+        return null;
     }
 }

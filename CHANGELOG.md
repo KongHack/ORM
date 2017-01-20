@@ -5,6 +5,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## 2.8.1
+ - @GameCharmer defaults_override_null Option
+ - @GameCharmer added a config documentation file & updated the readme
+
 ## 2.8.0
  - @GameCharmer Use Default Option
  - @GameCharmer Updated Composer
