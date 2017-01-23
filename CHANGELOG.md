@@ -5,6 +5,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## 2.8.1.4
+ - @GameCharmer have DirectSingle compensate for 0 as the primary id
+
+
 ## 2.8.1.3
  - @GameCharmer compensate for "CURRENT_TIMESTAMP" as a default value
 

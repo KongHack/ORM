@@ -109,26 +109,23 @@ abstract class DirectSingle
             throw new ORMException('Defaults Array is not an array');
         }
 
-        if ($this->_canCache && $primary_id != null) {
-            // Determine if we have this in the cache.
-            if ($primary_id > 0) {
-                if ($this->_cache) {
-                    $json = $this->_cache->hGet($this->myName, 'key_'.$primary_id);
-                    if (strlen($json) > 2) {
-                        $data       = json_decode($json, true);
-                        $properties = array_keys(get_object_vars($this));
-                        foreach ($data as $k => $v) {
-                            if (in_array($k, $properties)) {
-                                $this->$k = $v;
-                            }
+        if ($this->_canCache && $primary_id !== null && $primary_id !== 0) {
+            if ($this->_cache) {
+                $json = $this->_cache->hGet($this->myName, 'key_'.$primary_id);
+                if (strlen($json) > 2) {
+                    $data       = json_decode($json, true);
+                    $properties = array_keys(get_object_vars($this));
+                    foreach ($data as $k => $v) {
+                        if (in_array($k, $properties)) {
+                            $this->$k = $v;
                         }
-
-                        return;
                     }
+
+                    return;
                 }
             }
         }
-        if ($primary_id !== null) {
+        if ($primary_id !== null && $primary_id !== 0) {
             if (defined($this->myName.'::SQL')) {
                 $sql = constant($this->myName.'::SQL');
             } else {
@@ -136,7 +133,7 @@ abstract class DirectSingle
             }
 
             $query = $this->_db->prepare($sql);
-            $query->execute(array(':id' => $primary_id));
+            $query->execute([':id' => $primary_id]);
             $defaults = $query->fetch();
             if (!is_array($defaults)) {
                 if (!$this->_canInsert) {
@@ -243,7 +240,7 @@ abstract class DirectSingle
             if ($this->_audit) {
                 $sql   = 'SELECT * FROM '.$table_name.' WHERE '.$primary_name.' = :primary';
                 $query = $db->prepare($sql);
-                $query->execute(array(':primary' => $this->$primary_name));
+                $query->execute([':primary' => $this->$primary_name]);
                 $before = $query->fetch();
                 $query->closeCursor();
             }
@@ -313,7 +310,7 @@ abstract class DirectSingle
             if ($this->_audit) {
                 $sql   = 'SELECT * FROM '.$table_name.' WHERE '.$primary_name.' = :primary';
                 $query = $db->prepare($sql);
-                $query->execute(array(':primary' => $this->$primary_name));
+                $query->execute([':primary' => $this->$primary_name]);
                 $after = $query->fetch();
                 $query->closeCursor();
 
