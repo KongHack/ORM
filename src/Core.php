@@ -97,7 +97,7 @@ class Core
         }
 
 
-        $this->fileWrite($fh, "<?php\n");
+        $this->fileWrite($fh, '<?php'.PHP_EOL);
         $this->fileWrite($fh, 'namespace GCWorld\\ORM\\Generated;'.PHP_EOL.PHP_EOL);
 
         if ($this->json_serialize) {
@@ -116,7 +116,7 @@ class Core
 
             $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Interfaces\\GeneratedInterface AS dbi;'.PHP_EOL.PHP_EOL);
             $this->fileWrite($fh,
-                'class '.$table_name." extends dbc implements dbi, dbd".($this->json_serialize ? ", \JsonSerializable" : '').PHP_EOL."{".PHP_EOL);
+                'class '.$table_name.' extends dbc implements dbi, dbd'.($this->json_serialize ? ', \\JsonSerializable' : '').PHP_EOL.'{'.PHP_EOL);
             $this->fileBump($fh);
             $this->fileWrite($fh, "CONST ".str_pad('CLASS_TABLE', $max_var_name, ' ')."   = '$table_name';".PHP_EOL);
             $this->fileWrite($fh,
