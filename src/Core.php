@@ -98,58 +98,58 @@ class Core
 
 
         $this->fileWrite($fh, "<?php\n");
-        $this->fileWrite($fh, 'namespace GCWorld\\ORM\\Generated;'."\n\n");
+        $this->fileWrite($fh, 'namespace GCWorld\\ORM\\Generated;'.PHP_EOL.PHP_EOL);
 
         if ($this->json_serialize) {
-            $this->fileWrite($fh, 'use \\GCWorld\\ORM\\FieldName;'."\n");
+            $this->fileWrite($fh, 'use \\GCWorld\\ORM\\FieldName;'.PHP_EOL);
         }
 
         if (count($primaries) == 1) {
             // Single PK Classes get a simple set of functions.
             if ($this->get_set_funcs) {
-                $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Abstracts\\DirectSingle AS dbc;'."\n");
-                $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Interfaces\\ProtectedDBInterface as dbd;'."\n");
+                $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Abstracts\\DirectSingle AS dbc;'.PHP_EOL);
+                $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Interfaces\\ProtectedDBInterface as dbd;'.PHP_EOL);
             } else {
-                $this->fileWrite($fh, 'use \\GCWorld\\ORM\\DirectDBClass AS dbc;'."\n");
-                $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Interfaces\\PublicDBInterface as dbd;'."\n");
+                $this->fileWrite($fh, 'use \\GCWorld\\ORM\\DirectDBClass AS dbc;'.PHP_EOL);
+                $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Interfaces\\PublicDBInterface as dbd;'.PHP_EOL);
             }
 
-            $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Interfaces\\GeneratedInterface AS dbi;'."\n\n");
+            $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Interfaces\\GeneratedInterface AS dbi;'.PHP_EOL.PHP_EOL);
             $this->fileWrite($fh,
-                'class '.$table_name." extends dbc implements dbi, dbd".($this->json_serialize ? ", \JsonSerializable" : '')."\n{\n");
+                'class '.$table_name." extends dbc implements dbi, dbd".($this->json_serialize ? ", \JsonSerializable" : '').PHP_EOL."{".PHP_EOL);
             $this->fileBump($fh);
-            $this->fileWrite($fh, "CONST ".str_pad('CLASS_TABLE', $max_var_name, ' ')."   = '$table_name';\n");
+            $this->fileWrite($fh, "CONST ".str_pad('CLASS_TABLE', $max_var_name, ' ')."   = '$table_name';".PHP_EOL);
             $this->fileWrite($fh,
-                "CONST ".str_pad('CLASS_PRIMARY', $max_var_name, ' ')."   = '".$primaries[0]."';\n");
+                "CONST ".str_pad('CLASS_PRIMARY', $max_var_name, ' ')."   = '".$primaries[0]."';".PHP_EOL);
 
         } else {
             // Multiple primary keys!!!
             if ($this->get_set_funcs) {
-                $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Abstracts\\DirectMulti AS dbc;'."\n");
-                $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Interfaces\\ProtectedDBInterface as dbd;'."\n");
+                $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Abstracts\\DirectMulti AS dbc;'.PHP_EOL);
+                $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Interfaces\\ProtectedDBInterface as dbd;'.PHP_EOL);
             } else {
-                $this->fileWrite($fh, 'use \\GCWorld\\ORM\\DirectDBMultiClass AS dbc;'."\n");
-                $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Interfaces\\PublicDBInterface as dbd;'."\n");
+                $this->fileWrite($fh, 'use \\GCWorld\\ORM\\DirectDBMultiClass AS dbc;'.PHP_EOL);
+                $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Interfaces\\PublicDBInterface as dbd;'.PHP_EOL);
             }
-            $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Interfaces\\GeneratedMultiInterface AS dbi;'."\n\n");
-            $this->fileWrite($fh, 'class '.$table_name." extends dbc implements dbi, dbd\n{\n");
+            $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Interfaces\\GeneratedMultiInterface AS dbi;'.PHP_EOL.PHP_EOL);
+            $this->fileWrite($fh, 'class '.$table_name." extends dbc implements dbi, dbd".PHP_EOL."{".PHP_EOL);
             $this->fileBump($fh);
-            $this->fileWrite($fh, "CONST ".str_pad('CLASS_TABLE', $max_var_name, ' ')."   = '$table_name';\n");
+            $this->fileWrite($fh, "CONST ".str_pad('CLASS_TABLE', $max_var_name, ' ')."   = '$table_name';".PHP_EOL);
             $this->fileWrite($fh,
-                "CONST ".str_pad('CLASS_PRIMARIES', $max_var_name, ' ')."   = ".var_export($primaries, true).";\n");
+                "CONST ".str_pad('CLASS_PRIMARIES', $max_var_name, ' ')."   = ".var_export($primaries, true).";".PHP_EOL);
 
         }
 
         $this->fileWrite($fh,
-            'CONST '.str_pad('AUTO_INCREMENT', $max_var_name, ' ').'   = '.($auto_increment ? 'true' : 'false').";\n");
+            'CONST '.str_pad('AUTO_INCREMENT', $max_var_name, ' ').'   = '.($auto_increment ? 'true' : 'false').";".PHP_EOL);
 
         foreach ($fields as $i => $row) {
             $type = (stristr($row['Type'], 'int') ? 'int   ' : 'string');
-            $this->fileWrite($fh, "\n\n");
-            $this->fileWrite($fh, '/**'."\n");
-            $this->fileWrite($fh, '* @db-info '.$row['Type']."\n");
-            $this->fileWrite($fh, '* @var '.$type."\n");
-            $this->fileWrite($fh, '*/'."\n");
+            $this->fileWrite($fh, PHP_EOL.PHP_EOL);
+            $this->fileWrite($fh, '/**'.PHP_EOL);
+            $this->fileWrite($fh, '* @db-info '.$row['Type'].PHP_EOL);
+            $this->fileWrite($fh, '* @var '.$type.PHP_EOL);
+            $this->fileWrite($fh, '*/'.PHP_EOL);
             if ($this->use_defaults) {
                 $this->fileWrite($fh, $this->var_visibility.' $'.str_pad($row['Field'], $max_var_name,
                         ' ').' = '.$this->formatDefault($row).';');
@@ -157,12 +157,12 @@ class Core
                 $this->fileWrite($fh, $this->var_visibility.' $'.str_pad($row['Field'], $max_var_name, ' ').' = null;');
             }
         }
-        $this->fileWrite($fh, "\n");
-        $this->fileWrite($fh, '/**'."\n");
-        $this->fileWrite($fh, '* Contains an array of all fields and the database notation for field type'."\n");
-        $this->fileWrite($fh, '* @var array'."\n");
-        $this->fileWrite($fh, '*/'."\n");
-        $this->fileWrite($fh, 'public static $dbInfo = ['."\n");
+        $this->fileWrite($fh, PHP_EOL);
+        $this->fileWrite($fh, '/**'.PHP_EOL);
+        $this->fileWrite($fh, '* Contains an array of all fields and the database notation for field type'.PHP_EOL);
+        $this->fileWrite($fh, '* @var array'.PHP_EOL);
+        $this->fileWrite($fh, '*/'.PHP_EOL);
+        $this->fileWrite($fh, 'public static $dbInfo = ['.PHP_EOL);
         $this->fileBump($fh);
 
         foreach ($fields as $i => $row) {
@@ -170,63 +170,63 @@ class Core
                     "'".$row['Field']."'",
                     $max_var_name + 2,
                     ' '
-                )." => '".$row['Type'].($row['Comment'] != '' ? ' - '.$row['Comment'] : '')."',\n");
+                )." => '".$row['Type'].($row['Comment'] != '' ? ' - '.$row['Comment'] : '')."',".PHP_EOL);
         }
         $this->fileDrop($fh);
-        $this->fileWrite($fh, "];\n");
+        $this->fileWrite($fh, "];".PHP_EOL);
 
         if ($this->get_set_funcs) {
             foreach ($fields as $i => $row) {
                 $name = FieldName::nameConversion($row['Field']);
 
                 //TODO: Add doc block
-                $this->fileWrite($fh, 'public function get'.$name.'() {'."\n");
+                $this->fileWrite($fh, 'public function get'.$name.'() {'.PHP_EOL);
                 $this->fileBump($fh);
-                $this->fileWrite($fh, 'return $this->get(\''.$row['Field']."');\n");
+                $this->fileWrite($fh, 'return $this->get(\''.$row['Field']."');".PHP_EOL);
                 $this->fileDrop($fh);
-                $this->fileWrite($fh, "}\n\n");
+                $this->fileWrite($fh, "}".PHP_EOL.PHP_EOL);
             }
 
             foreach ($fields as $i => $row) {
                 $name = FieldName::nameConversion($row['Field']);
 
                 $this->fileWrite($fh, '/**'."\n");
-                $this->fileWrite($fh, '* @param mixed $value'."\n");
-                $this->fileWrite($fh, '* @return $this'."\n");
+                $this->fileWrite($fh, '* @param mixed $value'.PHP_EOL);
+                $this->fileWrite($fh, '* @return $this'.PHP_EOL);
                 $this->fileWrite($fh, '*/'."\n");
-                $this->fileWrite($fh, 'public function set'.$name.'($value) {'."\n");
+                $this->fileWrite($fh, 'public function set'.$name.'($value) {'.PHP_EOL);
                 $this->fileBump($fh);
-                $this->fileWrite($fh, 'return $this->set(\''.$row['Field'].'\', $value);'."\n");
+                $this->fileWrite($fh, 'return $this->set(\''.$row['Field'].'\', $value);'.PHP_EOL);
                 $this->fileDrop($fh);
-                $this->fileWrite($fh, "}\n\n");
+                $this->fileWrite($fh, "}".PHP_EOL.PHP_EOL);
             }
         }
 
         if ($this->json_serialize) {
-            $this->fileWrite($fh, 'public function jsonSerialize() {'."\n");
+            $this->fileWrite($fh, 'public function jsonSerialize() {'.PHP_EOL);
             $this->fileBump($fh);
 
-            $this->fileWrite($fh, 'return ['."\n");
+            $this->fileWrite($fh, 'return ['.PHP_EOL);
             $this->fileBump($fh);
             foreach ($fields as $i => $row) {
                 $fName = $row['Field'];
                 if ($this->get_set_funcs) {
                     $name = FieldName::getterName($fName);
-                    $this->fileWrite($fh, "'$fName' => ".'$this->'.$name.'(),'."\n");
+                    $this->fileWrite($fh, "'$fName' => ".'$this->'.$name.'(),'.PHP_EOL);
                 } else {
-                    $this->fileWrite($fh, "'$fName' => ".'$this->'.$fName.','."\n");
+                    $this->fileWrite($fh, "'$fName' => ".'$this->'.$fName.','.PHP_EOL);
                 }
             }
             $this->fileDrop($fh);
-            $this->fileWrite($fh, '];'."\n");
+            $this->fileWrite($fh, '];'.PHP_EOL);
 
             $this->fileDrop($fh);
-            $this->fileWrite($fh, "}\n");
+            $this->fileWrite($fh, "}".PHP_EOL);
         }
 
 
         $this->fileDrop($fh);
-        $this->fileWrite($fh, "}\n\n");
+        $this->fileWrite($fh, "}".PHP_EOL.PHP_EOL);
         $this->fileClose($fh);
 
         //Create a trait version
@@ -238,7 +238,7 @@ class Core
 
         $fh = $this->fileOpen($path.$filename);
         $this->fileWrite($fh, "<?php\n");
-        $this->fileWrite($fh, 'namespace GCWorld\\ORM\\Generated\\Traits;'."\n\n");
+        $this->fileWrite($fh, 'namespace GCWorld\\ORM\\Generated\\Traits;'.PHP_EOL.PHP_EOL);
         $this->fileWrite($fh, 'trait '.$table_name." \n{\n");
         $this->fileBump($fh);
 
