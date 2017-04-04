@@ -40,7 +40,7 @@ class Core
             }
         }
         if (isset($config['options']['var_visibility']) && in_array($config['options']['var_visibility'], ['public', 'protected'])) {
-            $this->var_visibility = $config['var_visibility'];
+            $this->var_visibility = $config['options']['var_visibility'];
         }
         if (isset($config['options']['json_serialize']) && !$config['options']['json_serialize']) {
             $this->json_serialize = false;
@@ -65,7 +65,7 @@ class Core
         $query->execute();
         $fields = $query->fetchAll(PDO::FETCH_ASSOC);
 
-        $overrides = isset($this->config['OVERRIDE:'.$table_name]) ? $this->config['OVERRIDE:'.$table_name] : [];
+        $overrides = isset($this->config['override:'.$table_name]) ? $this->config['override:'.$table_name] : [];
         if(!isset($overrides['constructor'])) {
             $overrides['constructor'] = 'public';
         }
@@ -108,9 +108,11 @@ class Core
         $this->fileWrite($fh, '<?php'.PHP_EOL);
         $this->fileWrite($fh, 'namespace GCWorld\\ORM\\Generated;'.PHP_EOL.PHP_EOL);
 
+        /* Not needed as a use, it's just fine how it is
         if ($this->json_serialize) {
             $this->fileWrite($fh, 'use \\GCWorld\\ORM\\FieldName;'.PHP_EOL);
         }
+        */
 
         if (count($primaries) == 1) {
             // Single PK Classes get a simple set of functions.
@@ -187,24 +189,20 @@ class Core
         $conVis = $overrides['constructor'];
         if (count($primaries) == 1) {
             $this->fileWrite($fh, PHP_EOL);
-            $this->fileBump($fh);
             $this->fileWrite($fh, $conVis.' function __construct($primary_id = null, $defaults = null)'.PHP_EOL);
             $this->fileWrite($fh, '{'.PHP_EOL);
             $this->fileBump($fh);
             $this->fileWrite($fh, 'parent::__construct($primary_id, $defaults);'.PHP_EOL);
             $this->fileDrop($fh);
-            $this->fileWrite($fh, '}'.PHP_EOL);
-            $this->fileDrop($fh);
+            $this->fileWrite($fh, '}'.PHP_EOL.PHP_EOL);
         } else {
             $this->fileWrite($fh, PHP_EOL);
-            $this->fileBump($fh);
             $this->fileWrite($fh, $conVis.' function __construct(...$keys)'.PHP_EOL);
             $this->fileWrite($fh, '{'.PHP_EOL);
             $this->fileBump($fh);
             $this->fileWrite($fh, 'parent::__construct(...$keys);'.PHP_EOL);
             $this->fileDrop($fh);
-            $this->fileWrite($fh, '}'.PHP_EOL);
-            $this->fileDrop($fh);
+            $this->fileWrite($fh, '}'.PHP_EOL.PHP_EOL);
         }
 
         if ($this->get_set_funcs) {
