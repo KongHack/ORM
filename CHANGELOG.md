@@ -5,6 +5,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## 3.0.0
+ - @GameCharmer WARNING, WILL TRASH YOUR CONFIG FILE
+ - @GameCharmer new config structure
+ - @GameCharmer override feature for class constructors
+
+
 ## 2.8.1.4
  - @GameCharmer have DirectSingle compensate for 0 as the primary id
 
