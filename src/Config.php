@@ -17,33 +17,40 @@ class Config
         if (!file_exists($file)) {
             throw new Exception('Config File Not Found');
         }
-        $config = parse_ini_file($file);
+        $config = parse_ini_file($file, true);
         if (isset($config['config_path'])) {
             $file = $config['config_path'];
-            $config = parse_ini_file($file);
+            $config = parse_ini_file($file, true);
         }
-        if (!isset($config['common'])) {
+        if (!isset($config['general']['common'])) {
             throw new Exception('Config does not contain "common" value!');
         }
-        if (!isset($config['user'])) {
+        if (!isset($config['general']['user'])) {
             throw new Exception('Config does not contain "user" value!');
         }
 
         // Get the example config, make sure we have all variables.
         $example = rtrim(dirname(__FILE__), DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR;
         $example .= 'config/config.example.ini';
-        $exConfig = parse_ini_file($example);
+        $exConfig = parse_ini_file($example, true);
 
         $reSave = false;
         foreach ($exConfig as $k => $v) {
             if (!isset($config[$k])) {
                 $config[$k] = $v;
                 $reSave = true;
+            } else {
+                foreach ($v as $x => $y) {
+                    if(!isset($config[$k][$x])) {
+                        $config[$k][$x] = $y;
+                        $reSave = true;
+                    }
+                }
             }
         }
 
         if ($reSave) {
-            $this->writeIniFile($config, $file);
+            $this->writeIniFile($config, $file, true);
         }
 
         $this->config = $config;
@@ -69,29 +76,33 @@ class Config
         $content = "";
         if ($has_sections) {
             foreach ($assoc_arr as $key => $elem) {
-                $content .= "[".$key."]\n";
-                foreach ($elem as $key2 => $elem2) {
-                    if (is_array($elem2)) {
-                        for ($i = 0; $i < count($elem2); $i++) {
-                            $content .= $key2."[] = \"".$elem2[$i]."\"\n";
+                if(is_array($elem)) {
+                    $content .= "\n[".$key."]\n";
+                    foreach ($elem as $key2 => $elem2) {
+                        if (is_array($elem2)) {
+                            for ($i = 0; $i < count($elem2); $i++) {
+                                $content .= $key2."[]=\"".$elem2[$i]."\"\n";
+                            }
+                        } elseif ($elem2 == "") {
+                            $content .= $key2."=\n";
+                        } else {
+                            $content .= $key2."=\"".$elem2."\"\n";
                         }
-                    } elseif ($elem2 == "") {
-                        $content .= $key2." = \n";
-                    } else {
-                        $content .= $key2." = \"".$elem2."\"\n";
                     }
+                } else {
+                    $content .= $key."=\"".$elem."\"\n";
                 }
             }
         } else {
             foreach ($assoc_arr as $key => $elem) {
                 if (is_array($elem)) {
                     for ($i = 0; $i < count($elem); $i++) {
-                        $content .= $key."[] = \"".$elem[$i]."\"\n";
+                        $content .= $key."[]=\"".$elem[$i]."\"\n";
                     }
                 } elseif ($elem == "") {
-                    $content .= $key." = \n";
+                    $content .= $key."=\n";
                 } else {
-                    $content .= $key." = \"".$elem."\"\n";
+                    $content .= $key."=\"".$elem."\"\n";
                 }
             }
         }

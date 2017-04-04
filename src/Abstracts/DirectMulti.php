@@ -38,7 +38,7 @@ abstract class DirectMulti {
      * @param array ...$keys
      * @throws ORMException
      */
-    public function __construct(...$keys)
+    protected function __construct(...$keys)
     {
         $this->myName  = get_class($this);
         $table_name    = constant($this->myName . '::CLASS_TABLE');

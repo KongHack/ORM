@@ -1,7 +1,6 @@
 <?php
 namespace GCWorld\ORM;
 
-use Exception;
 use GCWorld\Interfaces\Common;
 
 class CommonLoader
@@ -29,7 +28,7 @@ class CommonLoader
             $config = $cConfig->getConfig();
 
             /** @var \GCWorld\Common\Common $class */
-            $class = $config['common'];
+            $class = $config['general']['common'];
             $obj = $class::getInstance();
             self::$common = $obj;
         }

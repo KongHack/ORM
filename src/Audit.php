@@ -34,12 +34,13 @@ class Audit
     }
 
     /**
-     * @param string $table
-     * @param int    $primaryID
-     * @param int    $memberID
-     * @param array  $before
-     * @param array  $after
-     * @return int
+     * @param       $table
+     * @param       $primaryID
+     * @param       $memberID
+     * @param array $before
+     * @param array $after
+     * @return int|string
+     * @throws \Exception
      */
     public function storeLog($table, $primaryID, $memberID, array $before, array $after)
     {

@@ -10,6 +10,7 @@ class Core
     /** @var \GCWorld\Common\Common */
     protected $master_common    = null;
     protected $master_location  = null;
+    protected $config           = [];
     private   $open_files       = [];
     private   $open_files_level = [];
 
@@ -31,22 +32,23 @@ class Core
 
         $cConfig = new Config();
         $config  = $cConfig->getConfig();
+        $this->config = $config;
 
-        if (isset($config['get_set_funcs'])) {
-            if (!$config['get_set_funcs']) {
+        if (isset($config['options']['get_set_funcs'])) {
+            if (!$config['options']['get_set_funcs']) {
                 $this->get_set_funcs = false;
             }
         }
-        if (isset($config['var_visibility']) && in_array($config['var_visibility'], ['public', 'protected'])) {
+        if (isset($config['options']['var_visibility']) && in_array($config['options']['var_visibility'], ['public', 'protected'])) {
             $this->var_visibility = $config['var_visibility'];
         }
-        if (isset($config['json_serialize']) && !$config['json_serialize']) {
+        if (isset($config['options']['json_serialize']) && !$config['options']['json_serialize']) {
             $this->json_serialize = false;
         }
-        if (isset($config['use_defaults']) && !$config['use_defaults']) {
+        if (isset($config['options']['use_defaults']) && !$config['options']['use_defaults']) {
             $this->use_defaults = false;
         }
-        if (isset($config['defaults_override_null']) && !$config['defaults_override_null']) {
+        if (isset($config['options']['defaults_override_null']) && !$config['options']['defaults_override_null']) {
             $this->defaults_override_null = false;
         }
     }
@@ -62,6 +64,12 @@ class Core
         $query = $this->master_common->getDatabase()->prepare($sql);
         $query->execute();
         $fields = $query->fetchAll(PDO::FETCH_ASSOC);
+
+        $overrides = isset($this->config['OVERRIDE:'.$table_name]) ? $this->config['OVERRIDE:'.$table_name] : [];
+        if(!isset($overrides['constructor'])) {
+            $overrides['constructor'] = 'public';
+        }
+
 
         $auto_increment = false;
         $primaries      = [];
@@ -174,6 +182,30 @@ class Core
         }
         $this->fileDrop($fh);
         $this->fileWrite($fh, "];".PHP_EOL);
+
+        // CONSTRUCTOR!
+        $conVis = $overrides['constructor'];
+        if (count($primaries) == 1) {
+            $this->fileWrite($fh, PHP_EOL);
+            $this->fileBump($fh);
+            $this->fileWrite($fh, $conVis.' function __construct($primary_id = null, $defaults = null)'.PHP_EOL);
+            $this->fileWrite($fh, '{'.PHP_EOL);
+            $this->fileBump($fh);
+            $this->fileWrite($fh, 'parent::__construct($primary_id, $defaults);'.PHP_EOL);
+            $this->fileDrop($fh);
+            $this->fileWrite($fh, '}'.PHP_EOL);
+            $this->fileDrop($fh);
+        } else {
+            $this->fileWrite($fh, PHP_EOL);
+            $this->fileBump($fh);
+            $this->fileWrite($fh, $conVis.' function __construct(...$keys)'.PHP_EOL);
+            $this->fileWrite($fh, '{'.PHP_EOL);
+            $this->fileBump($fh);
+            $this->fileWrite($fh, 'parent::__construct(...$keys);'.PHP_EOL);
+            $this->fileDrop($fh);
+            $this->fileWrite($fh, '}'.PHP_EOL);
+            $this->fileDrop($fh);
+        }
 
         if ($this->get_set_funcs) {
             foreach ($fields as $i => $row) {

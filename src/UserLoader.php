@@ -29,15 +29,15 @@ class UserLoader
             if (!file_exists($file)) {
                 throw new Exception('Config File Not Found');
             }
-            $config = parse_ini_file($file);
+            $config = parse_ini_file($file, true);
             if (isset($config['config_path'])) {
-                $config = parse_ini_file($config['config_path']);
+                $config = parse_ini_file($config['config_path'], true);
             }
-            if (!isset($config['user'])) {
+            if (!isset($config['general']['user'])) {
                 throw new Exception('Config does not contain "user" value!');
             }
             /** @var \stdClass $class */
-            $class = $config['user'];
+            $class = $config['general']['user'];
             if (!method_exists($class, 'getInstance')) {
                 throw new Exception('getInstance method not found');
             }

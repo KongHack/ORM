@@ -1,9 +1,7 @@
 <?php
 
-//Place this next to common_2.php
-
-define('NO_SESSION',true);
-require_once('common_2.php');
+// Just example code!
+/*
 
 $core = new \GCWorld\ORM\Core(__NAMESPACE__, $COMMON);
 
@@ -17,3 +15,4 @@ while($table = $query->fetchColumn())
 }
 
 echo '<h1>DONE</h1>';
+*/
