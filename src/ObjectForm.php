@@ -59,8 +59,7 @@ class ObjectForm
 		<div class="form-group">
 			<label>',$field['caption'],'</label>';
 
-        switch($field['type'])
-        {
+        switch ($field['type']) {
             case 'caption':
                 echo '<p class="form-control-static">';
                 echo $field['params']['caption'];
@@ -151,7 +150,6 @@ class ObjectForm
             case 'hr':
                     //Do Nothing
                 break;
-            
         }
         echo '</div>';
     }

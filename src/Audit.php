@@ -105,28 +105,28 @@ class Audit
     {
         $db = $this->common->getDatabase($this->database);
 
-        if(!$db->tableExists($tableName)) {
+        if (!$db->tableExists($tableName)) {
             $source = file_get_contents($this->getDataModelDirectory().'source.sql');
             $sql = str_replace('__REPLACE__', $tableName, $source);
             $db->exec($sql);
-            $db->setTableComment($tableName,'0');
+            $db->setTableComment($tableName, '0');
         }
         $version = intval($db->getTableComment($tableName));
-        if($version < self::DATA_MODEL_VERSION) {
+        if ($version < self::DATA_MODEL_VERSION) {
             $versionFiles = glob($this->getDataModelDirectory().'revisions'.DIRECTORY_SEPARATOR.'*.sql');
             sort($versionFiles);
-            foreach($versionFiles as $file) {
+            foreach ($versionFiles as $file) {
                 $tmp = explode(DIRECTORY_SEPARATOR, $file);
                 $fileName = array_pop($tmp);
-                $tmp = explode('.',$fileName);
+                $tmp = explode('.', $fileName);
                 $fileNumber = intval($tmp[0]);
                 unset($tmp);
 
-                if($fileNumber > $version) {
+                if ($fileNumber > $version) {
                     $model = file_get_contents($file);
                     $sql = str_replace('__REPLACE__', $tableName, $model);
                     $db->exec($sql);
-                    $db->setTableComment($tableName,$fileNumber);
+                    $db->setTableComment($tableName, $fileNumber);
                 }
             }
         }
@@ -137,7 +137,7 @@ class Audit
      */
     private function getDataModelDirectory()
     {
-        $base  = rtrim(__DIR__,DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR;
+        $base  = rtrim(__DIR__, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR;
         $base .= 'datamodel'.DIRECTORY_SEPARATOR.'audit'.DIRECTORY_SEPARATOR;
         return $base;
     }
@@ -146,8 +146,9 @@ class Audit
      * More Info: http://stackoverflow.com/questions/1318608/php-get-parent-script-name
      * @return mixed
      */
-    private function get_topmost_script() {
-        $backtrace = debug_backtrace( defined("DEBUG_BACKTRACE_IGNORE_ARGS") ? DEBUG_BACKTRACE_IGNORE_ARGS : FALSE);
+    private function get_topmost_script()
+    {
+        $backtrace = debug_backtrace(defined("DEBUG_BACKTRACE_IGNORE_ARGS") ? DEBUG_BACKTRACE_IGNORE_ARGS : false);
         $top_frame = array_pop($backtrace);
         return $top_frame['file'];
     }
@@ -191,5 +192,4 @@ class Audit
     {
         return $this->after;
     }
-    
 }

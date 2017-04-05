@@ -4,7 +4,8 @@ namespace GCWorld\ORM\Abstracts;
 use GCWorld\ORM\CommonLoader;
 use GCWorld\ORM\ORMException;
 
-abstract class DirectMulti {
+abstract class DirectMulti
+{
         /**
      * @var \GCWorld\Common\Common
      */

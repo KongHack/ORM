@@ -11,8 +11,8 @@ class Core
     protected $master_common    = null;
     protected $master_location  = null;
     protected $config           = [];
-    private   $open_files       = [];
-    private   $open_files_level = [];
+    private $open_files       = [];
+    private $open_files_level = [];
 
     protected $get_set_funcs          = true;
     protected $var_visibility         = 'public';
@@ -66,7 +66,7 @@ class Core
         $fields = $query->fetchAll(PDO::FETCH_ASSOC);
 
         $overrides = isset($this->config['override:'.$table_name]) ? $this->config['override:'.$table_name] : [];
-        if(!isset($overrides['constructor'])) {
+        if (!isset($overrides['constructor'])) {
             $overrides['constructor'] = 'public';
         }
 
@@ -125,13 +125,16 @@ class Core
             }
 
             $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Interfaces\\GeneratedInterface AS dbi;'.PHP_EOL.PHP_EOL);
-            $this->fileWrite($fh,
-                'class '.$table_name.' extends dbc implements dbi, dbd'.($this->json_serialize ? ', \\JsonSerializable' : '').PHP_EOL.'{'.PHP_EOL);
+            $this->fileWrite(
+                $fh,
+                'class '.$table_name.' extends dbc implements dbi, dbd'.($this->json_serialize ? ', \\JsonSerializable' : '').PHP_EOL.'{'.PHP_EOL
+            );
             $this->fileBump($fh);
             $this->fileWrite($fh, "CONST ".str_pad('CLASS_TABLE', $max_var_name, ' ')."   = '$table_name';".PHP_EOL);
-            $this->fileWrite($fh,
-                "CONST ".str_pad('CLASS_PRIMARY', $max_var_name, ' ')."   = '".$primaries[0]."';".PHP_EOL);
-
+            $this->fileWrite(
+                $fh,
+                "CONST ".str_pad('CLASS_PRIMARY', $max_var_name, ' ')."   = '".$primaries[0]."';".PHP_EOL
+            );
         } else {
             // Multiple primary keys!!!
             if ($this->get_set_funcs) {
@@ -145,13 +148,16 @@ class Core
             $this->fileWrite($fh, 'class '.$table_name." extends dbc implements dbi, dbd".PHP_EOL."{".PHP_EOL);
             $this->fileBump($fh);
             $this->fileWrite($fh, "CONST ".str_pad('CLASS_TABLE', $max_var_name, ' ')."   = '$table_name';".PHP_EOL);
-            $this->fileWrite($fh,
-                "CONST ".str_pad('CLASS_PRIMARIES', $max_var_name, ' ')."   = ".var_export($primaries, true).";".PHP_EOL);
-
+            $this->fileWrite(
+                $fh,
+                "CONST ".str_pad('CLASS_PRIMARIES', $max_var_name, ' ')."   = ".var_export($primaries, true).";".PHP_EOL
+            );
         }
 
-        $this->fileWrite($fh,
-            'CONST '.str_pad('AUTO_INCREMENT', $max_var_name, ' ').'   = '.($auto_increment ? 'true' : 'false').";".PHP_EOL);
+        $this->fileWrite(
+            $fh,
+            'CONST '.str_pad('AUTO_INCREMENT', $max_var_name, ' ').'   = '.($auto_increment ? 'true' : 'false').";".PHP_EOL
+        );
 
         foreach ($fields as $i => $row) {
             $type = (stristr($row['Type'], 'int') ? 'int   ' : 'string');
@@ -161,8 +167,11 @@ class Core
             $this->fileWrite($fh, '* @var '.$type.PHP_EOL);
             $this->fileWrite($fh, '*/'.PHP_EOL);
             if ($this->use_defaults) {
-                $this->fileWrite($fh, $this->var_visibility.' $'.str_pad($row['Field'], $max_var_name,
-                        ' ').' = '.$this->formatDefault($row).';');
+                $this->fileWrite($fh, $this->var_visibility.' $'.str_pad(
+                    $row['Field'],
+                    $max_var_name,
+                    ' '
+                ).' = '.$this->formatDefault($row).';');
             } else {
                 $this->fileWrite($fh, $this->var_visibility.' $'.str_pad($row['Field'], $max_var_name, ' ').' = null;');
             }
@@ -177,10 +186,10 @@ class Core
 
         foreach ($fields as $i => $row) {
             $this->fileWrite($fh, str_pad(
-                    "'".$row['Field']."'",
-                    $max_var_name + 2,
-                    ' '
-                )." => '".$row['Type'].($row['Comment'] != '' ? ' - '.$row['Comment'] : '')."',".PHP_EOL);
+                "'".$row['Field']."'",
+                $max_var_name + 2,
+                ' '
+            )." => '".$row['Type'].($row['Comment'] != '' ? ' - '.$row['Comment'] : '')."',".PHP_EOL);
         }
         $this->fileDrop($fh);
         $this->fileWrite($fh, "];".PHP_EOL);
@@ -283,8 +292,11 @@ class Core
             $this->fileWrite($fh, '* @var '.$type."\n");
             $this->fileWrite($fh, '*/'."\n");
             if ($this->use_defaults) {
-                $this->fileWrite($fh, $this->var_visibility.' $'.str_pad($row['Field'], $max_var_name,
-                        ' ').' = '.$this->formatDefault($row).';');
+                $this->fileWrite($fh, $this->var_visibility.' $'.str_pad(
+                    $row['Field'],
+                    $max_var_name,
+                    ' '
+                ).' = '.$this->formatDefault($row).';');
             } else {
                 $this->fileWrite($fh, $this->var_visibility.' $'.str_pad($row['Field'], $max_var_name, ' ').' = null;');
             }
@@ -460,7 +472,6 @@ class Core
 
             case 'JSON':
                 return '{}';  // Probably not necessary, but hey, stay safe
-
         }
 
         // Ignoring geometry, because fuck that.

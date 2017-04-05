@@ -41,7 +41,7 @@ class Config
                 $reSave = true;
             } else {
                 foreach ($v as $x => $y) {
-                    if(!isset($config[$k][$x])) {
+                    if (!isset($config[$k][$x])) {
                         $config[$k][$x] = $y;
                         $reSave = true;
                     }
@@ -76,7 +76,7 @@ class Config
         $content = "";
         if ($has_sections) {
             foreach ($assoc_arr as $key => $elem) {
-                if(is_array($elem)) {
+                if (is_array($elem)) {
                     $content .= "\n[".$key."]\n";
                     foreach ($elem as $key2 => $elem2) {
                         if (is_array($elem2)) {

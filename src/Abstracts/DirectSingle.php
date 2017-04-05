@@ -267,13 +267,15 @@ abstract class DirectSingle
                     $query = $this->_db->prepare($sql);
                     $query->execute($params);
                     $newId = $this->_db->lastInsertId();
-                    if($newId > 0) {
+                    if ($newId > 0) {
                         $this->$primary_name = $newId;
                     }
                     $query->closeCursor();
                 } else {
-                    $sql = 'INSERT IGNORE INTO '.$table_name.' ('.implode(', ', $fields).') VALUES (:'.implode(', :',
-                            $fields).')';
+                    $sql = 'INSERT IGNORE INTO '.$table_name.' ('.implode(', ', $fields).') VALUES (:'.implode(
+                        ', :',
+                        $fields
+                    ).')';
                     foreach ($fields as $field) {
                         $params[':'.$field] = ($this->$field == null ? '' : $this->$field);
                         if ($field == $primary_name && !$auto_increment) {
@@ -285,12 +287,11 @@ abstract class DirectSingle
                     $query = $this->_db->prepare($sql);
                     $query->execute($params);
                     $newId = $this->_db->lastInsertId();
-                    if($newId > 0) {
+                    if ($newId > 0) {
                         $this->$primary_name = $newId;
                     }
                     $query->closeCursor();
                 }
-
             } else {
                 $sql                       = 'UPDATE '.$table_name.' SET ';
                 $params[':'.$primary_name] = $this->$primary_name;
@@ -329,9 +330,9 @@ abstract class DirectSingle
                             if (property_exists($user, $user_primary)) {
                                 $memberID = $user->$user_primary;
                             } elseif (method_exists($user, 'get')) {
-                                try{
+                                try {
                                     $memberID = $user->get($user_primary);
-                                } catch(\Exception $e){
+                                } catch (\Exception $e) {
                                     // Silently fail.
                                 }
                             }
