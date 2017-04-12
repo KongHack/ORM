@@ -3,8 +3,15 @@ namespace GCWorld\ORM;
 
 use GCWorld\Interfaces\Common;
 
+/**
+ * Class CommonLoader
+ * @package GCWorld\ORM
+ */
 class CommonLoader
 {
+    /**
+     * @var Common
+     */
     private static $common = null;
 
     /**
@@ -25,13 +32,14 @@ class CommonLoader
         if (self::$common == null) {
             // Attempt loading from a config.ini
             $cConfig = new Config();
-            $config = $cConfig->getConfig();
+            $config  = $cConfig->getConfig();
 
             /** @var \GCWorld\Common\Common $class */
-            $class = $config['general']['common'];
-            $obj = $class::getInstance();
+            $class        = $config['general']['common'];
+            $obj          = $class::getInstance();
             self::$common = $obj;
         }
+
         return self::$common;
     }
 }

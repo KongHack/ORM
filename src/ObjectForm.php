@@ -1,6 +1,11 @@
 <?php
 namespace GCWorld\ORM;
 
+/**
+ * Class ObjectForm
+ * @package GCWorld\ORM
+ * @deprecated 3.0.0 Will be removed in 3.1.0
+ */
 class ObjectForm
 {
     protected $source   = null;
@@ -13,7 +18,7 @@ class ObjectForm
 
     public $submit      = 'Submit';
 
-    function __construct($source, $action = null, $method = 'POST')
+    public function __construct($source, $action = null, $method = 'POST')
     {
         $this->source   = $source;
         $this->action   = $action;  //Null action does not include an action

@@ -4,6 +4,11 @@ namespace GCWorld\ORM\Abstracts;
 use GCWorld\ORM\CommonLoader;
 use GCWorld\ORM\ORMException;
 
+/**
+ * Class DirectMulti
+ * @package GCWorld\ORM\Abstracts
+ * @todo: Complete auditing system
+ */
 abstract class DirectMulti
 {
         /**

@@ -11,11 +11,11 @@ class Audit
     private $prefix   = '_Audit_';
 
     // Loaded via storeLog
-    protected $table = null;
+    protected $table     = null;
     protected $primaryId = null;
-    protected $memberId = null;
-    protected $before = [];
-    protected $after  = [];
+    protected $memberId  = null;
+    protected $before    = [];
+    protected $after     = [];
 
     /**
      * @param \GCWorld\Interfaces\Common $common
@@ -36,19 +36,23 @@ class Audit
     /**
      * @param       $table
      * @param       $primaryID
-     * @param       $memberID
      * @param array $before
      * @param array $after
+     * @param int   $memberID
      * @return int|string
      * @throws \Exception
      */
-    public function storeLog($table, $primaryID, $memberID, array $before, array $after)
+    public function storeLog($table, $primaryId, array $before, array $after, $memberId = 0)
     {
-        $this->table = $table;
-        $this->primaryId = $primaryID;
-        $this->memberId = $memberID;
-        $this->before = $before;
-        $this->after = $after;
+        if ($memberId < 1) {
+            $memberId = $this->determineMemberId();
+        }
+
+        $this->table     = $table;
+        $this->primaryId = $primaryId;
+        $this->memberId  = $memberId;
+        $this->before    = $before;
+        $this->after     = $after;
 
 
         if (!$this->enable) {
@@ -84,8 +88,8 @@ class Audit
             (:pid, :mid, :uri, :logB, :logA)';
             $query = $db->prepare($sql);
             $query->execute([
-                ':pid'  => intval($primaryID),
-                ':mid'  => intval($memberID),
+                ':pid'  => intval($primaryId),
+                ':mid'  => intval($memberId),
                 ':uri'  => (isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : $this->get_topmost_script()),
                 ':logB' => json_encode($B),
                 ':logA' => json_encode($A)
@@ -107,7 +111,7 @@ class Audit
 
         if (!$db->tableExists($tableName)) {
             $source = file_get_contents($this->getDataModelDirectory().'source.sql');
-            $sql = str_replace('__REPLACE__', $tableName, $source);
+            $sql    = str_replace('__REPLACE__', $tableName, $source);
             $db->exec($sql);
             $db->setTableComment($tableName, '0');
         }
@@ -116,15 +120,15 @@ class Audit
             $versionFiles = glob($this->getDataModelDirectory().'revisions'.DIRECTORY_SEPARATOR.'*.sql');
             sort($versionFiles);
             foreach ($versionFiles as $file) {
-                $tmp = explode(DIRECTORY_SEPARATOR, $file);
-                $fileName = array_pop($tmp);
-                $tmp = explode('.', $fileName);
+                $tmp        = explode(DIRECTORY_SEPARATOR, $file);
+                $fileName   = array_pop($tmp);
+                $tmp        = explode('.', $fileName);
                 $fileNumber = intval($tmp[0]);
                 unset($tmp);
 
                 if ($fileNumber > $version) {
                     $model = file_get_contents($file);
-                    $sql = str_replace('__REPLACE__', $tableName, $model);
+                    $sql   = str_replace('__REPLACE__', $tableName, $model);
                     $db->exec($sql);
                     $db->setTableComment($tableName, $fileNumber);
                 }
@@ -137,8 +141,9 @@ class Audit
      */
     private function getDataModelDirectory()
     {
-        $base  = rtrim(__DIR__, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR;
+        $base = rtrim(__DIR__, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR;
         $base .= 'datamodel'.DIRECTORY_SEPARATOR.'audit'.DIRECTORY_SEPARATOR;
+
         return $base;
     }
 
@@ -150,6 +155,7 @@ class Audit
     {
         $backtrace = debug_backtrace(defined("DEBUG_BACKTRACE_IGNORE_ARGS") ? DEBUG_BACKTRACE_IGNORE_ARGS : false);
         $top_frame = array_pop($backtrace);
+
         return $top_frame['file'];
     }
 
@@ -191,5 +197,35 @@ class Audit
     public function getAfter()
     {
         return $this->after;
+    }
+
+
+    public function determineMemberId()
+    {
+        //Audit Here
+        $memberId = 0;
+        if (method_exists($this->common, 'getUser')) {
+            $user = $this->common->getUser();
+            if (is_object($user)) {
+                // getRealMemberID
+                if (method_exists($user, 'getRealMemberId')) {
+                    $memberId = $user->getRealMemberId();
+                } elseif (method_exists($user, 'getMemberId')) {
+                    $memberId = $user->getMemberId();
+                } elseif (defined(get_class($user).'::CLASS_PRIMARY')) {
+                    $user_primary = constant(get_class($user).'::CLASS_PRIMARY');
+                    if (property_exists($user, $user_primary)) {
+                        $memberId = $user->$user_primary;
+                    } elseif (method_exists($user, 'get')) {
+                        try {
+                            $memberId = $user->get($user_primary);
+                        } catch (\Exception $e) {
+                            // Silently fail.
+                        }
+                    }
+                }
+            }
+        }
+        return $memberId;
     }
 }

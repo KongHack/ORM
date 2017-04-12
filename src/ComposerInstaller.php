@@ -3,9 +3,17 @@ namespace GCWorld\ORM;
 
 use Composer\Script\Event;
 
+/**
+ * Class ComposerInstaller
+ * @package GCWorld\ORM
+ */
 class ComposerInstaller
 {
-    static function setupConfig(Event $event)
+    /**
+     * @param \Composer\Script\Event $event
+     * @return bool
+     */
+    public static function setupConfig(Event $event)
     {
         $ds = DIRECTORY_SEPARATOR;
         $vendorDir = $event->getComposer()->getConfig()->get('vendor-dir');

@@ -4,6 +4,10 @@ namespace GCWorld\ORM;
 use \ReflectionClass;
 use \PDO;
 
+/**
+ * Class Core
+ * @package GCWorld\ORM
+ */
 class Core
 {
     protected $master_namespace = '\\';
@@ -394,6 +398,10 @@ class Core
         //$handler = call_user_func_array($class_name, $args);
     }
 
+    /**
+     * @param $row
+     * @return float|int|mixed
+     */
     private function formatDefault($row)
     {
         $default = $row['Default'];
@@ -416,6 +424,10 @@ class Core
         return var_export($default, true);
     }
 
+    /**
+     * @param $type
+     * @return null|string
+     */
     private function defaultData($type)
     {
         $type = strtoupper($type);

@@ -3,6 +3,10 @@ namespace GCWorld\ORM;
 
 use Exception;
 
+/**
+ * Class Config
+ * @package GCWorld\ORM
+ */
 class Config
 {
     /**
@@ -10,6 +14,10 @@ class Config
      */
     protected $config = [];
 
+    /**
+     * Config constructor.
+     * @throws \Exception
+     */
     public function __construct()
     {
         $file = rtrim(dirname(__FILE__), DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR;

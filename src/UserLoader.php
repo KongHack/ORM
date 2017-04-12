@@ -2,9 +2,17 @@
 namespace GCWorld\ORM;
 
 use Exception;
+use GCWorld\Interfaces\User;
 
+/**
+ * Class UserLoader
+ * @package GCWorld\ORM
+ */
 class UserLoader
 {
+    /**
+     * @var User
+     */
     private static $user = null;
 
     /**

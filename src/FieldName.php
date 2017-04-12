@@ -1,6 +1,10 @@
 <?php
 namespace GCWorld\ORM;
 
+/**
+ * Class FieldName
+ * @package GCWorld\ORM
+ */
 class FieldName
 {
     /**

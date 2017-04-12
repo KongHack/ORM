@@ -6,6 +6,10 @@ use GCWorld\ORM\CommonLoader;
 use GCWorld\ORM\Config;
 use GCWorld\ORM\ORMException;
 
+/**
+ * Class DirectSingle
+ * @package GCWorld\ORM\Abstracts
+ */
 abstract class DirectSingle
 {
     /**
@@ -45,7 +49,7 @@ abstract class DirectSingle
      * @var array
      */
     protected $_changed = [];
-    
+
     /**
      * Set this to false in your class when you don't want to log changes
      * @var bool
@@ -78,7 +82,6 @@ abstract class DirectSingle
     public static $dbInfo = [];
 
     /**
-     * @param      $common
      * @param null $primary_id
      * @param null $defaults
      * @throws \GCWorld\ORM\ORMException
@@ -238,7 +241,7 @@ abstract class DirectSingle
 
             // ============================================================================== Audit
             if ($this->_audit) {
-                $sql   = 'SELECT * FROM '.$table_name.' WHERE '.$primary_name.' = :primary';
+                $sql   = "SELECT * FROM $table_name WHERE $primary_name = :primary";
                 $query = $db->prepare($sql);
                 $query->execute([':primary' => $this->$primary_name]);
                 $before = $query->fetch();
@@ -315,35 +318,10 @@ abstract class DirectSingle
                 $after = $query->fetch();
                 $query->closeCursor();
 
-                //Audit Here
-                $memberID = 0;
-                if (method_exists($this->_common, 'getUser')) {
-                    $user = $this->_common->getUser();
-                    if (is_object($user)) {
-                        // getRealMemberID
-                        if (method_exists($user, 'getRealMemberId')) {
-                            $memberID = $user->getRealMemberId();
-                        } elseif (method_exists($user, 'getMemberId')) {
-                            $memberID = $user->getMemberId();
-                        } elseif (defined(get_class($user).'::CLASS_PRIMARY')) {
-                            $user_primary = constant(get_class($user).'::CLASS_PRIMARY');
-                            if (property_exists($user, $user_primary)) {
-                                $memberID = $user->$user_primary;
-                            } elseif (method_exists($user, 'get')) {
-                                try {
-                                    $memberID = $user->get($user_primary);
-                                } catch (\Exception $e) {
-                                    // Silently fail.
-                                }
-                            }
-                        }
-                    }
-                }
-
                 // The is_array check solves issues with canInsert style objects
                 if (is_array($before) && is_array($after)) {
                     $audit = new Audit($this->_common);
-                    $audit->storeLog($table_name, $this->$primary_name, $memberID, $before, $after);
+                    $audit->storeLog($table_name, $this->$primary_name, $before, $after);
                     $this->_lastAuditObject = $audit;
                 }
             }
