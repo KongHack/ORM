@@ -90,7 +90,7 @@ class Audit
             $query->execute([
                 ':pid'  => intval($primaryId),
                 ':mid'  => intval($memberId),
-                ':uri'  => (isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : $this->get_topmost_script()),
+                ':uri'  => (isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : $this->getTopScript()),
                 ':logB' => json_encode($B),
                 ':logA' => json_encode($A)
             ]);
@@ -151,7 +151,7 @@ class Audit
      * More Info: http://stackoverflow.com/questions/1318608/php-get-parent-script-name
      * @return mixed
      */
-    private function get_topmost_script()
+    private function getTopScript()
     {
         $backtrace = debug_backtrace(defined("DEBUG_BACKTRACE_IGNORE_ARGS") ? DEBUG_BACKTRACE_IGNORE_ARGS : false);
         $top_frame = array_pop($backtrace);
@@ -200,32 +200,36 @@ class Audit
     }
 
 
-    public function determineMemberId()
+    private function determineMemberId()
     {
-        //Audit Here
-        $memberId = 0;
-        if (method_exists($this->common, 'getUser')) {
-            $user = $this->common->getUser();
-            if (is_object($user)) {
-                // getRealMemberID
-                if (method_exists($user, 'getRealMemberId')) {
-                    $memberId = $user->getRealMemberId();
-                } elseif (method_exists($user, 'getMemberId')) {
-                    $memberId = $user->getMemberId();
-                } elseif (defined(get_class($user).'::CLASS_PRIMARY')) {
-                    $user_primary = constant(get_class($user).'::CLASS_PRIMARY');
-                    if (property_exists($user, $user_primary)) {
-                        $memberId = $user->$user_primary;
-                    } elseif (method_exists($user, 'get')) {
-                        try {
-                            $memberId = $user->get($user_primary);
-                        } catch (\Exception $e) {
-                            // Silently fail.
-                        }
-                    }
+        if (!method_exists($this->common, 'getUser')) {
+            return 0;
+        }
+        $user = $this->common->getUser();
+        if (!is_object($user)) {
+            return 0;
+        }
+
+        if (method_exists($user, 'getRealMemberId')) {
+            return $user->getRealMemberId();
+        }
+        if (method_exists($user, 'getMemberId')) {
+            return $user->getMemberId();
+        }
+        if (defined(get_class($user).'::CLASS_PRIMARY')) {
+            $user_primary = constant(get_class($user).'::CLASS_PRIMARY');
+            if (property_exists($user, $user_primary)) {
+                return $user->$user_primary;
+            }
+            if (method_exists($user, 'get')) {
+                try {
+                    return $user->get($user_primary);
+                } catch(\Exception $e) {
+                    // Silently fail.
                 }
             }
         }
-        return $memberId;
+
+        return 0;
     }
 }
