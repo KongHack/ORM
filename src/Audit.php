@@ -48,6 +48,19 @@ class Audit
             $memberId = $this->determineMemberId();
         }
 
+        $cConfig = new Config();
+        $config  = $cConfig->getConfig();
+        if(array_key_exists('audit_ignore',$config)) {
+            $ignore = $config['audit_ignore'];
+            if (array_key_exists($table, $ignore)) {
+                $fields = $ignore[$table];
+                foreach ($fields as $field) {
+                    unset($before[$field]);
+                    unset($after[$field]);
+                }
+            }
+        }
+
         $this->table     = $table;
         $this->primaryId = $primaryId;
         $this->memberId  = $memberId;
