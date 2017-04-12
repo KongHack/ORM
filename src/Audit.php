@@ -59,7 +59,7 @@ class Audit
             return 0;
         }
 
-        if (empty($primaryID)) {
+        if (empty($primaryId)) {
             throw new \Exception('AUDIT LOG:: Invalid Primary ID Passed');
         }
 
