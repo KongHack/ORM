@@ -5,6 +5,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+
+
+## 3.0.1.1
+ - @GameCharmer bug fix, switch to this one instead of 3.0.1
+
+
 ## 3.0.1
  - @GameCharmer code cleaning, phpcs & phpstan
  - @GameCharmer WARNING: parameter order changed in storeLog, so if you're using it outside of stock, move member ID to the end
