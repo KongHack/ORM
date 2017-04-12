@@ -7,6 +7,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## 3.1.0
+ - @GameCharmer Audit Ignore system
+
+
 ## 3.0.1.1
  - @GameCharmer bug fix, switch to this one instead of 3.0.1
 
