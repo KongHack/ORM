@@ -9,6 +9,7 @@ class Audit
     private $common   = null;
     private $database = 'default';
     private $prefix   = '_Audit_';
+    private $enable   = true;
 
     // Loaded via storeLog
     protected $table     = null;
