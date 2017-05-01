@@ -7,6 +7,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## 3.2.0
+ - @GameCharmer bump to PHP 7.1 for the new PEX stuff
+
+
 ## 3.1.0
  - @GameCharmer Audit Ignore system
 

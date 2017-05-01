@@ -8,9 +8,9 @@
     }
   ],
   "require": {
-    "php": ">=5.6.0",
+    "php": ">=7.1",
     "gcworld/common":"~2",
-    "gcworld/interfaces": "~2.0",
+    "gcworld/interfaces": "~3.0",
     "gcworld/database": "~2",
     "composer/composer": "^1.1",
     "composer/installers": "^1.0"
