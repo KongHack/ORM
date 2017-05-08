@@ -35,6 +35,6 @@ The config will update itself to add missing values upon update.  Below is the l
      - public/protected - Default constructor visibility, default is public, so only set if you need a protected constructor for things like factory implementation
      
      
-     
-     
+### [audit_ignore]
+ - TABLE_NAME[] = field_name - This will ignore field_name from TABLE_NAME when auditing.     
      
