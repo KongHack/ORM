@@ -8,17 +8,17 @@ namespace GCWorld\ORM\Interfaces;
 interface PublicDBInterface
 {
     /**
-     * @param $key
-     * @param $val
+     * @param string $key
+     * @param mixed  $val
      * @return mixed
      */
-    public function set($key, $val);
+    public function set(string $key, $val);
 
     /**
-     * @param $key
+     * @param string $key
      * @return mixed
      */
-    public function get($key);
+    public function get(string $key);
 
     /**
      * @return mixed

@@ -1,0 +1,7 @@
+parameters:
+	autoload_directories:
+		- %rootDir%/../../../src
+
+	ignoreErrors:
+		- '#stdClass#'
+		- '#Function d not found.#'

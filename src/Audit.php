@@ -1,6 +1,12 @@
 <?php
 namespace GCWorld\ORM;
 
+use GCWorld\Common\Common;
+
+/**
+ * Class Audit
+ * @package GCWorld\ORM
+ */
 class Audit
 {
     const DATA_MODEL_VERSION = 1;
@@ -11,7 +17,6 @@ class Audit
     private $prefix   = '_Audit_';
     private $enable   = true;
 
-    // Loaded via storeLog
     protected $table     = null;
     protected $primaryId = null;
     protected $memberId  = null;
@@ -21,7 +26,7 @@ class Audit
     /**
      * @param \GCWorld\Interfaces\Common $common
      */
-    public function __construct($common)
+    public function __construct(Common $common)
     {
         /** @var \GCWorld\Common\Common common */
         $this->common = $common;
@@ -35,15 +40,15 @@ class Audit
     }
 
     /**
-     * @param       $table
-     * @param       $primaryID
-     * @param array $before
-     * @param array $after
-     * @param int   $memberID
+     * @param string $table
+     * @param int    $primaryId
+     * @param array  $before
+     * @param array  $after
+     * @param int    $memberId
      * @return int|string
      * @throws \Exception
      */
-    public function storeLog($table, $primaryId, array $before, array $after, $memberId = 0)
+    public function storeLog(string $table, int $primaryId, array $before, array $after, int $memberId = 0)
     {
         if ($memberId < 1) {
             $memberId = $this->determineMemberId();
@@ -51,7 +56,7 @@ class Audit
 
         $cConfig = new Config();
         $config  = $cConfig->getConfig();
-        if(array_key_exists('audit_ignore',$config)) {
+        if (array_key_exists('audit_ignore', $config)) {
             $ignore = $config['audit_ignore'];
             if (array_key_exists($table, $ignore)) {
                 $fields = $ignore[$table];
@@ -117,9 +122,10 @@ class Audit
     }
 
     /**
-     * @param $tableName
+     * @param string $tableName
+     * @return void
      */
-    private function handleTable($tableName)
+    private function handleTable(string $tableName)
     {
         $db = $this->common->getDatabase($this->database);
 
@@ -155,7 +161,7 @@ class Audit
      */
     private function getDataModelDirectory()
     {
-        $base = rtrim(__DIR__, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR;
+        $base  = rtrim(__DIR__, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR;
         $base .= 'datamodel'.DIRECTORY_SEPARATOR.'audit'.DIRECTORY_SEPARATOR;
 
         return $base;
@@ -182,7 +188,7 @@ class Audit
     }
 
     /**
-     * @return null|integer
+     * @return null|int
      */
     public function getPrimaryId()
     {
@@ -190,7 +196,7 @@ class Audit
     }
 
     /**
-     * @return null|integer
+     * @return null|int
      */
     public function getMemberId()
     {
@@ -213,7 +219,9 @@ class Audit
         return $this->after;
     }
 
-
+    /**
+     * @return int
+     */
     private function determineMemberId()
     {
         if (!method_exists($this->common, 'getUser')) {
@@ -238,7 +246,7 @@ class Audit
             if (method_exists($user, 'get')) {
                 try {
                     return $user->get($user_primary);
-                } catch(\Exception $e) {
+                } catch (\Exception $e) {
                     // Silently fail.
                 }
             }

@@ -15,9 +15,9 @@ class ComposerInstaller
      */
     public static function setupConfig(Event $event)
     {
-        $ds = DIRECTORY_SEPARATOR;
+        $ds        = DIRECTORY_SEPARATOR;
         $vendorDir = $event->getComposer()->getConfig()->get('vendor-dir');
-        $myDir = dirname(__FILE__);
+        $myDir     = dirname(__FILE__);
 
         // Determine if ORM ini already exists.
         $iniPath = realpath($vendorDir.$ds.'..'.$ds.'config').$ds;

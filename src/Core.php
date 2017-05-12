@@ -1,6 +1,7 @@
 <?php
 namespace GCWorld\ORM;
 
+use GCWorld\Interfaces\Common;
 use \ReflectionClass;
 use \PDO;
 
@@ -12,11 +13,11 @@ class Core
 {
     protected $master_namespace = '\\';
     /** @var \GCWorld\Common\Common */
-    protected $master_common    = null;
-    protected $master_location  = null;
-    protected $config           = [];
-    private $open_files       = [];
-    private $open_files_level = [];
+    protected $master_common   = null;
+    protected $master_location = null;
+    protected $config          = [];
+    private $open_files        = [];
+    private $open_files_level  = [];
 
     protected $get_set_funcs          = true;
     protected $var_visibility         = 'public';
@@ -25,17 +26,17 @@ class Core
     protected $defaults_override_null = true;
 
     /**
-     * @param $namespace
-     * @param $common
+     * @param string $namespace
+     * @param Common $common
      */
-    public function __construct($namespace, $common)
+    public function __construct(string $namespace, Common $common)
     {
         $this->master_namespace = $namespace;
         $this->master_common    = $common;
         $this->master_location  = __DIR__;
 
-        $cConfig = new Config();
-        $config  = $cConfig->getConfig();
+        $cConfig      = new Config();
+        $config       = $cConfig->getConfig();
         $this->config = $config;
 
         if (isset($config['options']['get_set_funcs'])) {
@@ -58,11 +59,11 @@ class Core
     }
 
     /**
-     * @param $table_name
+     * @param string $table_name
      * @return bool
      * @throws \Exception
      */
-    public function generate($table_name)
+    public function generate(string $table_name)
     {
         $sql   = 'SHOW FULL COLUMNS FROM '.$table_name;
         $query = $this->master_common->getDatabase()->prepare($sql);
@@ -331,10 +332,10 @@ class Core
     }
 
     /**
-     * @param $filename
+     * @param string $filename
      * @return mixed
      */
-    protected function fileOpen($filename)
+    protected function fileOpen(string $filename)
     {
         $key                          = str_replace('.', '', microtime(true));
         $this->open_files[$key]       = fopen($filename, 'w');
@@ -344,16 +345,18 @@ class Core
     }
 
     /**
-     * @param $key
-     * @param $string
+     * @param mixed  $key
+     * @param string $string
+     * @return void
      */
-    protected function fileWrite($key, $string)
+    protected function fileWrite($key, string $string)
     {
         fwrite($this->open_files[$key], str_repeat(' ', $this->open_files_level[$key] * 4).$string);
     }
 
     /**
-     * @param $key
+     * @param mixed $key
+     * @return void
      */
     protected function fileBump($key)
     {
@@ -361,7 +364,8 @@ class Core
     }
 
     /**
-     * @param $key
+     * @param mixed $key
+     * @return void
      */
     protected function fileDrop($key)
     {
@@ -369,7 +373,8 @@ class Core
     }
 
     /**
-     * @param $key
+     * @param mixed $key
+     * @return void
      */
     protected function fileClose($key)
     {
@@ -399,10 +404,10 @@ class Core
     }
 
     /**
-     * @param $row
+     * @param array $row
      * @return float|int|mixed
      */
-    private function formatDefault($row)
+    private function formatDefault(array $row)
     {
         $default = $row['Default'];
         if ($default === null) {
@@ -425,7 +430,7 @@ class Core
     }
 
     /**
-     * @param $type
+     * @param mixed $type
      * @return null|string
      */
     private function defaultData($type)

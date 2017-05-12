@@ -16,33 +16,33 @@ class ObjectForm
     protected $hidden   = array();
     protected $CKEditor = false;
 
-    public $submit      = 'Submit';
+    public $submit = 'Submit';
 
     public function __construct($source, $action = null, $method = 'POST')
     {
-        $this->source   = $source;
-        $this->action   = $action;  //Null action does not include an action
-        $this->method   = $method;
-        $this->keys         = array_keys(get_object_vars($source));
+        $this->source = $source;
+        $this->action = $action;  //Null action does not include an action
+        $this->method = $method;
+        $this->keys   = array_keys(get_object_vars($source));
     }
 
     public function addField($key, $caption = '', $type = 'text', $params = array())
     {
         if ($key == 'hr') {
-            $this->fields[] = array('caption'=>'<hr />', 'type'=>'hr');
+            $this->fields[] = array('caption' => '<hr />', 'type' => 'hr');
         } elseif ($type == 'hidden') {
-            $this->hidden[] = array('key'=>$key, 'value'=>$params['value']);
+            $this->hidden[] = array('key' => $key, 'value' => $params['value']);
         } else {
             if (!property_exists($this->source, $key) && $key != 'caption') {
                 throw new ORMException('Invalid Key - '.$key.'<br /><pre>'.print_r($this->keys, true).'</pre>');
             }
-            $this->fields[] = array('key'=>$key, 'caption'=>$caption, 'type'=>$type, 'params'=>$params);
+            $this->fields[] = array('key' => $key, 'caption' => $caption, 'type' => $type, 'params' => $params);
         }
     }
 
     public function printForm()
     {
-        echo '<form '.($this->action!=null?'action="'.$this->action.'"':'').' method="',$this->method,'" role="form">';
+        echo '<form '.($this->action != null ? 'action="'.$this->action.'"' : '').' method="',$this->method,'" role="form">';
         foreach ($this->hidden as $field) {
             echo '<input type="hidden" name="',$field['key'],'" value="',$field['value'],'" />';
         }
@@ -94,7 +94,7 @@ class ObjectForm
                 echo '<option></option>';
                 if (is_array($field['params']['options'])) {
                     foreach ($field['params']['options'] as $k => $v) {
-                        echo '<option value="',$k,'" ',($k==$val?'selected':''),'>',$v,'</option>';
+                        echo '<option value="',$k,'" ',($k == $val ? 'selected' : ''),'>',$v,'</option>';
                     }
                 }
                 echo '</select>';
@@ -104,9 +104,9 @@ class ObjectForm
                 $val = $this->source->$field['key'];
                 if (isset($field['params']['selected'])) {
                     $selected = $field['params']['selected'];
-                } elseif (substr($val, 0, 1)=='*') {
+                } elseif (substr($val, 0, 1) == '*') {
                     $selected = explode('*', trim($val, '*'));
-                } elseif (substr($val, 0, 1)=='{' || substr($val, 0, 1)=='[') {
+                } elseif (substr($val, 0, 1) == '{' || substr($val, 0, 1) == '[') {
                     $selected = json_decode($val, true);
                 } else {
                     $selected = array();
@@ -120,7 +120,7 @@ class ObjectForm
                 echo '<option></option>';
                 if (is_array($field['params']['options'])) {
                     foreach ($field['params']['options'] as $k => $v) {
-                        echo '<option value="',$k,'" ',(in_array($k, $selected)?'selected':''),'>',$v,'</option>';
+                        echo '<option value="',$k,'" ',(in_array($k, $selected) ? 'selected' : ''),'>',$v,'</option>';
                     }
                 }
                 echo '</select>';
@@ -133,9 +133,9 @@ class ObjectForm
             case 'toggle':
                 echo '<div class="radios">';
                 echo '
-					<input type="radio" name="',$field['key'],'" id="',$field['key'],'_0" value="0" ',($this->source->$field['key']==0?'checked="checked"':''),' />
+					<input type="radio" name="',$field['key'],'" id="',$field['key'],'_0" value="0" ',($this->source->$field['key'] == 0 ? 'checked="checked"' : ''),' />
 					<label for="',$field['key'],'_0">No</label>
-					<input type="radio" name="',$field['key'],'" id="',$field['key'],'_1" value="1" ',($this->source->$field['key']==1?'checked="checked"':''),' />
+					<input type="radio" name="',$field['key'],'" id="',$field['key'],'_1" value="1" ',($this->source->$field['key'] == 1 ? 'checked="checked"' : ''),' />
 					<label for="',$field['key'],'_1">Yes</label>';
                 echo '</div>';
                 break;
@@ -143,7 +143,7 @@ class ObjectForm
             case 'CKEditor':
                 echo '<div>';
                 echo '<textarea name="',$field['key'],'" id="',$field['key'],'" style="width:400px; height:150px;">',$this->source->$field['key'],'</textarea>
-					'.(isset($field['params']['caption'])?$field['params']['caption']:'');
+					'.(isset($field['params']['caption']) ? $field['params']['caption'] : '');
                 echo '</div>';
                 echo '
 				<script type="text/javascript">

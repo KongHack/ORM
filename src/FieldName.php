@@ -11,7 +11,7 @@ class FieldName
      * @param string $field
      * @return string
      */
-    public static function getterName($field)
+    public static function getterName(string $field)
     {
         return 'get'.self::nameConversion($field);
     }
@@ -20,7 +20,7 @@ class FieldName
      * @param string $field
      * @return string
      */
-    public static function setterName($field)
+    public static function setterName(string $field)
     {
         return 'set'.self::nameConversion($field);
     }
@@ -29,7 +29,7 @@ class FieldName
      * @param string $name
      * @return mixed
      */
-    public static function nameConversion($name)
+    public static function nameConversion(string $name)
     {
         return str_replace('_', '', ucwords($name, '_'));
     }

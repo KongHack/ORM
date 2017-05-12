@@ -12,18 +12,18 @@ use GCWorld\ORM\ORMException;
 abstract class DirectMulti
 {
         /**
-     * @var \GCWorld\Common\Common
-     */
-    protected $_common  = null;
+         * @var \GCWorld\Common\Common
+         */
+    protected $_common = null;
     /**
      * @var array
      */
     protected $_changed = array();
     /**
      * Set this to false in your class when you don't want to log changes
-     * @var bool
+     * @var boolean
      */
-    protected $_audit   = false;
+    protected $_audit = false;
 
     /**
      * @var string
@@ -69,7 +69,7 @@ abstract class DirectMulti
             if ($redis) {
                 $json = $redis->hGet($this->myName, 'key_'.implode('-', $keys));
                 if (strlen($json) > 2) {
-                    $data = json_decode($json, true);
+                    $data       = json_decode($json, true);
                     $properties = array_keys(get_object_vars($this));
                     foreach ($data as $k => $v) {
                         if (in_array($k, $properties)) {
@@ -80,11 +80,11 @@ abstract class DirectMulti
                 }
             }
 
-            $params = array();
-            $sql = 'SELECT * FROM '.$table_name.' WHERE ';
+            $params    = array();
+            $sql       = 'SELECT * FROM '.$table_name.' WHERE ';
             $sqlBlocks = array();
             foreach ($primaries as $k => $primary) {
-                $sqlBlocks[] = ' '.$primary.' = :id_'.$k;
+                $sqlBlocks[]    = ' '.$primary.' = :id_'.$k;
                 $params[':id_'] = $keys[$k];
             }
             $sql .= implode(' AND ', $sqlBlocks);
@@ -152,15 +152,15 @@ abstract class DirectMulti
             }
 
             $params = array();
-            $sql = 'UPDATE '.$table_name.' SET ';
+            $sql    = 'UPDATE '.$table_name.' SET ';
             foreach ($this->_changed as $key) {
-                $sql .= $key.' = :'.$key.', ';
+                $sql             .= $key.' = :'.$key.', ';
                 $params[':'.$key] = $this->$key;
             }
-            $sql = substr($sql, 0, -2).' WHERE ';   //Remove last ', ';
+            $sql       = substr($sql, 0, -2).' WHERE ';   //Remove last ', ';
             $sqlBlocks = array();
             foreach ($primaries as $k => $primary) {
-                $sqlBlocks[] = ' '.$primary.' = :id_'.$k;
+                $sqlBlocks[]    = ' '.$primary.' = :id_'.$k;
                 $params[':id_'] = $this->$primary;
             }
             $sql .= implode(' AND ', $sqlBlocks);
@@ -188,8 +188,8 @@ abstract class DirectMulti
     {
         $redis = $this->_common->getCache();
         if ($redis) {
-            $primaries  = constant($this->myName . '::CLASS_PRIMARIES');
-            $keys = array();
+            $primaries = constant($this->myName . '::CLASS_PRIMARIES');
+            $keys      = array();
             foreach ($primaries as $pk) {
                 $keys[] = $this->$pk;
             }

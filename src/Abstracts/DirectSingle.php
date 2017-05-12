@@ -36,7 +36,7 @@ abstract class DirectSingle
 
     /**
      * Set to false if you want to omit this object from your memory cache all together.
-     * @var bool
+     * @var boolean
      */
     protected $_canCache = true;
 
@@ -52,7 +52,7 @@ abstract class DirectSingle
 
     /**
      * Set this to false in your class when you don't want to log changes
-     * @var bool
+     * @var boolean
      */
     protected $_audit = true;
 
@@ -65,7 +65,7 @@ abstract class DirectSingle
     /**
      * Setting this to true will enable insert on duplicate key update features.
      * This also includes not throwing an error on 0 id construct.
-     * @var bool
+     * @var boolean
      */
     protected $_canInsert = false;
 
@@ -172,10 +172,10 @@ abstract class DirectSingle
     }
 
     /**
-     * @param $key
+     * @param string $key
      * @return mixed
      */
-    protected function get($key)
+    protected function get(string $key)
     {
         return $this->$key;
     }
@@ -196,11 +196,11 @@ abstract class DirectSingle
 
 
     /**
-     * @param $key
+     * @param string $key
      * @param $val
      * @return $this
      */
-    protected function set($key, $val)
+    protected function set(string $key, $val)
     {
         if ($this->$key !== $val) {
             $this->$key = $val;
@@ -299,10 +299,10 @@ abstract class DirectSingle
                 $sql                       = 'UPDATE '.$table_name.' SET ';
                 $params[':'.$primary_name] = $this->$primary_name;
                 foreach ($this->_changed as $key) {
-                    $sql .= $key.' = :'.$key.', ';
+                    $sql             .= $key.' = :'.$key.', ';
                     $params[':'.$key] = $this->$key;
                 }
-                $sql = substr($sql, 0, -2);   //Remove last ', ';
+                $sql  = substr($sql, 0, -2);   //Remove last ', ';
                 $sql .= ' WHERE '.$primary_name.' = :'.$primary_name;
 
                 $query = $db->prepare($sql);

@@ -9,9 +9,6 @@ use GCWorld\Interfaces\Common;
  */
 class CommonLoader
 {
-    /**
-     * @var Common
-     */
     private static $common = null;
 
     /**
