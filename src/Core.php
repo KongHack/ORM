@@ -24,6 +24,7 @@ class Core
     protected $json_serialize         = true;
     protected $use_defaults           = true;
     protected $defaults_override_null = true;
+    protected $type_hinting      = false;
 
     /**
      * @param string $namespace
@@ -56,6 +57,9 @@ class Core
         if (isset($config['options']['defaults_override_null']) && !$config['options']['defaults_override_null']) {
             $this->defaults_override_null = false;
         }
+        if (isset($config['options']['type_hinting']) && $config['options']['type_hinting']) {
+            $this->type_hinting = true;
+        }
     }
 
     /**
@@ -74,6 +78,8 @@ class Core
         if (!isset($overrides['constructor'])) {
             $overrides['constructor'] = 'public';
         }
+
+        $return_types = isset($this->config['return_types:'.$table_name]) ? $this->config['return_types:'.$table_name] : [];
 
 
         $auto_increment = false;
@@ -221,9 +227,18 @@ class Core
 
         if ($this->get_set_funcs) {
             foreach ($fields as $i => $row) {
-                $name = FieldName::nameConversion($row['Field']);
+                $name        = FieldName::nameConversion($row['Field']);
+                $return_type = 'mixed';
+                if ($this->type_hinting) {
+                    $return_type = $this->defaultReturn($row['Type']);
+                }
+                if (array_key_exists($row['Field'], $return_types)) {
+                    $return_type = $return_types[$row['Field']];
+                }
 
-                //TODO: Add doc block
+                $this->fileWrite($fh, '/**'.PHP_EOL);
+                $this->fileWrite($fh, '* @return '.$return_type.PHP_EOL);
+                $this->fileWrite($fh, '*/'.PHP_EOL);
                 $this->fileWrite($fh, 'public function get'.$name.'() {'.PHP_EOL);
                 $this->fileBump($fh);
                 $this->fileWrite($fh, 'return $this->get(\''.$row['Field']."');".PHP_EOL);
@@ -232,13 +247,25 @@ class Core
             }
 
             foreach ($fields as $i => $row) {
-                $name = FieldName::nameConversion($row['Field']);
+                $name        = FieldName::nameConversion($row['Field']);
+                $return_type = 'mixed';
+                if ($this->type_hinting) {
+                    $return_type = $this->defaultReturn($row['Type']);
+                }
+                if (array_key_exists($row['Field'], $return_types)) {
+                    $return_type = $return_types[$row['Field']];
+                }
 
                 $this->fileWrite($fh, '/**'."\n");
-                $this->fileWrite($fh, '* @param mixed $value'.PHP_EOL);
+                $this->fileWrite($fh, '* @param '.$return_type.' $value'.PHP_EOL);
                 $this->fileWrite($fh, '* @return $this'.PHP_EOL);
                 $this->fileWrite($fh, '*/'."\n");
-                $this->fileWrite($fh, 'public function set'.$name.'($value) {'.PHP_EOL);
+                if ($return_type == 'mixed') {
+                    $return_type = '';
+                } else {
+                    $return_type .= ' ';
+                }
+                $this->fileWrite($fh, 'public function set'.$name.'('.$return_type.'$value) {'.PHP_EOL);
                 $this->fileBump($fh);
                 $this->fileWrite($fh, 'return $this->set(\''.$row['Field'].'\', $value);'.PHP_EOL);
                 $this->fileDrop($fh);
@@ -247,6 +274,9 @@ class Core
         }
 
         if ($this->json_serialize) {
+            $this->fileWrite($fh, '/**'.PHP_EOL);
+            $this->fileWrite($fh, '* @return array'.PHP_EOL);
+            $this->fileWrite($fh, '*/'.PHP_EOL);
             $this->fileWrite($fh, 'public function jsonSerialize() {'.PHP_EOL);
             $this->fileBump($fh);
 
@@ -313,8 +343,18 @@ class Core
                 if (in_array($row['Field'], $primaries)) {
                     continue;
                 }
-                $name = FieldName::nameConversion($row['Field']);
-                //TODO: Add doc block
+                $name        = FieldName::nameConversion($row['Field']);
+                $return_type = 'mixed';
+                if ($this->type_hinting) {
+                    $return_type = $this->defaultReturn($row['Type']);
+                }
+                if (array_key_exists($row['Field'], $return_types)) {
+                    $return_type = $return_types[$row['Field']];
+                }
+
+                $this->fileWrite($fh, '/**'.PHP_EOL);
+                $this->fileWrite($fh, '* @return '.$return_type.PHP_EOL);
+                $this->fileWrite($fh, '*/'.PHP_EOL);
                 $this->fileWrite($fh, 'public function get'.$name.'() {'."\n");
                 $this->fileBump($fh);
                 $this->fileWrite($fh, 'return $this->'.$row['Field'].";\n");
@@ -447,29 +487,34 @@ class Core
             case 'SMALLINT':
             case 'MEDIUMINT':
             case 'INT':
+            case 'BOOLEAN':
             case 'BIGINT':
+            case 'SERIAL':
                 return 0;
+
 
             case 'DECIMAL':
             case 'FLOAT':
             case 'DOUBLE':
             case 'REAL':
             case 'BIT':
-            case 'BOOLEAN':
-            case 'SERIAL':
             case 'NUMERIC':
             case 'YEAR':
                 return 0.0;
 
+
             case 'DATE':
                 return '0000-00-00';
+
 
             case 'DATETIME':
             case 'TIMESTAMP':
                 return '0000-00-00 00:00:00';
 
+
             case 'TIME':
                 return '00:00:00';
+
 
             case 'CHAR':
             case 'VARCHAR':
@@ -487,11 +532,72 @@ class Core
             case 'SET':
                 return '';
 
+
             case 'JSON':
                 return '{}';  // Probably not necessary, but hey, stay safe
         }
 
         // Ignoring geometry, because fuck that.
         return null;
+    }
+
+    /**
+     * @param string $type
+     * @return string
+     */
+    private function defaultReturn(string $type)
+    {
+        $type = strtoupper($type);
+        $pos  = strpos($type, '(');
+        if ($pos > 0) {
+            $type = substr($type, 0, $pos);
+        }
+
+        switch ($type) {
+            case 'INTEGER':
+            case 'TINYINT':
+            case 'SMALLINT':
+            case 'MEDIUMINT':
+            case 'INT':
+            case 'BIGINT':
+            case 'SERIAL':
+            case 'NUMERIC':
+                return 'int';
+
+            case 'BOOLEAN':
+                return 'bool';
+
+            case 'DECIMAL':
+            case 'FLOAT':
+            case 'DOUBLE':
+            case 'REAL':
+            case 'BIT':
+            case 'YEAR':
+                return 'float';
+
+            case 'DATE':
+            case 'DATETIME':
+            case 'TIMESTAMP':
+            case 'TIME':
+            case 'CHAR':
+            case 'VARCHAR':
+            case 'TINYTEXT':
+            case 'TEXT':
+            case 'MEDIUMTEXT':
+            case 'LONGTEXT':
+            case 'BINARY':
+            case 'VARBINARY':
+            case 'TINYBLOB':
+            case 'MEDIUMBLOB':
+            case 'BLOB':
+            case 'LONGBLOB':
+            case 'ENUM':
+            case 'SET':
+            case 'JSON':
+                return 'string';
+        }
+
+        // Ignoring geometry, because fuck that.
+        return 'mixed';
     }
 }
