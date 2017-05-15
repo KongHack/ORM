@@ -24,7 +24,7 @@ class Core
     protected $json_serialize         = true;
     protected $use_defaults           = true;
     protected $defaults_override_null = true;
-    protected $type_hinting      = false;
+    protected $type_hinting           = false;
 
     /**
      * @param string $namespace
@@ -209,7 +209,21 @@ class Core
         $conVis = $overrides['constructor'];
         if (count($primaries) == 1) {
             $this->fileWrite($fh, PHP_EOL);
-            $this->fileWrite($fh, $conVis.' function __construct($primary_id = null, $defaults = null)'.PHP_EOL);
+            if ($this->type_hinting) {
+                $this->fileWrite($fh, '/**'.PHP_EOL);
+                $this->fileWrite($fh, '* @param int $primary_id'.PHP_EOL);
+                $this->fileWrite($fh, '* @param array $defaults'.PHP_EOL);
+                $this->fileWrite($fh, '*/'.PHP_EOL);
+                $this->fileWrite(
+                    $fh,
+                    $conVis.' function __construct(int $primary_id = null, array $defaults = null)'.PHP_EOL
+                );
+            } else {
+                $this->fileWrite($fh, '/**'.PHP_EOL);
+                $this->fileWrite($fh, '* @param mixed ...$keys'.PHP_EOL);
+                $this->fileWrite($fh, '*/'.PHP_EOL);
+                $this->fileWrite($fh, $conVis.' function __construct($primary_id = null, $defaults = null)'.PHP_EOL);
+            }
             $this->fileWrite($fh, '{'.PHP_EOL);
             $this->fileBump($fh);
             $this->fileWrite($fh, 'parent::__construct($primary_id, $defaults);'.PHP_EOL);
@@ -217,6 +231,9 @@ class Core
             $this->fileWrite($fh, '}'.PHP_EOL.PHP_EOL);
         } else {
             $this->fileWrite($fh, PHP_EOL);
+            $this->fileWrite($fh, '/**'.PHP_EOL);
+            $this->fileWrite($fh, '* @param mixed ...$keys'.PHP_EOL);
+            $this->fileWrite($fh, '*/'.PHP_EOL);
             $this->fileWrite($fh, $conVis.' function __construct(...$keys)'.PHP_EOL);
             $this->fileWrite($fh, '{'.PHP_EOL);
             $this->fileBump($fh);
@@ -256,10 +273,10 @@ class Core
                     $return_type = $return_types[$row['Field']];
                 }
 
-                $this->fileWrite($fh, '/**'."\n");
+                $this->fileWrite($fh, '/**'.PHP_EOL);
                 $this->fileWrite($fh, '* @param '.$return_type.' $value'.PHP_EOL);
                 $this->fileWrite($fh, '* @return $this'.PHP_EOL);
-                $this->fileWrite($fh, '*/'."\n");
+                $this->fileWrite($fh, '*/'.PHP_EOL);
                 if ($return_type == 'mixed') {
                     $return_type = '';
                 } else {
@@ -322,10 +339,10 @@ class Core
             }
             $type = (stristr($row['Type'], 'int') ? 'int   ' : 'string');
             $this->fileWrite($fh, "\n\n");
-            $this->fileWrite($fh, '/**'."\n");
-            $this->fileWrite($fh, '* @db-info '.$row['Type']."\n");
-            $this->fileWrite($fh, '* @var '.$type."\n");
-            $this->fileWrite($fh, '*/'."\n");
+            $this->fileWrite($fh, '/**'.PHP_EOL);
+            $this->fileWrite($fh, '* @db-info '.$row['Type'].PHP_EOL);
+            $this->fileWrite($fh, '* @var '.$type.PHP_EOL);
+            $this->fileWrite($fh, '*/'.PHP_EOL);
             if ($this->use_defaults) {
                 $this->fileWrite($fh, $this->var_visibility.' $'.str_pad(
                     $row['Field'],
@@ -336,7 +353,7 @@ class Core
                 $this->fileWrite($fh, $this->var_visibility.' $'.str_pad($row['Field'], $max_var_name, ' ').' = null;');
             }
         }
-        $this->fileWrite($fh, "\n");
+        $this->fileWrite($fh, PHP_EOL);
 
         if ($this->get_set_funcs || $this->var_visibility == 'protected') {
             foreach ($fields as $i => $row) {
@@ -355,13 +372,13 @@ class Core
                 $this->fileWrite($fh, '/**'.PHP_EOL);
                 $this->fileWrite($fh, '* @return '.$return_type.PHP_EOL);
                 $this->fileWrite($fh, '*/'.PHP_EOL);
-                $this->fileWrite($fh, 'public function get'.$name.'() {'."\n");
+                $this->fileWrite($fh, 'public function get'.$name.'() {'.PHP_EOL);
                 $this->fileBump($fh);
                 $this->fileWrite($fh, 'return $this->'.$row['Field'].";\n");
                 $this->fileDrop($fh);
                 $this->fileWrite($fh, "}\n\n");
             }
-            $this->fileWrite($fh, "\n");
+            $this->fileWrite($fh, PHP_EOL);
         }
 
         $this->fileDrop($fh);
