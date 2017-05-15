@@ -136,6 +136,11 @@ class Core
             }
 
             $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Interfaces\\GeneratedInterface AS dbi;'.PHP_EOL.PHP_EOL);
+
+            $this->fileWrite($fh,'/**'.PHP_EOL);
+            $this->fileWrite($fh,'* Class '.$table_name.PHP_EOL);
+            $this->fileWrite($fh,'* @package GCWorld\ORM\Generated'.PHP_EOL);
+            $this->fileWrite($fh,'*/'.PHP_EOL);
             $this->fileWrite(
                 $fh,
                 'class '.$table_name.' extends dbc implements dbi, dbd'.($this->json_serialize ? ', \\JsonSerializable' : '').PHP_EOL.'{'.PHP_EOL
