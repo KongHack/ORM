@@ -11,6 +11,7 @@ The config will update itself to add missing values upon update.  Below is the l
  - user=\Your\Fully\Qualified\Class\Name\Here
    - Must be the fully qualified class name of your User class
 
+
 ### [options]
  - get_set_funcs=true
    - true/false - Will automatically generate default get/set functions.  Should be used if your var_visibility is not public
@@ -30,9 +31,18 @@ The config will update itself to add missing values upon update.  Below is the l
  - defaults_override_null=true
    - true/false - use_defaults must be true for this option to do anything.  It will try to set non-null defaults based on data type when the default is null and the null option is not set on the field
    
+ - type_hinting=false
+   - true/false - Will enable type hinting in get/set functions
+   
+   
 ### [override:TABLE_NAME_HERE]
    - constructor=protected
      - public/protected - Default constructor visibility, default is public, so only set if you need a protected constructor for things like factory implementation
+     
+     
+### [return_types:TABLE_NAME_HERE]
+   - field1=mixed
+     - Sets the type hint in the get/set functions for a particular field.  Useful when you're returning an array/object from a string, or requiring an object/array in the setter
      
      
 ### [audit_ignore]

@@ -79,7 +79,7 @@ class Core
             $overrides['constructor'] = 'public';
         }
 
-        $return_types = isset($this->config['return_types:'.$table_name]) ? $this->config['return_types:'.$table_name] : [];
+        $type_hints = isset($this->config['type_hints:'.$table_name]) ? $this->config['type_hints:'.$table_name] : [];
 
 
         $auto_increment = false;
@@ -254,8 +254,8 @@ class Core
                 if ($this->type_hinting) {
                     $return_type = $this->defaultReturn($row['Type']);
                 }
-                if (array_key_exists($row['Field'], $return_types)) {
-                    $return_type = $return_types[$row['Field']];
+                if (array_key_exists($row['Field'], $type_hints)) {
+                    $return_type = $type_hints[$row['Field']];
                 }
 
                 $this->fileWrite($fh, '/**'.PHP_EOL);
@@ -274,8 +274,8 @@ class Core
                 if ($this->type_hinting) {
                     $return_type = $this->defaultReturn($row['Type']);
                 }
-                if (array_key_exists($row['Field'], $return_types)) {
-                    $return_type = $return_types[$row['Field']];
+                if (array_key_exists($row['Field'], $type_hints)) {
+                    $return_type = $type_hints[$row['Field']];
                 }
 
                 $this->fileWrite($fh, '/**'.PHP_EOL);
@@ -370,8 +370,8 @@ class Core
                 if ($this->type_hinting) {
                     $return_type = $this->defaultReturn($row['Type']);
                 }
-                if (array_key_exists($row['Field'], $return_types)) {
-                    $return_type = $return_types[$row['Field']];
+                if (array_key_exists($row['Field'], $type_hints)) {
+                    $return_type = $type_hints[$row['Field']];
                 }
 
                 $this->fileWrite($fh, '/**'.PHP_EOL);

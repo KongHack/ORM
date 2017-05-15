@@ -7,6 +7,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## 3.3.0
+ - @GameCharmer New option ``type_hinting``
+ - @GameCharmer New type hinting override system (see docs)
+
+
 ## 3.2.0
  - @GameCharmer bump to PHP 7.1 for the new PEX stuff
 
