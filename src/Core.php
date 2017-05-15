@@ -179,8 +179,8 @@ class Core
             $type = (stristr($row['Type'], 'int') ? 'int   ' : 'string');
             $this->fileWrite($fh, PHP_EOL.PHP_EOL);
             $this->fileWrite($fh, '/**'.PHP_EOL);
-            $this->fileWrite($fh, '* @db-info '.$row['Type'].PHP_EOL);
             $this->fileWrite($fh, '* @var '.$type.PHP_EOL);
+            $this->fileWrite($fh, '* @db-info '.$row['Type'].PHP_EOL);
             $this->fileWrite($fh, '*/'.PHP_EOL);
             if ($this->use_defaults) {
                 $this->fileWrite($fh, $this->var_visibility.' $'.str_pad(
@@ -194,8 +194,8 @@ class Core
         }
         $this->fileWrite($fh, PHP_EOL);
         $this->fileWrite($fh, '/**'.PHP_EOL);
-        $this->fileWrite($fh, '* Contains an array of all fields and the database notation for field type'.PHP_EOL);
         $this->fileWrite($fh, '* @var array'.PHP_EOL);
+        $this->fileWrite($fh, '* Contains an array of all fields and the database notation for field type'.PHP_EOL);
         $this->fileWrite($fh, '*/'.PHP_EOL);
         $this->fileWrite($fh, 'public static $dbInfo = ['.PHP_EOL);
         $this->fileBump($fh);
@@ -345,8 +345,8 @@ class Core
             $type = (stristr($row['Type'], 'int') ? 'int   ' : 'string');
             $this->fileWrite($fh, "\n\n");
             $this->fileWrite($fh, '/**'.PHP_EOL);
-            $this->fileWrite($fh, '* @db-info '.$row['Type'].PHP_EOL);
             $this->fileWrite($fh, '* @var '.$type.PHP_EOL);
+            $this->fileWrite($fh, '* @db-info '.$row['Type'].PHP_EOL);
             $this->fileWrite($fh, '*/'.PHP_EOL);
             if ($this->use_defaults) {
                 $this->fileWrite($fh, $this->var_visibility.' $'.str_pad(
@@ -379,15 +379,15 @@ class Core
                 $this->fileWrite($fh, '*/'.PHP_EOL);
                 $this->fileWrite($fh, 'public function get'.$name.'() {'.PHP_EOL);
                 $this->fileBump($fh);
-                $this->fileWrite($fh, 'return $this->'.$row['Field'].";\n");
+                $this->fileWrite($fh, 'return $this->'.$row['Field'].";".PHP_EOL);
                 $this->fileDrop($fh);
-                $this->fileWrite($fh, "}\n\n");
+                $this->fileWrite($fh, '}'.PHP_EOL.PHP_EOL);
             }
             $this->fileWrite($fh, PHP_EOL);
         }
 
         $this->fileDrop($fh);
-        $this->fileWrite($fh, "}\n\n");
+        $this->fileWrite($fh, '}'.PHP_EOL.PHP_EOL);
         $this->fileClose($fh);
 
         return true;
