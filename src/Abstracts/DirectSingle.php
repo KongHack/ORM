@@ -82,11 +82,11 @@ abstract class DirectSingle
     public static $dbInfo = [];
 
     /**
-     * @param null $primary_id
-     * @param null $defaults
-     * @throws \GCWorld\ORM\ORMException
+     * @param int|null   $primary_id
+     * @param array|null $defaults
+     * @throws ORMException
      */
-    protected function __construct($primary_id = null, $defaults = null)
+    protected function __construct(int $primary_id = null, array $defaults = null)
     {
         $this->myName  = get_class($this);
         $table_name    = constant($this->myName.'::CLASS_TABLE');
@@ -197,7 +197,7 @@ abstract class DirectSingle
 
     /**
      * @param string $key
-     * @param $val
+     * @param mixed  $val
      * @return $this
      */
     protected function set(string $key, $val)
@@ -336,6 +336,7 @@ abstract class DirectSingle
 
     /**
      * Purges the current item from Redis
+     * @return void
      */
     public function purgeCache()
     {

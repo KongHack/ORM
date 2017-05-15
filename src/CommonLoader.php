@@ -14,6 +14,7 @@ class CommonLoader
     /**
      * Sets the common object
      * @param \GCWorld\Interfaces\Common $common
+     * @return void
      */
     public static function setCommonObject(Common $common)
     {

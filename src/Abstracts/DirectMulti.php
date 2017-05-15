@@ -11,9 +11,9 @@ use GCWorld\ORM\ORMException;
  */
 abstract class DirectMulti
 {
-        /**
-         * @var \GCWorld\Common\Common
-         */
+    /**
+     * @var \GCWorld\Common\Common
+     */
     protected $_common = null;
     /**
      * @var array
@@ -41,14 +41,14 @@ abstract class DirectMulti
      *
      * NOTE: Only pass in IDs as arguments, not an array!
      *
-     * @param array ...$keys
+     * @param mixed ...$keys
      * @throws ORMException
      */
     protected function __construct(...$keys)
     {
         $this->myName  = get_class($this);
-        $table_name    = constant($this->myName . '::CLASS_TABLE');
-        $primaries     = constant($this->myName . '::CLASS_PRIMARIES');
+        $table_name    = constant($this->myName.'::CLASS_TABLE');
+        $primaries     = constant($this->myName.'::CLASS_PRIMARIES');
         $this->_common = CommonLoader::getCommon();
 
 
@@ -59,7 +59,10 @@ abstract class DirectMulti
         $db = $this->_common->getDatabase();
         if (!is_object($db)) {
             debug_print_backtrace();
-            die('Database Not Defined<br>'.$table_name.'<br>'.var_export($primaries, true).'<br>'.var_export($keys, true));
+            die('Database Not Defined<br>'.$table_name.'<br>'.var_export($primaries, true).'<br>'.var_export(
+                $keys,
+                true
+            ));
         }
 
         if (count($keys) == count($primaries)) {
@@ -76,6 +79,7 @@ abstract class DirectMulti
                             $this->$k = $v;
                         }
                     }
+
                     return;
                 }
             }
@@ -111,20 +115,20 @@ abstract class DirectMulti
     }
 
     /**
-     * @param $key
+     * @param string $key
      * @return mixed
      */
-    protected function get($key)
+    protected function get(string $key)
     {
         return $this->$key;
     }
 
     /**
-     * @param $key
-     * @param $val
+     * @param string $key
+     * @param mixed  $val
      * @return $this
      */
-    protected function set($key, $val)
+    protected function set(string $key, $val)
     {
         if ($this->$key !== $val) {
             $this->$key = $val;
@@ -132,6 +136,7 @@ abstract class DirectMulti
                 $this->_changed[] = $key;
             }
         }
+
         return $this;
     }
 
@@ -140,8 +145,8 @@ abstract class DirectMulti
      */
     public function save()
     {
-        $table_name = constant($this->myName . '::CLASS_TABLE');
-        $primaries  = constant($this->myName . '::CLASS_PRIMARIES');
+        $table_name = constant($this->myName.'::CLASS_TABLE');
+        $primaries  = constant($this->myName.'::CLASS_PRIMARIES');
 
         if (count($this->_changed) > 0) {
             /** @var \GCWorld\Database\Database $db */
@@ -176,19 +181,22 @@ abstract class DirectMulti
             */
 
             $this->purgeCache();
+
             return true;
         }
+
         return false;
     }
 
     /**
      * Purges the current item from Redis
+     * @return void
      */
     public function purgeCache()
     {
         $redis = $this->_common->getCache();
         if ($redis) {
-            $primaries = constant($this->myName . '::CLASS_PRIMARIES');
+            $primaries = constant($this->myName.'::CLASS_PRIMARIES');
             $keys      = array();
             foreach ($primaries as $pk) {
                 $keys[] = $this->$pk;
@@ -205,7 +213,7 @@ abstract class DirectMulti
     {
         return array_keys(self::$dbInfo);
     }
-    
+
     /**
      * @return bool
      */

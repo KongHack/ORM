@@ -10,16 +10,23 @@ use GCWorld\ORM\Abstracts\DirectMulti;
 abstract class DirectDBMultiClass extends DirectMulti
 {
     /**
-     * @param $key
+     * @param string $key
      * @return mixed
      */
-    public function get($key)
+    public function get(string $key)
     {
         return parent::get($key);
     }
 
-    public function set($key, $val)
+    /**
+     * @param string $key
+     * @param mixed  $val
+     * @return $this
+     */
+    public function set(string $key, $val)
     {
-        return parent::set($key, $val);
+        parent::set($key, $val);
+
+        return $this;
     }
 }

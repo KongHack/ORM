@@ -16,7 +16,7 @@ class Config
 
     /**
      * Config constructor.
-     * @throws \Exception
+     * @throws Exception
      */
     public function __construct()
     {
@@ -79,7 +79,7 @@ class Config
      * @param bool   $has_sections
      * @return bool|int
      */
-    private function writeIniFile($assoc_arr, $path, $has_sections = false)
+    private function writeIniFile(array $assoc_arr, string $path, bool $has_sections = false)
     {
         $content = "";
         if ($has_sections) {
