@@ -24,21 +24,27 @@ abstract class DirectSingle
     protected $_dbName = null;
 
     /**
+     * @var \GCWorld\Database\Database
+     */
+    protected $_db = null;
+
+    /**
      * Set this in the event your class needs a non-standard Cache.
      * @var null|string
      */
     protected $_cacheName = null;
 
     /**
-     * @var \GCWorld\Database\Database
-     */
-    protected $_db = null;
-
-    /**
-     * Set to false if you want to omit this object from your memory cache all together.
      * @var boolean
+     * Set to false if you want to omit this object from your memory cache all together.
      */
     protected $_canCache = true;
+
+    /**
+     * @var boolean
+     * Set this to false in your class when you don't want to auto re-cache after a purge
+     */
+    protected $_canCacheAfterPurge = true;
 
     /**
      * @var \Redis|bool
@@ -343,6 +349,15 @@ abstract class DirectSingle
         if ($this->_canCache && $this->_cache) {
             $primary_name = constant($this->myName.'::CLASS_PRIMARY');
             $this->_cache->hDel($this->myName, 'key_'.$this->$primary_name);
+
+            if ($this->_canCacheAfterPurge) {
+                $fields = array_keys(self::$dbInfo);
+                $data   = [];
+                foreach ($fields as $field) {
+                    $data[$field] = $this->$field;
+                }
+                $this->_cache->hSet($this->myName, 'key_'.$this->$primary_name, json_encode($data));
+            }
         }
     }
 

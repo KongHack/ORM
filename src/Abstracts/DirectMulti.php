@@ -15,13 +15,15 @@ abstract class DirectMulti
      * @var \GCWorld\Common\Common
      */
     protected $_common = null;
+
     /**
      * @var array
      */
     protected $_changed = array();
+
     /**
-     * Set this to false in your class when you don't want to log changes
      * @var boolean
+     * Set this to false in your class when you don't want to log changes
      */
     protected $_audit = false;
 
