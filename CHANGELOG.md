@@ -7,6 +7,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## 3.3.1
+ - @GameCharmer added $_canCacheAfterPurge to DirectSingle to auto-reload caches **!!WARNING!!** Defaults to true
+ 
+
 ## 3.3.0
  - @GameCharmer New option ``type_hinting``
  - @GameCharmer New type hinting override system (see docs)

@@ -24,7 +24,7 @@ The GCWorld ORM builds extensible classes used for selecting and updating object
 
 
 ### Version
-3.3.0
+3.3.1
 
 
 ###### Todo
