@@ -11,6 +11,8 @@ class Audit
 {
     const DATA_MODEL_VERSION = 1;
 
+    private static $overrideMemberId = null;
+
     /** @var \GCWorld\Common\Common */
     private $common   = null;
     private $database = 'default';
@@ -37,6 +39,23 @@ class Audit
             $this->database = $audit['database'];
             $this->prefix   = $audit['prefix'];
         }
+    }
+
+    /**
+     * @param int $memberId
+     * @return void
+     */
+    public static function setOverrideMemberId(int $memberId)
+    {
+        self::$overrideMemberId = $memberId;
+    }
+
+    /**
+     * @return void
+     */
+    public static function clearOverrideMemberId()
+    {
+        self::$overrideMemberId  = null;
     }
 
     /**
@@ -224,6 +243,10 @@ class Audit
      */
     private function determineMemberId()
     {
+        if(self::$overrideMemberId !== null) {
+            return intval(self::$overrideMemberId);
+        }
+
         if (!method_exists($this->common, 'getUser')) {
             return 0;
         }
