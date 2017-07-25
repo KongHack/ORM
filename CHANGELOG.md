@@ -7,6 +7,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## 3.3.2
+ - @GameCharmer Audit Static Member ID Override System
+ 
+
 ## 3.3.1
  - @GameCharmer added $_canCacheAfterPurge to DirectSingle to auto-reload caches **!!WARNING!!** Defaults to true
  
