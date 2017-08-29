@@ -15,8 +15,9 @@ class Audit
 
     /** @var \GCWorld\Common\Common */
     private $common   = null;
-    private $database = 'default';
-    private $prefix   = '_Audit_';
+    private $database = null;
+    private $connection = 'default';
+    private $prefix     = '_Audit_';
     private $enable   = true;
 
     protected $table     = null;
@@ -35,9 +36,10 @@ class Audit
         /** @var array $audit */
         $audit = $common->getConfig('audit');
         if (is_array($audit)) {
-            $this->enable   = $audit['enable'];
-            $this->database = $audit['database'];
-            $this->prefix   = $audit['prefix'];
+            $this->enable     = $audit['enable'];
+            $this->database   = $audit['database'];
+            $this->connection = $audit['connection'];
+            $this->prefix     = $audit['prefix'];
         }
     }
 
@@ -102,8 +104,11 @@ class Audit
         }
 
         $storeTable = $this->prefix.$table;
+        if($this->database != null) {
+            $storeTable = $this->database.'.'.$storeTable;
+        }
         /** @var \GCWorld\Database\Database $db */
-        $db = $this->common->getDatabase($this->database);
+        $db = $this->common->getDatabase($this->connection);
 
         $this->handleTable($storeTable);
 
@@ -146,7 +151,7 @@ class Audit
      */
     private function handleTable(string $tableName)
     {
-        $db = $this->common->getDatabase($this->database);
+        $db = $this->common->getDatabase($this->connection);
 
         if (!$db->tableExists($tableName)) {
             $source = file_get_contents($this->getDataModelDirectory().'source.sql');
