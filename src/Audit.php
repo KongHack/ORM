@@ -2,6 +2,7 @@
 namespace GCWorld\ORM;
 
 use GCWorld\Common\Common;
+use MHC\ACE2\Core\Utilities;
 
 /**
  * Class Audit
@@ -159,6 +160,7 @@ class Audit
             $db->exec($sql);
             $db->setTableComment($tableName, '0');
         }
+
         $version = intval($db->getTableComment($tableName));
         if ($version < self::DATA_MODEL_VERSION) {
             $versionFiles = glob($this->getDataModelDirectory().'revisions'.DIRECTORY_SEPARATOR.'*.sql');

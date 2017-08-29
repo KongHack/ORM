@@ -1,1 +1,1 @@
-ALTER TABLE `__REPLACE__` ADD `log_request_uri` TEXT NULL DEFAULT NULL AFTER `log_timestamp`;
+ALTER TABLE __REPLACE__ ADD `log_request_uri` TEXT NULL DEFAULT NULL AFTER `log_timestamp`;
