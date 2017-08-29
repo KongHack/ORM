@@ -7,6 +7,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## 3.4.0
+ - @GameCharmer COMMON CONFIG HAS CHANGED!
+
 ## 3.3.2
  - @GameCharmer Audit Static Member ID Override System
  
