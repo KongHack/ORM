@@ -5,6 +5,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## 3.4.2 
+ - @GameCharmer Update Database to fix backtick issue
 
 
 ## 3.4.1 

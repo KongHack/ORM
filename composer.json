@@ -11,7 +11,7 @@
     "php": ">=7.1",
     "gcworld/common":"~2.2",
     "gcworld/interfaces": ">=3.1.1",
-    "gcworld/database": "^2.3.3",
+    "gcworld/database": "^2.3.4",
     "composer/composer": "^1.1",
     "composer/installers": "^1.0"
   },

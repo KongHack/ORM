@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "a68382601b7af2d803f0190a7df272f8",
+    "content-hash": "1f6aa50a2a35a964532a72134c1c6fec",
     "packages": [
         {
             "name": "composer/ca-bundle",
@@ -427,16 +427,16 @@
         },
         {
             "name": "gcworld/database",
-            "version": "2.3.3",
+            "version": "2.3.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/KongHack/Database.git",
-                "reference": "571b1bb9dc9f6a7a341d58846e067ccc12d0aa16"
+                "reference": "7c9435894ba7853ca1ecd6b1ae3414dcc45b5e32"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/KongHack/Database/zipball/571b1bb9dc9f6a7a341d58846e067ccc12d0aa16",
-                "reference": "571b1bb9dc9f6a7a341d58846e067ccc12d0aa16",
+                "url": "https://api.github.com/repos/KongHack/Database/zipball/7c9435894ba7853ca1ecd6b1ae3414dcc45b5e32",
+                "reference": "7c9435894ba7853ca1ecd6b1ae3414dcc45b5e32",
                 "shasum": ""
             },
             "require": {
@@ -467,7 +467,7 @@
                 }
             ],
             "description": "GCWorld Industries Database",
-            "time": "2017-08-29T20:19:30+00:00"
+            "time": "2017-08-31T19:30:24+00:00"
         },
         {
             "name": "gcworld/interfaces",
