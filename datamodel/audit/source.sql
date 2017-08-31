@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS `__REPLACE__` (
+CREATE TABLE IF NOT EXISTS __REPLACE__ (
   `log_id` int(11) NOT NULL AUTO_INCREMENT,
   `primary_id` int(11) NOT NULL,
   `member_id` int(11) NOT NULL DEFAULT '0',
