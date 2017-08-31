@@ -7,6 +7,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## 3.4.1 
+ - @GameCharmer Resolve Backtick Issue on new table create
+
+
 ## 3.4.0
  - @GameCharmer COMMON CONFIG HAS CHANGED!
 
