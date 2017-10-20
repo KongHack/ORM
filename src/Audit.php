@@ -9,7 +9,7 @@ use GCWorld\Common\Common;
  */
 class Audit
 {
-    const DATA_MODEL_VERSION = 1;
+
 
     private static $overrideMemberId = null;
 
@@ -41,6 +41,7 @@ class Audit
             $this->connection = $audit['connection'];
             $this->prefix     = $audit['prefix'];
         }
+
     }
 
     /**
@@ -110,7 +111,7 @@ class Audit
         /** @var \GCWorld\Database\Database $db */
         $db = $this->common->getDatabase($this->connection);
 
-        $this->handleTable($storeTable);
+        AuditMaster::getInstance(1,$this->common)->handleTable($storeTable);
 
         //Determine only things changed.
         $A = [];
@@ -143,53 +144,6 @@ class Audit
         }
 
         return 0;
-    }
-
-    /**
-     * @param string $tableName
-     * @return void
-     */
-    private function handleTable(string $tableName)
-    {
-        $db = $this->common->getDatabase($this->connection);
-
-        if (!$db->tableExists($tableName)) {
-            $source = file_get_contents($this->getDataModelDirectory().'source.sql');
-            $sql    = str_replace('__REPLACE__', $tableName, $source);
-            $db->exec($sql);
-            $db->setTableComment($tableName, '0');
-        }
-
-        $version = intval($db->getTableComment($tableName));
-        if ($version < self::DATA_MODEL_VERSION) {
-            $versionFiles = glob($this->getDataModelDirectory().'revisions'.DIRECTORY_SEPARATOR.'*.sql');
-            sort($versionFiles);
-            foreach ($versionFiles as $file) {
-                $tmp        = explode(DIRECTORY_SEPARATOR, $file);
-                $fileName   = array_pop($tmp);
-                $tmp        = explode('.', $fileName);
-                $fileNumber = intval($tmp[0]);
-                unset($tmp);
-
-                if ($fileNumber > $version) {
-                    $model = file_get_contents($file);
-                    $sql   = str_replace('__REPLACE__', $tableName, $model);
-                    $db->exec($sql);
-                    $db->setTableComment($tableName, $fileNumber);
-                }
-            }
-        }
-    }
-
-    /**
-     * @return string
-     */
-    private function getDataModelDirectory()
-    {
-        $base  = rtrim(__DIR__, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR;
-        $base .= 'datamodel'.DIRECTORY_SEPARATOR.'audit'.DIRECTORY_SEPARATOR;
-
-        return $base;
     }
 
     /**
