@@ -64,7 +64,7 @@ class AuditMaster
         if (!$this->_db->tableExists($tableName)) {
             // Find all tables that currently exist, their versions, and prep for insertion
             $sql   = 'SELECT TABLE_NAME, TABLE_COMMENT, TABLE_SCHEMA
-                    information_schema.TABLES
+                    FROM information_schema.TABLES
                     WHERE TABLE_SCHEMA = :schema';
             $query = $this->_db->prepare($sql);
             $query->execute([':schema' => ($this->config['database'] != null ? $this->config['database'] : '')]);
