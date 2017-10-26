@@ -155,7 +155,7 @@ class AuditMaster
             $sql   = 'INSERT INTO '.$this->master.'
                     (audit_schema, audit_table, audit_version, audit_datetime_created)
                     VALUES
-                    (:schema, :table, :version. NOW())
+                    (:schema, :table, :version, NOW())
                     ON DUPLICATE KEY UPDATE 
                         audit_version = VALUES(audit_version), 
                         audit_datetime_updated = NOW()';
