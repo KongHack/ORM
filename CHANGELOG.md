@@ -5,6 +5,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## 3.5.0.2
+ - @GameCharmer audit master fix.
+
 ## 3.5.0.1
  - @GameCharmer quick fix to master.sql.  If you've already used 3.5.0, delete the table it creates and run it again
  
