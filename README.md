@@ -2,6 +2,11 @@
 
 The GCWorld ORM builds extensible classes used for selecting and updating objects.
 
+### WARNING
+If you are using a version prior to 3.6, please use the convert ini to yml file in the contrib folder
+to convert your GCWorld_ORM.ini to a yml file.
+
+
 ##### Features include
 
   - Fully formed classes containing all database fields.
@@ -10,21 +15,17 @@ The GCWorld ORM builds extensible classes used for selecting and updating object
   - Audit User tracking via Common getUser() function
   - Redis smart caching
   - Read More About The Config Options [HERE](docs/Config.md)
-
-
-##### New Features in V2
-
- - Multi-Primary key support!
- - Auto-loading of common via config file
- - Insertable type single-key objects (using on duplicate key update)
- - DBInterface for keeping DirectDB systems in line and universal
- - Support for auto-generation of getters/setters
- - Custom definition of variable visibility
- - Use Default Option (with a null override thing!)
+  - Multi-Primary key support!
+  - Auto-loading of common via config file
+  - Insertable type single-key objects (using on duplicate key update)
+  - DBInterface for keeping DirectDB systems in line and universal
+  - Support for auto-generation of getters/setters
+  - Custom definition of variable visibility
+  - Use Default Option (with a null override thing!)
 
 
 ### Version
-3.6.0
+3.6.1
 
 
 ###### Todo

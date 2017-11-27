@@ -11,9 +11,9 @@ options:
     type_hinting: false
 tables:
     EXAMPLE_TABLE:
-        override:
+        overrides:
             constructor: protected
-        return_types:
+        type_hints:
             field1: mixed
             field2: string
             field3: bool
