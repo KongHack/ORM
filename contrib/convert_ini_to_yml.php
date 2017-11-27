@@ -1,13 +1,12 @@
 <?php
 
+require('../../../autoload.php');
 
 
-
-$file = rtrim(dirname(__FILE__), DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR;
-$file .= 'config'.DIRECTORY_SEPARATOR.'config.ini';
+$file = 'GCWorld_ORM.ini';
 
 if(!file_exists($file)) {
-    die('Please change the file location to the location of your ini file');
+    die('File Not Found:'.$file.PHP_EOL.'Please change the file location to the location of your ini file');
 }
 
 $config   = parse_ini_file($file, true);
@@ -53,13 +52,32 @@ if (array_key_exists('audit_ignore', $config)) {
         $config['tables'][$table]['audit_ignore'] = $ignores;
     }
 }
+
+// Because unsetting isn't working the first time around...
+foreach($config as $k => $v) {
+    if(strpos($k,'override:')!==false) {
+        unset($config[$k]);
+    }
+    if(strpos($k,'type_hints:')!==false) {
+        unset($config[$k]);
+    }
+}
 unset($config['audit_ignore']);
 
-$newFile = str_replace($file, '.ini', '.yml');
+foreach($config['options'] as $k => $v) {
+    if($v === 1 || $v === '1') {
+        $config['options'][$k] = true;
+    }
+    if($v === 0 || $v === '0' || $v === '') {
+        $config['options'][$k] = false;
+    }
+}
+
+$newFile = str_replace('.ini', '.yml', $file);
 file_put_contents($newFile, \Symfony\Component\Yaml\Yaml::dump($config, 5));
 
 if ($redirect != '') {
-    $newRedirect = str_replace($redirect, '.ini', '.yml');
+    $newRedirect = str_replace('.ini', '.yml', $redirect);
     file_put_contents($newRedirect, \Symfony\Component\Yaml\Yaml::dump([
         'config_path' => $newFile
     ], 4));
