@@ -5,6 +5,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## 3.6.2.1
+ - @GameCharmer Fix for real this time
+ 
 ## 3.6.2
  - @GameCharmer Fix Composer Installer
 
