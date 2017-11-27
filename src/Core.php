@@ -13,11 +13,11 @@ class Core
 {
     protected $master_namespace = '\\';
     /** @var \GCWorld\Common\Common */
-    protected $master_common   = null;
-    protected $master_location = null;
-    protected $config          = [];
-    private $open_files        = [];
-    private $open_files_level  = [];
+    protected $master_common    = null;
+    protected $master_location  = null;
+    protected $config           = [];
+    private   $open_files       = [];
+    private   $open_files_level = [];
 
     protected $get_set_funcs          = true;
     protected $var_visibility         = 'public';
@@ -45,7 +45,9 @@ class Core
                 $this->get_set_funcs = false;
             }
         }
-        if (isset($config['options']['var_visibility']) && in_array($config['options']['var_visibility'], ['public', 'protected'])) {
+        if (isset($config['options']['var_visibility']) && in_array($config['options']['var_visibility'],
+                ['public', 'protected'])
+        ) {
             $this->var_visibility = $config['options']['var_visibility'];
         }
         if (isset($config['options']['json_serialize']) && !$config['options']['json_serialize']) {
@@ -74,13 +76,13 @@ class Core
         $query->execute();
         $fields = $query->fetchAll(PDO::FETCH_ASSOC);
 
-        $overrides = isset($this->config['override:'.$table_name]) ? $this->config['override:'.$table_name] : [];
+        $tableConfig = isset($this->config['tables'][$table_name]) ? $this->config['tables'][$table_name] : [];
+        $overrides   = isset($tableConfig['overrides']) ? $tableConfig['overrides'] : [];
+        $type_hints  = isset($tableConfig['type_hints']) ? $tableConfig['type_hints'] : [];
+
         if (!isset($overrides['constructor'])) {
             $overrides['constructor'] = 'public';
         }
-
-        $type_hints = isset($this->config['type_hints:'.$table_name]) ? $this->config['type_hints:'.$table_name] : [];
-
 
         $auto_increment = false;
         $primaries      = [];
@@ -172,7 +174,8 @@ class Core
 
         $this->fileWrite(
             $fh,
-            'CONST '.str_pad('AUTO_INCREMENT', $max_var_name, ' ').'   = '.($auto_increment ? 'true' : 'false').";".PHP_EOL
+            'CONST '.str_pad('AUTO_INCREMENT', $max_var_name,
+                ' ').'   = '.($auto_increment ? 'true' : 'false').";".PHP_EOL
         );
 
         foreach ($fields as $i => $row) {
@@ -183,11 +186,9 @@ class Core
             $this->fileWrite($fh, '* @db-info '.$row['Type'].PHP_EOL);
             $this->fileWrite($fh, '*/'.PHP_EOL);
             if ($this->use_defaults) {
-                $this->fileWrite($fh, $this->var_visibility.' $'.str_pad(
-                    $row['Field'],
-                    $max_var_name,
-                    ' '
-                ).' = '.$this->formatDefault($row).';');
+                $this->fileWrite($fh, $this->var_visibility.' $'.str_pad($row['Field'],$max_var_name,
+                        ' '
+                    ).' = '.$this->formatDefault($row).';');
             } else {
                 $this->fileWrite($fh, $this->var_visibility.' $'.str_pad($row['Field'], $max_var_name, ' ').' = null;');
             }
@@ -201,11 +202,7 @@ class Core
         $this->fileBump($fh);
 
         foreach ($fields as $i => $row) {
-            $this->fileWrite($fh, str_pad(
-                "'".$row['Field']."'",
-                $max_var_name + 2,
-                ' '
-            )." => '".$row['Type'].($row['Comment'] != '' ? ' - '.$row['Comment'] : '')."',".PHP_EOL);
+            $this->fileWrite($fh, str_pad("'".$row['Field']."'",$max_var_name + 2,' ')." => '".$row['Type'].($row['Comment'] != '' ? ' - '.$row['Comment'] : '')."',".PHP_EOL);
         }
         $this->fileDrop($fh);
         $this->fileWrite($fh, "];".PHP_EOL);
@@ -350,10 +347,10 @@ class Core
             $this->fileWrite($fh, '*/'.PHP_EOL);
             if ($this->use_defaults) {
                 $this->fileWrite($fh, $this->var_visibility.' $'.str_pad(
-                    $row['Field'],
-                    $max_var_name,
-                    ' '
-                ).' = '.$this->formatDefault($row).';');
+                        $row['Field'],
+                        $max_var_name,
+                        ' '
+                    ).' = '.$this->formatDefault($row).';');
             } else {
                 $this->fileWrite($fh, $this->var_visibility.' $'.str_pad($row['Field'], $max_var_name, ' ').' = null;');
             }

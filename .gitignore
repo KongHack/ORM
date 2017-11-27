@@ -2,4 +2,5 @@
 src/Generated/*
 vendor/*
 config/*
+!config/config.example.yml
 !config/config.example.ini

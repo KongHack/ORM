@@ -2,6 +2,7 @@
 namespace GCWorld\ORM;
 
 use Exception;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * Class Config
@@ -20,46 +21,25 @@ class Config
      */
     public function __construct()
     {
-        $file  = rtrim(dirname(__FILE__), DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR;
-        $file .= 'config'.DIRECTORY_SEPARATOR.'config.ini';
+        // Test for yml.  If not found, test for ini
+        $file = rtrim(dirname(__FILE__), DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR;
+        $file .= 'config'.DIRECTORY_SEPARATOR.'config.yml';
         if (!file_exists($file)) {
-            throw new Exception('Config File Not Found');
-        }
-        $config = parse_ini_file($file, true);
-        if (isset($config['config_path'])) {
-            $file   = $config['config_path'];
-            $config = parse_ini_file($file, true);
-        }
-        if (!isset($config['general']['common'])) {
-            throw new Exception('Config does not contain "common" value!');
-        }
-        if (!isset($config['general']['user'])) {
-            throw new Exception('Config does not contain "user" value!');
-        }
-
-        // Get the example config, make sure we have all variables.
-        $example  = rtrim(dirname(__FILE__), DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR;
-        $example .= 'config/config.example.ini';
-        $exConfig = parse_ini_file($example, true);
-
-        $reSave = false;
-        foreach ($exConfig as $k => $v) {
-            if (!isset($config[$k])) {
-                $config[$k] = $v;
-                $reSave     = true;
-            } else {
-                foreach ($v as $x => $y) {
-                    if (!isset($config[$k][$x])) {
-                        $config[$k][$x] = $y;
-                        $reSave         = true;
-                    }
-                }
+            $config = $this->loadIni();
+        } else {
+            $config = Yaml::parse(file_get_contents($file));
+            if(array_key_exists('config_path', $config)) {
+                $config = Yaml::parse(file_get_contents($config['config_path']));
             }
         }
 
-        if ($reSave) {
-            $this->writeIniFile($config, $file, true);
+        if (!array_key_exists('common', $config['general'])) {
+            throw new \Exception('Missing Common Variable In General');
         }
+        if (!array_key_exists('user', $config['general'])) {
+            throw new \Exception('Missing User Variable In General');
+        }
+
 
         $this->config = $config;
     }
@@ -73,55 +53,70 @@ class Config
     }
 
     /**
-     * @url          http://stackoverflow.com/questions/1268378/create-ini-file-write-values-in-php
-     * @param array  $assoc_arr
-     * @param string $path
-     * @param bool   $has_sections
-     * @return bool|int
+     * @return array
+     * @throws Exception
      */
-    private function writeIniFile(array $assoc_arr, string $path, bool $has_sections = false)
+    private function loadIni(): array
     {
-        $content = "";
-        if ($has_sections) {
-            foreach ($assoc_arr as $key => $elem) {
-                if (is_array($elem)) {
-                    $content .= "\n[".$key."]\n";
-                    foreach ($elem as $key2 => $elem2) {
-                        if (is_array($elem2)) {
-                            for ($i = 0; $i < count($elem2); $i++) {
-                                $content .= $key2."[]=\"".$elem2[$i]."\"\n";
-                            }
-                        } elseif ($elem2 == "") {
-                            $content .= $key2."=\n";
-                        } else {
-                            $content .= $key2."=\"".$elem2."\"\n";
-                        }
-                    }
-                } else {
-                    $content .= $key."=\"".$elem."\"\n";
-                }
-            }
-        } else {
-            foreach ($assoc_arr as $key => $elem) {
-                if (is_array($elem)) {
-                    for ($i = 0; $i < count($elem); $i++) {
-                        $content .= $key."[]=\"".$elem[$i]."\"\n";
-                    }
-                } elseif ($elem == "") {
-                    $content .= $key."=\n";
-                } else {
-                    $content .= $key."=\"".$elem."\"\n";
-                }
+        $file = rtrim(dirname(__FILE__), DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR;
+        $file .= 'config'.DIRECTORY_SEPARATOR.'config.ini';
+        if (!file_exists($file)) {
+            throw new Exception('Config File Not Found');
+        }
+        $config   = parse_ini_file($file, true);
+        $redirect = '';
+        if (isset($config['config_path'])) {
+            $redirect = $file;
+            $file     = $config['config_path'];
+            $config   = parse_ini_file($file, true);
+        }
+
+        $overrides    = [];
+        $return_types = [];
+        foreach ($config as $k => $v) {
+            if (substr($k, 0, 9) == 'override:') {
+                $overrides[substr($k, 9)] = $v;
+                unset($config[$k]);
+            } elseif (substr($k, 0, 13) == 'return_types:') {
+                $return_types[substr($k, 13)] = $v;
+                unset($config[$k]);
             }
         }
 
-        if (!$handle = fopen($path, 'w')) {
-            return false;
+        // New Config Array
+        $config['tables'] = [];
+        foreach ($overrides as $table => $override) {
+            if (!array_key_exists($table, $config['tables'])) {
+                $config['tables'][$table] = [];
+            }
+            $config['tables'][$table]['override'] = $override;
+        }
+        foreach ($return_types as $table => $return_type) {
+            if (!array_key_exists($table, $config['tables'])) {
+                $config['tables'][$table] = [];
+            }
+            $config['tables'][$table]['return_types'] = $return_type;
+        }
+        if (array_key_exists('audit_ignore', $config)) {
+            foreach ($config['audit_ignore'] as $table => $ignores) {
+                if (!array_key_exists($table, $config['tables'])) {
+                    $config['tables'][$table] = [];
+                }
+                $config['tables'][$table]['audit_ignore'] = $ignores;
+            }
+        }
+        unset($config['audit_ignore']);
+
+        $newFile = str_replace($file, '.ini', '.yml');
+        file_put_contents($newFile, Yaml::dump($config, 5));
+
+        if ($redirect != '') {
+            $newRedirect = str_replace($redirect, '.ini', '.yml');
+            file_put_contents($newRedirect, Yaml::dump([
+                'config_path' => $newFile
+            ], 4));
         }
 
-        $success = fwrite($handle, $content);
-        fclose($handle);
-
-        return $success;
+        return $config;
     }
 }
