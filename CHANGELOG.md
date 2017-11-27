@@ -5,6 +5,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## 3.6.0
+ - @GameCharmer Convert to YML
+
 ## 3.5.0.2
  - @GameCharmer audit master fix.
 
