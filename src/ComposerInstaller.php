@@ -38,7 +38,7 @@ class ComposerInstaller
         }
 
         file_put_contents($myDir.$ds.'..'.$ds.'config'.$ds.'config.yml', Yaml::dump([
-            'config_path' => $ymlPath.'GCWorld_ORM.ini'
+            'config_path' => $ymlPath.'GCWorld_ORM.yml'
         ],4));
         return true;
     }
