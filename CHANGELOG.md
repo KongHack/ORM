@@ -6,9 +6,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 ## 3.6.1
+ **BROKEN, DO NOT USE**
  - @GameCharmer remove inline ini handling, move to contrib file
 
 ## 3.6.0
+ **BROKEN, DO NOT USE**
  - @GameCharmer Convert to YML
 
 ## 3.5.0.2

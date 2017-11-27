@@ -31,11 +31,15 @@ class ComposerInstaller
                 return false;   // Silently Fail.
             }
         }
+
         if (!file_exists($ymlPath.'GCWorld_ORM.yml')) {
             $example = file_get_contents($myDir.$ds.'..'.$ds.'config'.$ds.'config.example.yml');
             file_put_contents($ymlPath.'GCWorld_ORM.yml', $example);
         }
 
+        file_put_contents($myDir.$ds.'..'.$ds.'config'.$ds.'config.yml', Yaml::dump([
+            'config_path' => $ymlPath.'GCWorld_ORM.ini'
+        ],4));
         return true;
     }
 }
