@@ -1,5 +1,14 @@
 # GCWorld ORM
 
+
+![Packagist](https://img.shields.io/packagist/dm/gcworld/orm.svg)
+![Packagist](https://img.shields.io/packagist/dt/gcworld/orm.svg)
+
+![Packagist PHP](https://img.shields.io/packagist/php-v/gcworld/orm.svg)
+![Packagist](https://img.shields.io/packagist/v/gcworld/orm.svg)
+![GitHub](https://img.shields.io/github/tag/konghack/orm.svg)
+
+
 The GCWorld ORM builds extensible classes used for selecting and updating objects.
 
 ### WARNING
