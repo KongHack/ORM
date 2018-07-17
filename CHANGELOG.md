@@ -5,6 +5,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## 3.6.3
+ - @GameCharmer Add support for protecting generated setter functions
+
+
 ## 3.6.2.1
  - @GameCharmer Fix for real this time
  
