@@ -39,6 +39,7 @@ The config will NOT update itself to add missing values upon update. Below is th
    - TABLE_NAME
      - overrides
        - constructor: protected *(Default constructor visibility, default is public, so only set if you need a protected constructor for things like factory implementation)*
+       - field_name: public/protected *(Sets visibility on the setter functions.  Useful if you want a field only handled internally within your class)*
      - type_hints
        - field_name: type *(mixed is applicable)*
      - audit_ignore *(will ignore these fields all together in the audit process)*

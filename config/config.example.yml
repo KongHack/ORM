@@ -13,6 +13,7 @@ tables:
     EXAMPLE_TABLE:
         overrides:
             constructor: protected
+            field_name: protected
         type_hints:
             field1: mixed
             field2: string

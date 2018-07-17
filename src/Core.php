@@ -284,7 +284,8 @@ class Core
                 } else {
                     $return_type .= ' ';
                 }
-                $this->fileWrite($fh, 'public function set'.$name.'('.$return_type.'$value) {'.PHP_EOL);
+                $setterVis = $overrides[$row['Field']] ?? 'public';
+                $this->fileWrite($fh, $setterVis.' function set'.$name.'('.$return_type.'$value) {'.PHP_EOL);
                 $this->fileBump($fh);
                 $this->fileWrite($fh, 'return $this->set(\''.$row['Field'].'\', $value);'.PHP_EOL);
                 $this->fileDrop($fh);

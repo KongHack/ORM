@@ -64,10 +64,12 @@ class AuditMaster
         if (!$this->_db->tableExists($tableName)) {
             // Find all tables that currently exist, their versions, and prep for insertion
             $sql   = 'SELECT TABLE_NAME, TABLE_COMMENT, TABLE_SCHEMA
-                    FROM information_schema.TABLES
-                    WHERE TABLE_SCHEMA = :schema';
+                      FROM information_schema.TABLES
+                      WHERE TABLE_SCHEMA = :schema';
             $query = $this->_db->prepare($sql);
-            $query->execute([':schema' => ($this->config['database'] != null ? $this->config['database'] : '')]);
+            $query->execute([
+                ':schema' => ($this->config['database'] != null ? $this->config['database'] : '')
+            ]);
             $tables = $query->fetchAll();
 
             // Ok, time to create our audit master.
@@ -77,9 +79,9 @@ class AuditMaster
             $this->_db->exec($sql);
             sleep(1);
             $sql   = 'INSERT INTO '.$tableName.' 
-                    (audit_schema, audit_table, audit_version, audit_datetime_created) 
-                    VALUES
-                    (:schema, :table, :version, NOW())';
+                      (audit_schema, audit_table, audit_version, audit_datetime_created) 
+                      VALUES
+                      (:schema, :table, :version, NOW())';
             $query = $this->_db->prepare($sql);
             foreach ($tables as $table) {
                 $query->execute([
@@ -153,10 +155,10 @@ class AuditMaster
             }
 
             $sql   = 'INSERT INTO '.$this->master.'
-                    (audit_schema, audit_table, audit_version, audit_datetime_created)
-                    VALUES
-                    (:schema, :table, :version, NOW())
-                    ON DUPLICATE KEY UPDATE 
+                      (audit_schema, audit_table, audit_version, audit_datetime_created)
+                      VALUES
+                      (:schema, :table, :version, NOW())
+                      ON DUPLICATE KEY UPDATE 
                         audit_version = VALUES(audit_version), 
                         audit_datetime_updated = NOW()';
             $query = $this->_db->prepare($sql);
