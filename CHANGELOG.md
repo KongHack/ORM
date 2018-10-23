@@ -4,35 +4,43 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 
+
+## [3.6.4](https://github.com/KongHack/ORM/releases/tag/3.6.4)
  - @GameCharmer Change config pathing to relative
  - symfony/yaml updated from v3.3.13 to v3.3.18
    See changes: https://github.com/symfony/yaml/compare/v3.3.13...v3.3.18
    Release notes: https://github.com/symfony/yaml/releases/tag/v3.3.18
 
 
-## 3.6.3
+## [3.6.3](https://github.com/KongHack/ORM/releases/tag/3.6.3)
  - @GameCharmer Add support for protecting generated setter functions
 
 
-## 3.6.2.1
+## [3.6.2.1](https://github.com/KongHack/ORM/releases/tag/3.6.2.1)
  - @GameCharmer Fix for real this time
  
-## 3.6.2
+ 
+## [3.6.2](https://github.com/KongHack/ORM/releases/tag/3.6.2)
  - @GameCharmer Fix Composer Installer
 
-## 3.6.1
+
+## [3.6.1](https://github.com/KongHack/ORM/releases/tag/3.6.1)
  **BROKEN, DO NOT USE**
  - @GameCharmer remove inline ini handling, move to contrib file
 
-## 3.6.0
+
+## [3.6.0](https://github.com/KongHack/ORM/releases/tag/3.6.0)
  **BROKEN, DO NOT USE**
  - @GameCharmer Convert to YML
+
 
 ## 3.5.0.2
  - @GameCharmer audit master fix.
 
+
 ## 3.5.0.1
  - @GameCharmer quick fix to master.sql.  If you've already used 3.5.0, delete the table it creates and run it again
+ 
  
 ## 3.5.0 
  - @GameCharmer New Audit Master system for better version control of tables
@@ -138,6 +146,6 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 ## 2.4.3
-- @GameCharmer Start of changelog tracking
-- @GameCharmer Added a UserLoader class **(and config requirement)** to streamline loading singleton user classes.
-- @GameCharmer NOTE: user config option will not be fully required until 3.0
+ - @GameCharmer Start of changelog tracking
+ - @GameCharmer Added a UserLoader class **(and config requirement)** to streamline loading singleton user classes.
+ - @GameCharmer NOTE: user config option will not be fully required until 3.0
