@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 
+ - @GameCharmer Change config pathing to relative
+ - symfony/yaml updated from v3.3.13 to v3.3.18
+   See changes: https://github.com/symfony/yaml/compare/v3.3.13...v3.3.18
+   Release notes: https://github.com/symfony/yaml/releases/tag/v3.3.18
+
 
 ## 3.6.3
  - @GameCharmer Add support for protecting generated setter functions

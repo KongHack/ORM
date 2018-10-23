@@ -29,7 +29,7 @@ class Config
         }
         $config = Yaml::parse(file_get_contents($file));
         if(array_key_exists('config_path', $config)) {
-            $file = $config['config_path'];
+            $file = __DIR__.DIRECTORY_SEPARATOR.$config['config_path'];
             $config = Yaml::parse(file_get_contents($file));
         }
 
