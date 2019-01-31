@@ -97,7 +97,7 @@ abstract class DirectMulti
 
             $query = $this->_common->getDatabase()->prepare($sql);
             $query->execute($params);
-            $data = $query->fetch();
+            $data = $query->fetch(\PDO::FETCH_ASSOC);
             if (!is_array($data)) {
                 throw new ORMException($this->myName.' Construct Failed');
             }
