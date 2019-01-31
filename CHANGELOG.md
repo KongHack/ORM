@@ -5,6 +5,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [3.6.5](https://github.com/KongHack/ORM/releases/tag/3.6.5)
+ - @GameCharmer Strict `\PDO::FETCH_ASSOC` enforcement for Audits
+
+
 ## [3.6.4](https://github.com/KongHack/ORM/releases/tag/3.6.4)
  - @GameCharmer Change config pathing to relative
  - symfony/yaml updated from v3.3.13 to v3.3.18
