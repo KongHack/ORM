@@ -26,18 +26,24 @@ class Builder
      */
     protected $config = [];
 
+    protected $database = null;
+
     public function __construct(Common $common)
     {
-        $this->config = $common->getConfig('audit');
-        $this->common = $common;
-        $this->_db    = $common->getDatabase();
-        $this->_audit = $common->getDatabase($this->config['connection']);
-        d($this->config);
+        $this->config   = $common->getConfig('audit');
+        $this->common   = $common;
+        $this->_db      = $common->getDatabase();
+        $this->_audit   = $common->getDatabase($this->config['connection']);
+        $this->database = $this->config['database'];
     }
 
     public function run()
     {
         $master = $this->config['prefix'].'_GCAuditMaster';
+        if($this->database != null) {
+            $master = $this->database.'.'.$master;
+        }
+
         if(!$this->_audit->tableExists($master)) {
             // This will create the audit master
             AuditMaster::getInstance(1,$this->common);
@@ -61,6 +67,9 @@ class Builder
         foreach($tables as $tRow) {
             $table = $tRow[0];
             $audit = $this->config['prefix'].$table;
+            if($this->database != null) {
+                $audit = $this->database.'.'.$audit;
+            }
 
             if(isset($existing[$schema][$table])) {
                 $version = $existing[$schema][$table]['audit_version'];
