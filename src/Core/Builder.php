@@ -64,7 +64,6 @@ class Builder
         $tables = $query->fetchAll(\PDO::FETCH_NUM);
 
         foreach($tables as $tRow) {
-            d($tRow);
             $table = $tRow[0];
             $audit = $auditBase = $this->config['prefix'].$table;
             if($this->database != null) {
@@ -108,8 +107,6 @@ class Builder
                             }
 
                             echo 'BAD SQL: ',PHP_EOL,PHP_EOL,$sql,PHP_EOL,PHP_EOL;
-                            d($version);
-                            d($versionFiles);
 
                             throw $e;
                         }
