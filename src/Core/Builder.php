@@ -102,7 +102,7 @@ class Builder
                             $this->_audit->exec($sql);
                             $this->_audit->setTableComment($audit, $fileNumber);
                         } catch (\PDOException $e) {
-                            if(strpos($e->getMessage(),'Column already exists')) {
+                            if(strpos($e->getMessage(),'Column already exists') !== false) {
                                 continue;
                             }
 
