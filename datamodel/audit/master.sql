@@ -6,6 +6,6 @@ CREATE TABLE __REPLACE__ (
   `audit_version` INT(11) NOT NULL ,
   `audit_datetime_created` DATETIME NOT NULL ,
   `audit_datetime_updated` DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
-  PRIMARY KEY (`audit_id`)
+  PRIMARY KEY (`audit_id`),
+  UNIQUE `master_unique` (`audit_schema`,`audit_table`)
 ) ENGINE = InnoDB;
-

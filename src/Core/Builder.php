@@ -71,12 +71,17 @@ class Builder
             }
 
             if(!isset($existing[$schema][$auditBase])) {
-                $source = file_get_contents($this->getDataModelDirectory().'source.sql');
-                $sql    = str_replace('__REPLACE__', $audit, $source);
-                $this->_audit->exec($sql);
-                $this->_audit->setTableComment($audit, '0');
-                $existing[$schema][$table]['audit_version'] = 0;
-                $existing[$schema][$table]['audit_pk_set'] = 0;
+                if($this->_audit->tableExists($audit)) {
+                    $existing[$schema][$table]['audit_version'] = $this->_audit->getTableComment($audit);
+                    $existing[$schema][$table]['audit_pk_set'] = 0;
+                } else {
+                    $source = file_get_contents($this->getDataModelDirectory().'source.sql');
+                    $sql    = str_replace('__REPLACE__', $audit, $source);
+                    $this->_audit->exec($sql);
+                    $this->_audit->setTableComment($audit, '0');
+                    $existing[$schema][$table]['audit_version'] = 0;
+                    $existing[$schema][$table]['audit_pk_set']  = 0;
+                }
             }
 
             $version = $existing[$schema][$auditBase]['audit_version'];
@@ -94,7 +99,6 @@ class Builder
                         $model = file_get_contents($file);
                         $sql   = str_replace('__REPLACE__', $audit, $model);
                         $this->_audit->exec($sql);
-                        d('Setting Comment: '.$audit.' | '.$fileNumber);
                         $this->_audit->setTableComment($audit, $fileNumber);
                     }
                 }
