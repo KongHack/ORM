@@ -148,7 +148,7 @@ abstract class DirectSingle
 
             $query = $this->_db->prepare($sql);
             $query->execute([':id' => $primary_id]);
-            $defaults = $query->fetch();
+            $defaults = $query->fetch(\PDO::FETCH_ASSOC);
             if (!is_array($defaults)) {
                 if (!$this->_canInsert) {
                     $cConfig = new Config();
@@ -255,7 +255,7 @@ abstract class DirectSingle
                 $sql   = "SELECT * FROM $table_name WHERE $primary_name = :primary";
                 $query = $db->prepare($sql);
                 $query->execute([':primary' => $this->$primary_name]);
-                $before = $query->fetch();
+                $before = $query->fetch(\PDO::FETCH_ASSOC);
                 $query->closeCursor();
             }
 
@@ -326,7 +326,7 @@ abstract class DirectSingle
                 $sql   = 'SELECT * FROM '.$table_name.' WHERE '.$primary_name.' = :primary';
                 $query = $db->prepare($sql);
                 $query->execute([':primary' => $this->$primary_name]);
-                $after = $query->fetch();
+                $after = $query->fetch(\PDO::FETCH_ASSOC);
                 $query->closeCursor();
 
                 // The is_array check solves issues with canInsert style objects
