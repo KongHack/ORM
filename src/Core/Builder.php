@@ -3,7 +3,6 @@ namespace GCWorld\ORM\Core;
 
 use GCWorld\Database\Database;
 use GCWorld\Interfaces\Common;
-use GCWorld\ORM\AuditMaster;
 
 class Builder
 {
@@ -87,6 +86,7 @@ class Builder
                             $model = file_get_contents($file);
                             $sql   = str_replace('__REPLACE__', $audit, $model);
                             $this->_audit->exec($sql);
+                            d('Setting Comment: '.$audit.' | '.$fileNumber);
                             $this->_audit->setTableComment($audit, $fileNumber);
                         }
                     }
@@ -121,7 +121,7 @@ class Builder
                     }
                 }
             } else {
-                AuditMaster::getInstance(1,$this->common)->handleTable($audit, $table);
+                // TODO HERE
             }
 
             $sql   = "INSERT INTO $master 
@@ -139,6 +139,8 @@ class Builder
                 ':audit_version' => self::BUILDER_VERSION,
             ]);
             $query->closeCursor();
+
+            $this->_audit->setTableComment($audit, self::BUILDER_VERSION);
         }
     }
 

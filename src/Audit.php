@@ -111,8 +111,6 @@ class Audit
         /** @var \GCWorld\Database\Database $db */
         $db = $this->common->getDatabase($this->connection);
 
-        AuditMaster::getInstance(1,$this->common)->handleTable($storeTable, $table);
-
         //Determine only things changed.
         $A = [];
         $B = [];
