@@ -51,7 +51,7 @@ class Builder
         }
 
         $cConfig   = new Config();
-        $ormConfig = $cConfig->getConfig();
+        $ormConfig = $cConfig->getConfig()['tables']??[];
 
         $existing = [];
         $sql      = "SELECT * FROM $master";
@@ -67,9 +67,16 @@ class Builder
         $query = $this->_db->prepare($sql);
         $query->execute();
         $tables = $query->fetchAll(\PDO::FETCH_NUM);
+        $preLen = \strlen($this->config['prefix']);
 
         foreach($tables as $tRow) {
             $table = $tRow[0];
+
+            // Prevent recursion
+            if(substr($table,0,$preLen) == $this->config['prefix']) {
+                continue;
+            }
+
             if (array_key_exists($table, $ormConfig)) {
                 $tableConfig = $ormConfig[$table];
                 if(isset($tableConfig['audit_ignore']) && $tableConfig['audit_ignore']) {

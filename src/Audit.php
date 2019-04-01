@@ -77,7 +77,7 @@ class Audit
         }
 
         $cConfig = new Config();
-        $config  = $cConfig->getConfig();
+        $config  = $cConfig->getConfig()['tables']??[];
         if (array_key_exists($table, $config)) {
             $tableConfig = $config[$table];
             // Check to see if we are auditing this table at all
