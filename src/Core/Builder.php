@@ -32,6 +32,7 @@ class Builder
         $this->common = $common;
         $this->_db    = $common->getDatabase();
         $this->_audit = $common->getDatabase($this->config['connection']);
+        d($this->config);
     }
 
     public function run()
@@ -101,7 +102,7 @@ class Builder
 
 
                         $sql   = 'ALTER TABLE '.$audit.' CHANGE primary_id primary_id '.$type.' DEFAULT '.($int?'\'0\'':'\'\'');
-                        $query = $this->_db->prepare($sql);
+                        $query = $this->_audit->prepare($sql);
                         $query->execute();
                         $query->closeCursor();
                     }
