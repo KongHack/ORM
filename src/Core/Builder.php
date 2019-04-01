@@ -120,6 +120,7 @@ class Builder
             // Now make sure the primary key is set.
             if(!$existing[$schema][$auditBase]['audit_pk_set']) {
                 // Determine our primary field type
+                $keys  = 0;
                 $sql   = 'SHOW COLUMNS FROM '.$table;
                 $query = $this->_db->prepare($sql);
                 $query->execute();
@@ -128,13 +129,14 @@ class Builder
                 foreach($data as $datum) {
                     if($datum['Key'] == 'PRI') {
                         $type = $datum['Type'];
+                        $keys++;
                     }
                 }
-                if($type != null) {
+                if($type != null && $keys == 1) {
                     $int   = stripos($type,'int')!==false;
                     try {
-                        $sql   = 'ALTER TABLE '.$audit.' CHANGE primary_id primary_id '.$type.' DEFAULT '.($int ?
-                                '\'0\'' : '\'\'');
+                        $sql   = 'ALTER TABLE '.$audit.' CHANGE primary_id primary_id '.$type.' DEFAULT '.
+                                 ($int ? '\'0\'' : '\'\'');
                         $query = $this->_audit->prepare($sql);
                         $query->execute();
                         $query->closeCursor();
