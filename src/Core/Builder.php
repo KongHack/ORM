@@ -64,6 +64,7 @@ class Builder
         $tables = $query->fetchAll(\PDO::FETCH_NUM);
 
         foreach($tables as $tRow) {
+            d($tRow);
             $table = $tRow[0];
             $audit = $auditBase = $this->config['prefix'].$table;
             if($this->database != null) {
