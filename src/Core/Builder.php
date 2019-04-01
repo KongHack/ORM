@@ -107,13 +107,17 @@ class Builder
                         }
                     }
                     if($type != null) {
-                        $int = stripos($type,'int')!==false;
-
-
-                        $sql   = 'ALTER TABLE '.$audit.' CHANGE primary_id primary_id '.$type.' DEFAULT '.($int?'\'0\'':'\'\'');
-                        $query = $this->_audit->prepare($sql);
-                        $query->execute();
-                        $query->closeCursor();
+                        $int   = stripos($type,'int')!==false;
+                        try {
+                            $sql   = 'ALTER TABLE '.$audit.' CHANGE primary_id primary_id '.$type.' DEFAULT '.($int ?
+                                    '\'0\'' : '\'\'');
+                            $query = $this->_audit->prepare($sql);
+                            $query->execute();
+                            $query->closeCursor();
+                        } catch (\PDOException $e) {
+                            echo 'BAD SQL',PHP_EOL,PHP_EOL,$sql,PHP_EOL,PHP_EOL;
+                            throw $e;
+                        }
                     }
                 }
             } else {
