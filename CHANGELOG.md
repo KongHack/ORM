@@ -5,6 +5,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [3.7.0](https://github.com/KongHack/ORM/releases/tag/3.7.0)
+ - @GameCharmer ***WARNING*** Experimental branch for audit builder system
+
+
 ## [3.6.5](https://github.com/KongHack/ORM/releases/tag/3.6.5)
  - @GameCharmer Strict `\PDO::FETCH_ASSOC` enforcement for Audits
 
