@@ -191,7 +191,7 @@ class AuditMaster
             $int = stripos($type,'int')!==false;
 
 
-            $sql   = 'ALTER '.$tableName.' CHANGE primary_id primary_id '.$type.' DEFAULT '.($int?'\'0\'':'\'\'');
+            $sql   = 'ALTER '.$tableName.' ALTER COLUMN primary_id primary_id '.$type.' DEFAULT '.($int?'\'0\'':'\'\'');
             $query = $this->_db->prepare($sql);
             $query->execute();
             $query->closeCursor();
