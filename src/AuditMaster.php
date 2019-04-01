@@ -188,7 +188,10 @@ class AuditMaster
             }
         }
         if($type != null) {
-            $sql   = 'ALTER '.$tableName.' CHANGE primary_id primary_id '.$type;
+            $int = stripos($type,'int')!==false;
+
+
+            $sql   = 'ALTER '.$tableName.' CHANGE primary_id primary_id DEFAULT '.$type.($int?'\'0\'':'\'\'');
             $query = $this->_db->prepare($sql);
             $query->execute();
             $query->closeCursor();
