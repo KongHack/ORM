@@ -98,8 +98,16 @@ class Builder
                     if ($fileNumber > $version && $fileNumber < self::BUILDER_VERSION) {
                         $model = file_get_contents($file);
                         $sql   = str_replace('__REPLACE__', $audit, $model);
-                        $this->_audit->exec($sql);
-                        $this->_audit->setTableComment($audit, $fileNumber);
+                        try {
+                            $this->_audit->exec($sql);
+                            $this->_audit->setTableComment($audit, $fileNumber);
+                        } catch (\PDOException $e) {
+                            echo 'BAD SQL: ',PHP_EOL,PHP_EOL,$sql,PHP_EOL,PHP_EOL;
+                            d($version);
+                            d($versionFiles);
+
+                            throw $e;
+                        }
                     }
                 }
             }
