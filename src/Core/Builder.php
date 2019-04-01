@@ -57,7 +57,7 @@ class Builder
             $existing[$row['audit_schema']][$row['audit_table']] = $row;
         }
 
-        $schema = $this->_db->getWorkingDatabaseName();
+        $schema = $this->database??$this->_audit->getWorkingDatabaseName();
 
         $sql   = 'SHOW TABLES';
         $query = $this->_db->prepare($sql);
@@ -130,7 +130,7 @@ class Builder
                         audit_datetime_updated = NOW()";
             $query = $this->_audit->prepare($sql);
             $query->execute([
-                ':audit_schema'  => $schema,
+                ':audit_schema'  => $this->database??$schema,
                 ':audit_table'   => $auditBase,
                 ':audit_version' => self::BUILDER_VERSION,
             ]);
