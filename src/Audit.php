@@ -80,8 +80,13 @@ class Audit
         $config  = $cConfig->getConfig();
         if (array_key_exists($table, $config)) {
             $tableConfig = $config[$table];
-            if (array_key_exists('audit_ignore', $tableConfig)) {
-                $fields = $tableConfig['audit_ignore'];
+            // Check to see if we are auditing this table at all
+            if(isset($tableConfig['audit_ignore']) && $tableConfig['audit_ignore']) {
+                return 0;
+            }
+
+            if (array_key_exists('audit_ignore_fields', $tableConfig)) {
+                $fields = $tableConfig['audit_ignore_fields'];
                 foreach ($fields as $field) {
                     unset($before[$field]);
                     unset($after[$field]);

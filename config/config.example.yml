@@ -11,6 +11,7 @@ options:
     type_hinting: false
 tables:
     EXAMPLE_TABLE:
+        audit_ignore: false
         overrides:
             constructor: protected
             field_name: protected
@@ -18,6 +19,6 @@ tables:
             field1: mixed
             field2: string
             field3: bool
-        audit_ignore:
+        audit_ignore_fields:
             - example_field_1
             - example_field_2

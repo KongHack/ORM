@@ -3,6 +3,8 @@ namespace GCWorld\ORM\Core;
 
 use GCWorld\Database\Database;
 use GCWorld\Interfaces\Common;
+use GCWorld\ORM\AuditMaster;
+use GCWorld\ORM\Config;
 
 class Builder
 {
@@ -48,6 +50,9 @@ class Builder
             AuditMaster::getInstance(1,$this->common);
         }
 
+        $cConfig   = new Config();
+        $ormConfig = $cConfig->getConfig();
+
         $existing = [];
         $sql      = "SELECT * FROM $master";
         $query    = $this->_audit->prepare($sql);
@@ -65,6 +70,13 @@ class Builder
 
         foreach($tables as $tRow) {
             $table = $tRow[0];
+            if (array_key_exists($table, $ormConfig)) {
+                $tableConfig = $ormConfig[$table];
+                if(isset($tableConfig['audit_ignore']) && $tableConfig['audit_ignore']) {
+                    continue;
+                }
+            }
+
             $audit = $auditBase = $this->config['prefix'].$table;
             if($this->database != null) {
                 $audit = $this->database.'.'.$audit;
