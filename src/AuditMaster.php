@@ -173,46 +173,6 @@ class AuditMaster
 
             $this->versions[$tableName] = self::DATA_MODEL_VERSION;
         }
-
-        // Determine our primary field type
-        $sql   = 'SHOW COLUMNS FROM '.$tableOrigin;
-        /** @var Database $subDB */
-        $subDB = $this->common->getDatabase();
-        $query = $subDB->prepare($sql);
-        $query->execute();
-        $data = $query->fetchAll();
-        $type = null;
-        foreach($data as $datum) {
-            if($datum['Key'] == 'PRI') {
-                $type = $datum['Type'];
-            }
-        }
-        if($type != null) {
-            $int = stripos($type,'int')!==false;
-
-
-            $sql   = 'ALTER TABLE '.$tableName.' CHANGE primary_id primary_id '.$type.' DEFAULT '.($int?'\'0\'':'\'\'');
-            $query = $this->_db->prepare($sql);
-            $query->execute();
-            $query->closeCursor();
-        }
-
-        $tmp = explode('.', $tableName);
-        if ($tmp == 2) {
-            $schema = $tmp[0];
-            $table  = $tmp[1];
-        } else {
-            $schema = $this->config['database'];
-            $table  = $tableName;
-        }
-
-        $sql   = 'UPDATE '.$this->master.' SET audit_pk_set = 1 WHERE audit_schema = :schema AND audit_table = :table';
-        $query = $this->_db->prepare($sql);
-        $query->execute([
-            ':schema'  => $schema,
-            ':table'   => $table,
-        ]);
-        $query->closeCursor();
     }
 
     /**
