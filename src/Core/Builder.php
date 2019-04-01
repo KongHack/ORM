@@ -70,59 +70,65 @@ class Builder
                 $audit = $this->database.'.'.$audit;
             }
 
-            if(isset($existing[$schema][$table])) {
-                $version = $existing[$schema][$table]['audit_version'];
-                if($version < self::BUILDER_VERSION) {
-                    $versionFiles = glob($this->getDataModelDirectory().'revisions'.DIRECTORY_SEPARATOR.'*.sql');
-                    sort($versionFiles);
-                    foreach ($versionFiles as $file) {
-                        $tmp        = explode(DIRECTORY_SEPARATOR, $file);
-                        $fileName   = array_pop($tmp);
-                        $tmp        = explode('.', $fileName);
-                        $fileNumber = intval($tmp[0]);
-                        unset($tmp);
-
-                        if ($fileNumber > $version && $fileNumber < self::BUILDER_VERSION) {
-                            $model = file_get_contents($file);
-                            $sql   = str_replace('__REPLACE__', $audit, $model);
-                            $this->_audit->exec($sql);
-                            d('Setting Comment: '.$audit.' | '.$fileNumber);
-                            $this->_audit->setTableComment($audit, $fileNumber);
-                        }
-                    }
-                }
-
-                // Ok, that updates the version.
-                // Now make sure the primary key is set.
-                if(!$existing[$schema][$table]['audit_pk_set']) {
-                    // Determine our primary field type
-                    $sql   = 'SHOW COLUMNS FROM '.$table;
-                    $query = $this->_db->prepare($sql);
-                    $query->execute();
-                    $data = $query->fetchAll();
-                    $type = null;
-                    foreach($data as $datum) {
-                        if($datum['Key'] == 'PRI') {
-                            $type = $datum['Type'];
-                        }
-                    }
-                    if($type != null) {
-                        $int   = stripos($type,'int')!==false;
-                        try {
-                            $sql   = 'ALTER TABLE '.$audit.' CHANGE primary_id primary_id '.$type.' DEFAULT '.($int ?
-                                    '\'0\'' : '\'\'');
-                            $query = $this->_audit->prepare($sql);
-                            $query->execute();
-                            $query->closeCursor();
-                        } catch (\PDOException $e) {
-                            echo 'BAD SQL',PHP_EOL,PHP_EOL,$sql,PHP_EOL,PHP_EOL;
-                            throw $e;
-                        }
-                    }
-                }
-            } else {
-                // TODO HERE
+            if(!isset($existing[$schema][$table])) {
+                $source = file_get_contents($this->getDataModelDirectory().'source.sql');
+                $sql    = str_replace('__REPLACE__', $audit, $source);
+                $this->_audit->exec($sql);
+                $this->_audit->setTableComment($audit, '0');
+                $existing[$schema][$table]['audit_version'] = 0;
+                $existing[$schema][$table]['audit_pk_set'] = 0;
             }
+
+            $version = $existing[$schema][$table]['audit_version'];
+            if($version < self::BUILDER_VERSION) {
+                $versionFiles = glob($this->getDataModelDirectory().'revisions'.DIRECTORY_SEPARATOR.'*.sql');
+                sort($versionFiles);
+                foreach ($versionFiles as $file) {
+                    $tmp        = explode(DIRECTORY_SEPARATOR, $file);
+                    $fileName   = array_pop($tmp);
+                    $tmp        = explode('.', $fileName);
+                    $fileNumber = intval($tmp[0]);
+                    unset($tmp);
+
+                    if ($fileNumber > $version && $fileNumber < self::BUILDER_VERSION) {
+                        $model = file_get_contents($file);
+                        $sql   = str_replace('__REPLACE__', $audit, $model);
+                        $this->_audit->exec($sql);
+                        d('Setting Comment: '.$audit.' | '.$fileNumber);
+                        $this->_audit->setTableComment($audit, $fileNumber);
+                    }
+                }
+            }
+
+            // Ok, that updates the version.
+            // Now make sure the primary key is set.
+            if(!$existing[$schema][$table]['audit_pk_set']) {
+                // Determine our primary field type
+                $sql   = 'SHOW COLUMNS FROM '.$table;
+                $query = $this->_db->prepare($sql);
+                $query->execute();
+                $data = $query->fetchAll();
+                $type = null;
+                foreach($data as $datum) {
+                    if($datum['Key'] == 'PRI') {
+                        $type = $datum['Type'];
+                    }
+                }
+                if($type != null) {
+                    $int   = stripos($type,'int')!==false;
+                    try {
+                        $sql   = 'ALTER TABLE '.$audit.' CHANGE primary_id primary_id '.$type.' DEFAULT '.($int ?
+                                '\'0\'' : '\'\'');
+                        $query = $this->_audit->prepare($sql);
+                        $query->execute();
+                        $query->closeCursor();
+                    } catch (\PDOException $e) {
+                        echo 'BAD SQL',PHP_EOL,PHP_EOL,$sql,PHP_EOL,PHP_EOL;
+                        throw $e;
+                    }
+                }
+            }
+
 
             $sql   = "INSERT INTO $master 
                       (audit_schema, audit_table, audit_pk_set, audit_version, audit_datetime_created)

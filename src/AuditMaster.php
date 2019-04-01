@@ -100,4 +100,15 @@ class AuditMaster
             $this->versions[$row['audit_schema'].'.'.$row['audit_table']] = (int) $row['audit_version'];
         }
     }
+
+    /**
+     * @return string
+     */
+    private function getDataModelDirectory()
+    {
+        $base  = rtrim(__DIR__, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR;
+        $base .= 'datamodel'.DIRECTORY_SEPARATOR.'audit'.DIRECTORY_SEPARATOR;
+
+        return $base;
+    }
 }
