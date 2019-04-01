@@ -54,14 +54,14 @@ class ComposerInstaller
             }
         }
 
-        $relPath = str_repeat('..'.DIRECTORY_SEPARATOR,count($tmpMy));
+        $relPath  = str_repeat('..'.DIRECTORY_SEPARATOR,count($tmpMy));
         $relPath .= implode(DIRECTORY_SEPARATOR, $tmpYml);
-        $ymlPath = $relPath.DIRECTORY_SEPARATOR.self::CONFIG_FILE_NAME;
+        $ymlPath  = $relPath.DIRECTORY_SEPARATOR.self::CONFIG_FILE_NAME;
 
         $tmp = ['config_path' => $ymlPath];
 
-
         file_put_contents($myDir.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.'config.yml', Yaml::dump($tmp,4));
+
         return true;
     }
 }

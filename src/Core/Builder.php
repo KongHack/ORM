@@ -31,7 +31,7 @@ class Builder
         $this->config = $common->getConfig('audit');
         $this->common = $common;
         $this->_db    = $common->getDatabase();
-        $this->_audit = $common->getDatabase($this->config['database']);
+        $this->_audit = $common->getDatabase($this->config['connection']);
     }
 
     public function run()
