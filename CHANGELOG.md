@@ -7,6 +7,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [3.7.1](https://github.com/KongHack/ORM/releases/tag/3.7.1)
+ - @GameCharmer prevent recursion, update config pointers
+
+
+
 ## [3.7.0](https://github.com/KongHack/ORM/releases/tag/3.7.0)
  - @GameCharmer ***WARNING*** Experimental branch for audit builder system
 
