@@ -70,7 +70,7 @@ class Builder
                 $audit = $this->database.'.'.$audit;
             }
 
-            if(!isset($existing[$schema][$table])) {
+            if(!isset($existing[$schema][$auditBase])) {
                 $source = file_get_contents($this->getDataModelDirectory().'source.sql');
                 $sql    = str_replace('__REPLACE__', $audit, $source);
                 $this->_audit->exec($sql);
@@ -79,7 +79,7 @@ class Builder
                 $existing[$schema][$table]['audit_pk_set'] = 0;
             }
 
-            $version = $existing[$schema][$table]['audit_version'];
+            $version = $existing[$schema][$auditBase]['audit_version'];
             if($version < self::BUILDER_VERSION) {
                 $versionFiles = glob($this->getDataModelDirectory().'revisions'.DIRECTORY_SEPARATOR.'*.sql');
                 sort($versionFiles);
@@ -102,7 +102,7 @@ class Builder
 
             // Ok, that updates the version.
             // Now make sure the primary key is set.
-            if(!$existing[$schema][$table]['audit_pk_set']) {
+            if(!$existing[$schema][$auditBase]['audit_pk_set']) {
                 // Determine our primary field type
                 $sql   = 'SHOW COLUMNS FROM '.$table;
                 $query = $this->_db->prepare($sql);
