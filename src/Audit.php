@@ -14,11 +14,11 @@ class Audit
     private static $overrideMemberId = null;
 
     /** @var \GCWorld\Common\Common */
-    private $common   = null;
-    private $database = null;
-    private $connection = 'default';
-    private $prefix     = '_Audit_';
-    private $enable   = true;
+    protected $common     = null;
+    protected $database   = null;
+    protected $connection = 'default';
+    protected $prefix     = '_Audit_';
+    protected $enable     = true;
 
     protected $table     = null;
     protected $primaryId = null;
@@ -63,14 +63,14 @@ class Audit
 
     /**
      * @param string $table
-     * @param int    $primaryId
+     * @param mixed  $primaryId
      * @param array  $before
      * @param array  $after
      * @param int    $memberId
      * @return int|string
      * @throws \Exception
      */
-    public function storeLog(string $table, int $primaryId, array $before, array $after, int $memberId = 0)
+    public function storeLog(string $table, $primaryId, array $before, array $after, int $memberId = 0)
     {
         if ($memberId < 1) {
             $memberId = $this->determineMemberId();
@@ -111,7 +111,7 @@ class Audit
         /** @var \GCWorld\Database\Database $db */
         $db = $this->common->getDatabase($this->connection);
 
-        AuditMaster::getInstance(1,$this->common)->handleTable($storeTable);
+        AuditMaster::getInstance(1,$this->common)->handleTable($storeTable, $table);
 
         //Determine only things changed.
         $A = [];
@@ -132,7 +132,7 @@ class Audit
             (:pid, :mid, :uri, :logB, :logA)';
             $query = $db->prepare($sql);
             $query->execute([
-                ':pid'  => intval($primaryId),
+                ':pid'  => $primaryId,
                 ':mid'  => intval($memberId),
                 ':uri'  => (isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : $this->getTopScript()),
                 ':logB' => json_encode($B),

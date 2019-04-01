@@ -88,11 +88,11 @@ abstract class DirectSingle
     public static $dbInfo = [];
 
     /**
-     * @param int|null   $primary_id
+     * @param mixed|null $primary_id
      * @param array|null $defaults
      * @throws ORMException
      */
-    protected function __construct(int $primary_id = null, array $defaults = null)
+    protected function __construct($primary_id = null, array $defaults = null)
     {
         $this->myName  = get_class($this);
         $table_name    = constant($this->myName.'::CLASS_TABLE');
@@ -118,7 +118,12 @@ abstract class DirectSingle
             throw new ORMException('Defaults Array is not an array');
         }
 
-        if ($this->_canCache && $primary_id !== null && $primary_id !== 0) {
+        if ($this->_canCache
+            && !empty($primary_id)
+            && $primary_id !== null
+            && $primary_id !== 0
+            && $primary_id !== ''
+        ) {
             if ($this->_cache) {
                 $json = $this->_cache->hGet($this->myName, 'key_'.$primary_id);
                 if (strlen($json) > 2) {

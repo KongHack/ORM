@@ -1,6 +1,7 @@
 <?php
 namespace GCWorld\ORM;
 
+use GCWorld\Database\Database;
 use GCWorld\Interfaces\Common;
 
 /**
@@ -102,10 +103,11 @@ class AuditMaster
 
     /**
      * @param string $tableName
+     * @param string $tableOrigin
      *
      * @return void
      */
-    public function handleTable(string $tableName)
+    public function handleTable(string $tableName, string $tableOrigin)
     {
         if (in_array($tableName, $this->checked)) {
             return;
@@ -171,6 +173,43 @@ class AuditMaster
 
             $this->versions[$tableName] = self::DATA_MODEL_VERSION;
         }
+
+        // Determine our primary field type
+        $sql   = 'SHOW COLUMNS FROM '.$tableOrigin;
+        /** @var Database $subDB */
+        $subDB = $this->common->getDatabase();
+        $query = $subDB->prepare($sql);
+        $query->execute();
+        $data = $query->fetchAll();
+        $type = null;
+        foreach($data as $datum) {
+            if($datum['Key'] == 'PRI') {
+                $type = $datum['Type'];
+            }
+        }
+        if($type != null) {
+            $sql   = 'ALTER '.$tableName.' CHANGE primary_id primary_id '.$type;
+            $query = $this->_db->prepare($sql);
+            $query->execute();
+            $query->closeCursor();
+        }
+
+        $tmp = explode('.', $tableName);
+        if ($tmp == 2) {
+            $schema = $tmp[0];
+            $table  = $tmp[1];
+        } else {
+            $schema = $this->config['database'];
+            $table  = $tableName;
+        }
+
+        $sql   = 'UPDATE '.$this->master.' SET audit_pk_set = 1 WHERE audit_schema = :schema AND audit_table = :table';
+        $query = $this->_db->prepare($sql);
+        $query->execute([
+            ':schema'  => $schema,
+            ':table'   => $table,
+        ]);
+        $query->closeCursor();
     }
 
     /**
