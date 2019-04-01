@@ -66,7 +66,7 @@ class Builder
 
         foreach($tables as $tRow) {
             $table = $tRow[0];
-            $audit = $this->config['prefix'].$table;
+            $audit = $auditBase = $this->config['prefix'].$table;
             if($this->database != null) {
                 $audit = $this->database.'.'.$audit;
             }
@@ -131,7 +131,7 @@ class Builder
             $query = $this->_audit->prepare($sql);
             $query->execute([
                 ':audit_schema'  => $schema,
-                ':audit_table'   => $audit,
+                ':audit_table'   => $auditBase,
                 ':audit_version' => self::BUILDER_VERSION,
             ]);
             $query->closeCursor();
