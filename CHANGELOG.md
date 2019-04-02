@@ -7,6 +7,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [3.7.3](https://github.com/KongHack/ORM/releases/tag/3.7.3)
+ - @GameCharmer patching up issues with the builder script
+
+
+
 ## [3.7.2](https://github.com/KongHack/ORM/releases/tag/3.7.2)
  - @GameCharmer eliminate audit master class
 
