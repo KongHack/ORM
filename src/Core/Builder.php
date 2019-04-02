@@ -3,9 +3,11 @@ namespace GCWorld\ORM\Core;
 
 use GCWorld\Database\Database;
 use GCWorld\Interfaces\Common;
-use GCWorld\ORM\AuditMaster;
 use GCWorld\ORM\Config;
 
+/**
+ * Class Builder
+ */
 class Builder
 {
     const BUILDER_VERSION = 3;
@@ -29,12 +31,17 @@ class Builder
 
     protected $database = null;
 
+    /**
+     * Builder constructor.
+     *
+     * @param Common $common
+     */
     public function __construct(Common $common)
     {
         $this->config   = $common->getConfig('audit');
         $this->common   = $common;
         $this->_db      = $common->getDatabase();
-        $this->_audit   = $common->getDatabase($this->config['connection']);
+        $this->_audit   = $common->getDatabase($this->config['connection']??'');
         $this->database = $this->config['database'];
     }
 
@@ -94,15 +101,15 @@ class Builder
 
             if(!isset($existing[$schema][$auditBase])) {
                 if($this->_audit->tableExists($audit)) {
-                    $existing[$schema][$table]['audit_version'] = $this->_audit->getTableComment($audit);
-                    $existing[$schema][$table]['audit_pk_set'] = 0;
+                    $existing[$schema][$auditBase]['audit_version'] = $this->_audit->getTableComment($audit);
+                    $existing[$schema][$auditBase]['audit_pk_set'] = 0;
                 } else {
                     $source = file_get_contents($this->getDataModelDirectory().'source.sql');
                     $sql    = str_replace('__REPLACE__', $audit, $source);
                     $this->_audit->exec($sql);
                     $this->_audit->setTableComment($audit, '0');
-                    $existing[$schema][$table]['audit_version'] = 0;
-                    $existing[$schema][$table]['audit_pk_set']  = 0;
+                    $existing[$schema][$auditBase]['audit_version'] = 0;
+                    $existing[$schema][$auditBase]['audit_pk_set']  = 0;
                 }
             }
 
@@ -156,7 +163,7 @@ class Builder
                     $int   = stripos($type,'int')!==false;
                     try {
                         $sql   = 'ALTER TABLE '.$audit.' CHANGE primary_id primary_id '.$type.' DEFAULT '.
-                                 ($int ? '\'0\'' : '\'\'');
+                            ($int ? '\'0\'' : '\'\'');
                         $query = $this->_audit->prepare($sql);
                         $query->execute();
                         $query->closeCursor();
