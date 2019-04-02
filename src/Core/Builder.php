@@ -47,7 +47,10 @@ class Builder
 
         if(!$this->_audit->tableExists($master)) {
             // This will create the audit master
-            AuditMaster::getInstance(1,$this->common);
+            $file    = $this->getDataModelDirectory().'master.sql';
+            $content = file_get_contents($file);
+            $content = str_replace('__REPLACE__',$master,$content);
+            $this->_audit->exec($content);
         }
 
         $cConfig   = new Config();
