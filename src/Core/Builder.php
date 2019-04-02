@@ -72,7 +72,7 @@ class Builder
                 }
             }
             if(!$colGood) {
-                $sql = "ALTER TABLE $master CREATE audit_pk_set TINYINT(1) NOT NULL DEFAULT '0' AFTER audit_table";
+                $sql = "ALTER TABLE $master ADD `audit_pk_set` TINYINT(1) NOT NULL DEFAULT '0' AFTER `audit_table`";
                 $this->_audit->exec($sql);
             }
         }
