@@ -7,6 +7,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [3.7.4](https://github.com/KongHack/ORM/releases/tag/3.7.4)
+ - @GameCharmer Add patch to handle audit_pk_set field
+
+
+
 ## [3.7.3](https://github.com/KongHack/ORM/releases/tag/3.7.3)
  - @GameCharmer patching up issues with the builder script
 

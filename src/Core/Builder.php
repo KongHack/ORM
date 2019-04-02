@@ -58,6 +58,23 @@ class Builder
             $content = file_get_contents($file);
             $content = str_replace('__REPLACE__',$master,$content);
             $this->_audit->exec($content);
+        } else {
+            $sql   = 'SHOW COLUMNS FROM '.$master;
+            $query = $this->_audit->prepare($sql);
+            $query->execute();
+            $rows    = $query->fetchAll();
+            $col     = 'audit_pk_set';
+            $colGood = false;
+            foreach($rows as $row) {
+                if($row['Field'] == $col) {
+                    $colGood = true;
+                    break;
+                }
+            }
+            if(!$colGood) {
+                $sql = "ALTER TABLE $master CREATE audit_pk_set TINYINT(1) NOT NULL DEFAULT '0' AFTER audit_table";
+                $this->_audit->exec($sql);
+            }
         }
 
         $cConfig   = new Config();
