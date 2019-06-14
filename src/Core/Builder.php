@@ -90,9 +90,12 @@ class Builder
 
         $schema = $this->database??$this->_audit->getWorkingDatabaseName();
 
-        $sql   = 'SHOW TABLES';
+        $sql   = 'SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = :schema AND TABLE_TYPE = :type';
         $query = $this->_db->prepare($sql);
-        $query->execute();
+        $query->execute([
+            ':schema' => $schema,
+            ':type'   => 'BASE TABLE',
+        ]);
         $tables = $query->fetchAll(\PDO::FETCH_NUM);
         $preLen = \strlen($this->config['prefix']);
 
