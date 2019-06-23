@@ -7,6 +7,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [3.7.7](https://github.com/KongHack/ORM/releases/tag/3.7.7)
+ - @GameCharmer Extra checks against empty in DirectSingle
+
+
+
 ## [3.7.6](https://github.com/KongHack/ORM/releases/tag/3.7.6)
  - @GameCharmer Switch from SHOW TABLES to selecting from INFORMATION_SCHEMA to only get BASE TABLES
 
