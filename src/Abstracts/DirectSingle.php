@@ -139,7 +139,11 @@ abstract class DirectSingle
                 }
             }
         }
-        if ($primary_id !== null && $primary_id !== 0) {
+        if (!empty($primary_id)
+            && $primary_id !== null
+            && $primary_id !== 0
+            && $primary_id !== ''
+        ) {
             if (defined($this->myName.'::SQL')) {
                 $sql = constant($this->myName.'::SQL');
             } else {
