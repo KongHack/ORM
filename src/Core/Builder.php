@@ -45,7 +45,10 @@ class Builder
         $this->database = $this->config['database'];
     }
 
-    public function run()
+    /**
+     * @param string|null $schema
+     */
+    public function run(string $schema = null)
     {
         $master = $this->config['prefix'].'_GCAuditMaster';
         if($this->database != null) {
@@ -88,7 +91,9 @@ class Builder
             $existing[$row['audit_schema']][$row['audit_table']] = $row;
         }
 
-        $schema = $this->database??$this->_audit->getWorkingDatabaseName();
+        if($schema == null) {
+            $schema = $this->database ?? $this->_audit->getWorkingDatabaseName();
+        }
 
         $sql   = 'SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = :schema AND TABLE_TYPE = :type';
         $query = $this->_db->prepare($sql);

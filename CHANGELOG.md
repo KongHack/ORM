@@ -7,6 +7,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [3.7.8](https://github.com/KongHack/ORM/releases/tag/3.7.8)
+ - @GameCharmer Update Builder to handle inbound schema name
+
+
+
 ## [3.7.7](https://github.com/KongHack/ORM/releases/tag/3.7.7)
  - @GameCharmer Extra checks against empty in DirectSingle
 
