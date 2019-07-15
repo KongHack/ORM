@@ -5,6 +5,18 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [3.8.0](https://github.com/KongHack/ORM/releases/tag/3.8.0)
+ - @GameCharmer Updated Audit to handle binary data in the audit
+ 
+ - symfony/polyfill-ctype installed in version v1.11.0  
+   Release notes: https://github.com/symfony/polyfill-ctype/releases/tag/v1.11.0  
+ 
+ - paragonie/random_compat installed in version v9.99.99  
+   Release notes: https://github.com/paragonie/random_compat/releases/tag/v9.99.99  
+ 
+ - ramsey/uuid installed in version 3.8.0  
+   Release notes: https://github.com/ramsey/uuid/releases/tag/3.8.0  
+
 
 
 ## [3.7.8](https://github.com/KongHack/ORM/releases/tag/3.7.8)

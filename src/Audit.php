@@ -2,6 +2,7 @@
 namespace GCWorld\ORM;
 
 use GCWorld\Common\Common;
+use Ramsey\Uuid\Uuid;
 
 /**
  * Class Audit
@@ -113,7 +114,7 @@ class Audit
         if($this->database != null) {
             $storeTable = $this->database.'.'.$storeTable;
         }
-        /** @var \GCWorld\Database\Database $db */
+        /** @var Database $db */
         $db = $this->common->getDatabase($this->connection);
 
         //Determine only things changed.
@@ -125,6 +126,19 @@ class Audit
             if ($after[$k] !== $v) {
                 $B[$k] = $v;
                 $A[$k] = $after[$k];
+
+                // Overrides
+
+                if(strpos($k,'_uuid')!==false && strlen($v)==16) {
+                    $B[$k] = Uuid::fromBytes($v)->toString();
+                } elseif(self::isBinary($v)) {
+                    $B[$k] = base64_encode($v);
+                }
+                if(strpos($k,'_uuid')!==false && strlen($after[$k])==16) {
+                    $A[$k] = Uuid::fromBytes($after[$k])->toString();
+                } elseif(self::isBinary($after[$k])) {
+                    $A[$k] = base64_encode($after[$k]);
+                }
             }
         }
 
@@ -204,7 +218,7 @@ class Audit
     /**
      * @return int
      */
-    private function determineMemberId()
+    protected function determineMemberId()
     {
         if(self::$overrideMemberId !== null) {
             return intval(self::$overrideMemberId);
@@ -239,5 +253,13 @@ class Audit
         }
 
         return 0;
+    }
+
+    public function isBinary($str)
+    {
+        if(mb_detect_encoding($str)) {
+            return false;
+        }
+        return preg_match('~[^\x20-\x7E\t\r\n]~', $str) > 0;
     }
 }

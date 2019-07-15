@@ -34,7 +34,7 @@ to convert your GCWorld_ORM.ini to a yml file.
 
 
 ### Version
-3.7.8
+3.8.0
 
 
 ###### Todo
