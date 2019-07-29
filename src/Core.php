@@ -76,9 +76,10 @@ class Core
         $query->execute();
         $fields = $query->fetchAll(PDO::FETCH_ASSOC);
 
-        $tableConfig = isset($this->config['tables'][$table_name]) ? $this->config['tables'][$table_name] : [];
-        $overrides   = isset($tableConfig['overrides']) ? $tableConfig['overrides'] : [];
-        $type_hints  = isset($tableConfig['type_hints']) ? $tableConfig['type_hints'] : [];
+        $tableConfig = $this->config['tables'][$table_name] ?? [];
+        $overrides   = $tableConfig['overrides'] ?? [];
+        $type_hints  = $tableConfig['type_hints'] ?? [];
+        $uuid_fields = $tableConfig['uuid_fields'] ?? [];
 
         if (!isset($overrides['constructor'])) {
             $overrides['constructor'] = 'public';
@@ -107,16 +108,20 @@ class Core
             if (strstr($row['Extra'], 'auto_increment')) {
                 $auto_increment = true;
             }
+            if(!in_array($uuid_fields,$row['Field'])
+               && strpos($row['Field'],'_uuid') !== false
+               && $row['Type'] == 'binary(16)'
+            ) {
+                $uuid_fields[] = $row['Field'];
+            }
         }
 
         $filename = $table_name.'.php';
         $fh       = $this->fileOpen($path.$filename);
 
-
         if (count($primaries) < 1) {
             return false;
         }
-
 
         $this->fileWrite($fh, '<?php'.PHP_EOL);
         $this->fileWrite($fh, 'namespace GCWorld\\ORM\\Generated;'.PHP_EOL.PHP_EOL);
@@ -126,6 +131,9 @@ class Core
             $this->fileWrite($fh, 'use \\GCWorld\\ORM\\FieldName;'.PHP_EOL);
         }
         */
+        if(count($uuid_fields) > 0) {
+            $this->fileWrite($fh,'use \\Ramsey\\Uuid\\Uuid;'.PHP_EOL);
+        }
 
         if (count($primaries) == 1) {
             // Single PK Classes get a simple set of functions.
@@ -213,12 +221,12 @@ class Core
             $this->fileWrite($fh, PHP_EOL);
             if ($this->type_hinting) {
                 $this->fileWrite($fh, '/**'.PHP_EOL);
-                $this->fileWrite($fh, '* @param int $primary_id'.PHP_EOL);
+                $this->fileWrite($fh, '* @param mixed $primary_id'.PHP_EOL);
                 $this->fileWrite($fh, '* @param array $defaults'.PHP_EOL);
                 $this->fileWrite($fh, '*/'.PHP_EOL);
                 $this->fileWrite(
                     $fh,
-                    $conVis.' function __construct(int $primary_id = null, array $defaults = null)'.PHP_EOL
+                    $conVis.' function __construct($primary_id = null, array $defaults = null)'.PHP_EOL
                 );
             } else {
                 $this->fileWrite($fh, '/**'.PHP_EOL);
@@ -226,6 +234,7 @@ class Core
                 $this->fileWrite($fh, '*/'.PHP_EOL);
                 $this->fileWrite($fh, $conVis.' function __construct($primary_id = null, $defaults = null)'.PHP_EOL);
             }
+
             $this->fileWrite($fh, '{'.PHP_EOL);
             $this->fileBump($fh);
             $this->fileWrite($fh, 'parent::__construct($primary_id, $defaults);'.PHP_EOL);
@@ -255,6 +264,7 @@ class Core
                     $return_type = $type_hints[$row['Field']];
                 }
 
+
                 $this->fileWrite($fh, '/**'.PHP_EOL);
                 $this->fileWrite($fh, '* @return '.$return_type.PHP_EOL);
                 $this->fileWrite($fh, '*/'.PHP_EOL);
@@ -263,6 +273,24 @@ class Core
                 $this->fileWrite($fh, 'return $this->get(\''.$row['Field']."');".PHP_EOL);
                 $this->fileDrop($fh);
                 $this->fileWrite($fh, "}".PHP_EOL.PHP_EOL);
+
+                if(in_array($row['Field'],$uuid_fields)) {
+                    $this->fileWrite($fh, '/**'.PHP_EOL);
+                    $this->fileWrite($fh, '* @return '.$return_type.PHP_EOL);
+                    $this->fileWrite($fh, '*/'.PHP_EOL);
+                    $this->fileWrite($fh, 'public function get'.$name.'AsString() {'.PHP_EOL);
+                    $this->fileBump($fh);
+                    $this->fileWrite($fh, '$value = $this->get(\''.$row['Field']."');".PHP_EOL);
+                    $this->fileWrite($fh, 'if(empty($value)) {'.PHP_EOL);
+                    $this->fileBump($fh);
+                    $this->fileWrite($fh,'return \'\';'.PHP_EOL);
+                    $this->fileDrop($fh);
+                    $this->fileWrite($fh,'}'.PHP_EOL);
+                    $this->fileWrite($fh, PHP_EOL);
+                    $this->fileWrite($fh,'return (Uuid::fromBytes($value))->toString();'.PHP_EOL);
+                    $this->fileDrop($fh);
+                    $this->fileWrite($fh, "}".PHP_EOL.PHP_EOL);
+                }
             }
 
             foreach ($fields as $i => $row) {
@@ -287,6 +315,19 @@ class Core
                 $setterVis = $overrides[$row['Field']] ?? 'public';
                 $this->fileWrite($fh, $setterVis.' function set'.$name.'('.$return_type.'$value) {'.PHP_EOL);
                 $this->fileBump($fh);
+                if(in_array($row['Field'],$uuid_fields)) {
+                    $now = <<<'NOW'
+if(strlen($value)==36) {
+    $value = Uuid::fromString($value)->getBytes();
+} elseif (strlen($value)!== 16) {
+    throw new UuidException('UUID must be a binary 16');
+}
+NOW;
+                    $tmp = explode(PHP_EOL,$now);
+                    foreach($tmp as $item) {
+                        $this->fileWrite($fh,$item);
+                    }
+                }
                 $this->fileWrite($fh, 'return $this->set(\''.$row['Field'].'\', $value);'.PHP_EOL);
                 $this->fileDrop($fh);
                 $this->fileWrite($fh, "}".PHP_EOL.PHP_EOL);
@@ -306,10 +347,15 @@ class Core
                 $fName = $row['Field'];
                 if ($this->get_set_funcs) {
                     $name = FieldName::getterName($fName);
+                    if(in_array($fName,$uuid_fields)) {
+                        $this->fileWrite($fh, "'$fName' => ".'$this->'.$name.'AsString(),'.PHP_EOL);
+                        continue;
+                    }
                     $this->fileWrite($fh, "'$fName' => ".'$this->'.$name.'(),'.PHP_EOL);
-                } else {
-                    $this->fileWrite($fh, "'$fName' => ".'$this->'.$fName.','.PHP_EOL);
+                    continue;
                 }
+                $this->fileWrite($fh, "'$fName' => ".'$this->'.$fName.','.PHP_EOL);
+
             }
             $this->fileDrop($fh);
             $this->fileWrite($fh, '];'.PHP_EOL);
@@ -380,6 +426,25 @@ class Core
                 $this->fileWrite($fh, 'return $this->'.$row['Field'].";".PHP_EOL);
                 $this->fileDrop($fh);
                 $this->fileWrite($fh, '}'.PHP_EOL.PHP_EOL);
+
+                if(in_array($row['Field'],$uuid_fields)) {
+                    $this->fileWrite($fh, '/**'.PHP_EOL);
+                    $this->fileWrite($fh, '* @return '.$return_type.PHP_EOL);
+                    $this->fileWrite($fh, '*/'.PHP_EOL);
+                    $this->fileWrite($fh, 'public function get'.$name.'AsString() {'.PHP_EOL);
+                    $this->fileBump($fh);
+                    $this->fileWrite($fh, '$value = $this->get(\''.$row['Field']."');".PHP_EOL);
+                    $this->fileWrite($fh, 'if(empty($value)) {'.PHP_EOL);
+                    $this->fileBump($fh);
+                    $this->fileWrite($fh,'return \'\';'.PHP_EOL);
+                    $this->fileDrop($fh);
+                    $this->fileWrite($fh,'}'.PHP_EOL);
+                    $this->fileWrite($fh, PHP_EOL);
+                    $this->fileWrite($fh,'return (Uuid::fromBytes($value))->toString();'.PHP_EOL);
+                    $this->fileDrop($fh);
+                    $this->fileWrite($fh, "}".PHP_EOL.PHP_EOL);
+                }
+
             }
             $this->fileWrite($fh, PHP_EOL);
         }

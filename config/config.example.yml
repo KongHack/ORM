@@ -22,3 +22,6 @@ tables:
         audit_ignore_fields:
             - example_field_1
             - example_field_2
+        uuid_fields:
+            - example_1_uuid
+            - example_2_uuid

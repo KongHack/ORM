@@ -249,15 +249,13 @@ abstract class DirectSingle
         $primary_name = constant($this->myName.'::CLASS_PRIMARY');
 
         if (count($this->_changed) > 0) {
-            /** @var \GCWorld\Database\Database $db */
-            $db     = $this->_db;
             $before = [];
             $after  = [];
 
             // ============================================================================== Audit
             if ($this->_audit) {
                 $sql   = "SELECT * FROM $table_name WHERE $primary_name = :primary";
-                $query = $db->prepare($sql);
+                $query = $this->_db->prepare($sql);
                 $query->execute([':primary' => $this->$primary_name]);
                 $before = $query->fetch(\PDO::FETCH_ASSOC);
                 $query->closeCursor();
@@ -272,8 +270,9 @@ abstract class DirectSingle
                 }
                 $params = [];
                 if (count($fields) > 1) {    // 1 being the primary key
-                    $sql = 'INSERT INTO '.$table_name.' ('.implode(', ', $fields).') VALUES (:'.implode(', :', $fields).')
-                        ON DUPLICATE KEY UPDATE ';
+                    $sql = 'INSERT INTO '.$table_name.
+                           ' ('.implode(', ', $fields).
+                           ') VALUES (:'.implode(', :', $fields).') ON DUPLICATE KEY UPDATE ';
                     foreach ($fields as $field) {
                         $params[':'.$field] = ($this->$field == null ? '' : $this->$field);
                         if ($field == $primary_name && !$auto_increment) {
@@ -290,10 +289,9 @@ abstract class DirectSingle
                     }
                     $query->closeCursor();
                 } else {
-                    $sql = 'INSERT IGNORE INTO '.$table_name.' ('.implode(', ', $fields).') VALUES (:'.implode(
-                        ', :',
-                        $fields
-                    ).')';
+                    $sql = 'INSERT IGNORE INTO '.$table_name.
+                           ' ('.implode(', ', $fields).') VALUES (:'.
+                           implode(', :', $fields).')';
                     foreach ($fields as $field) {
                         $params[':'.$field] = ($this->$field == null ? '' : $this->$field);
                         if ($field == $primary_name && !$auto_increment) {
@@ -320,7 +318,7 @@ abstract class DirectSingle
                 $sql  = substr($sql, 0, -2);   //Remove last ', ';
                 $sql .= ' WHERE '.$primary_name.' = :'.$primary_name;
 
-                $query = $db->prepare($sql);
+                $query = $this->_db->prepare($sql);
                 $query->execute($params);
                 $query->closeCursor();
             }
@@ -328,8 +326,10 @@ abstract class DirectSingle
             // ============================================================================== Audit
             if ($this->_audit) {
                 $sql   = 'SELECT * FROM '.$table_name.' WHERE '.$primary_name.' = :primary';
-                $query = $db->prepare($sql);
-                $query->execute([':primary' => $this->$primary_name]);
+                $query = $this->_db->prepare($sql);
+                $query->execute([
+                    ':primary' => $this->$primary_name
+                ]);
                 $after = $query->fetch(\PDO::FETCH_ASSOC);
                 $query->closeCursor();
 

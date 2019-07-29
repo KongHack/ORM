@@ -7,7 +7,7 @@ use GCWorld\ORM\ORMException;
 /**
  * Class DirectMulti
  * @package GCWorld\ORM\Abstracts
- * @todo: Complete auditing system
+ * @deprecated Do not use this thing anymore.  It's insanely out of date
  */
 abstract class DirectMulti
 {

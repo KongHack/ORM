@@ -34,7 +34,11 @@ class ComposerInstaller
         }
 
         if (!file_exists($ymlPath.self::CONFIG_FILE_NAME)) {
-            $example = file_get_contents($myDir.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.'config.example.yml');
+            $example = file_get_contents($myDir.
+                                         DIRECTORY_SEPARATOR.'..'.
+                                         DIRECTORY_SEPARATOR.'config'.
+                                         DIRECTORY_SEPARATOR.'config.example.yml'
+            );
             file_put_contents($ymlPath.self::CONFIG_FILE_NAME, $example);
         }
 
@@ -60,7 +64,11 @@ class ComposerInstaller
 
         $tmp = ['config_path' => $ymlPath];
 
-        file_put_contents($myDir.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.'config.yml', Yaml::dump($tmp,4));
+        file_put_contents($myDir.
+                          DIRECTORY_SEPARATOR.'..'.
+                          DIRECTORY_SEPARATOR.'config'.
+                          DIRECTORY_SEPARATOR.'config.yml', Yaml::dump($tmp,4)
+        );
 
         return true;
     }

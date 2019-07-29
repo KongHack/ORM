@@ -9,7 +9,7 @@ use GCWorld\Interfaces\Common;
  */
 class CommonLoader
 {
-    private static $common = null;
+    protected static $common = null;
 
     /**
      * Sets the common object
@@ -23,7 +23,6 @@ class CommonLoader
 
     /**
      * @return \GCWorld\Common\Common
-     * @throws \Exception
      */
     public static function getCommon()
     {

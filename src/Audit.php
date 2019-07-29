@@ -46,10 +46,10 @@ class Audit
     }
 
     /**
-     * @param int $memberId
+     * @param mixed $memberId
      * @return void
      */
-    public static function setOverrideMemberId(int $memberId)
+    public static function setOverrideMemberId($memberId)
     {
         self::$overrideMemberId = $memberId;
     }
@@ -67,13 +67,13 @@ class Audit
      * @param mixed  $primaryId
      * @param array  $before
      * @param array  $after
-     * @param int    $memberId
+     * @param mixed  $memberId
      * @return int|string
      * @throws \Exception
      */
-    public function storeLog(string $table, $primaryId, array $before, array $after, int $memberId = 0)
+    public function storeLog(string $table, $primaryId, array $before, array $after, $memberId = null)
     {
-        if ($memberId < 1) {
+        if ($memberId === null) {
             $memberId = $this->determineMemberId();
         }
 
@@ -150,7 +150,7 @@ class Audit
             $query = $db->prepare($sql);
             $query->execute([
                 ':pid'  => $primaryId,
-                ':mid'  => intval($memberId),
+                ':mid'  => $memberId,
                 ':uri'  => (isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : $this->getTopScript()),
                 ':logB' => json_encode($B),
                 ':logA' => json_encode($A)
@@ -232,12 +232,18 @@ class Audit
             return 0;
         }
 
+        if(method_exists($user,'getRealMemberUuid')) {
+            return $user->getRealMemberUuid();
+        }
+
         if (method_exists($user, 'getRealMemberId')) {
             return $user->getRealMemberId();
         }
+
         if (method_exists($user, 'getMemberId')) {
             return $user->getMemberId();
         }
+
         if (defined(get_class($user).'::CLASS_PRIMARY')) {
             $user_primary = constant(get_class($user).'::CLASS_PRIMARY');
             if (property_exists($user, $user_primary)) {
