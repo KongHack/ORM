@@ -45,8 +45,8 @@ class Core
                 $this->get_set_funcs = false;
             }
         }
-        if (isset($config['options']['var_visibility']) && in_array($config['options']['var_visibility'],
-                ['public', 'protected'])
+        if (isset($config['options']['var_visibility'])
+            && in_array($config['options']['var_visibility'],['public', 'protected'])
         ) {
             $this->var_visibility = $config['options']['var_visibility'];
         }
@@ -108,7 +108,7 @@ class Core
             if (strstr($row['Extra'], 'auto_increment')) {
                 $auto_increment = true;
             }
-            if(!in_array($uuid_fields,$row['Field'])
+            if(!in_array($row['Field'], $uuid_fields)
                && strpos($row['Field'],'_uuid') !== false
                && $row['Type'] == 'binary(16)'
             ) {
