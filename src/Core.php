@@ -80,6 +80,8 @@ class Core
         $overrides   = $tableConfig['overrides'] ?? [];
         $type_hints  = $tableConfig['type_hints'] ?? [];
         $uuid_fields = $tableConfig['uuid_fields'] ?? [];
+        $getIgnore   = $tableConfig['getter_ignore_fields'] ?? [];
+        $setIgnore   = $tableConfig['setter_ignore_fields'] ?? [];
 
         if (!isset($overrides['constructor'])) {
             $overrides['constructor'] = 'public';
@@ -255,6 +257,10 @@ class Core
 
         if ($this->get_set_funcs) {
             foreach ($fields as $i => $row) {
+                if(in_array($row['Field'],$getIgnore)) {
+                    continue;
+                }
+
                 $name        = FieldName::nameConversion($row['Field']);
                 $return_type = 'mixed';
                 if ($this->type_hinting) {
@@ -294,6 +300,10 @@ class Core
             }
 
             foreach ($fields as $i => $row) {
+                if(in_array($row['Field'],$setIgnore)) {
+                    continue;
+                }
+
                 $name        = FieldName::nameConversion($row['Field']);
                 $return_type = 'mixed';
                 if ($this->type_hinting) {
