@@ -325,7 +325,7 @@ if(strlen($value)==36) {
 NOW;
                     $tmp = explode(PHP_EOL,$now);
                     foreach($tmp as $item) {
-                        $this->fileWrite($fh,$item);
+                        $this->fileWrite($fh,$item.PHP_EOL);
                     }
                 }
                 $this->fileWrite($fh, 'return $this->set(\''.$row['Field'].'\', $value);'.PHP_EOL);
