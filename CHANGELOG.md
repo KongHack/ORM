@@ -10,6 +10,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
  - @GameCharmer support for binary(16) uuid fields
  - @GameCharmer override support for uuid fields
  - @GameCharmer override support to ignore getters and setters (respectively)
+ - @GameCharmer removed ini to yml contrib file
+ - @GameCharmer Deprecated DirectMulti.  This one is drastically out of date and will be removed in 5.0.0
 
 
 

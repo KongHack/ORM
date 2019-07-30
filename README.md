@@ -11,11 +11,6 @@
 
 The GCWorld ORM builds extensible classes used for selecting and updating objects.
 
-### WARNING
-If you are using a version prior to 3.6, please use the convert ini to yml file in the contrib folder
-to convert your GCWorld_ORM.ini to a yml file.
-
-
 ##### Features include
 
   - Fully formed classes containing all database fields.
@@ -34,12 +29,11 @@ to convert your GCWorld_ORM.ini to a yml file.
 
 
 ### Version
-3.8.0
+4.0.0
 
 
 ###### Todo
-- Upgrade audit system to function in the DirectDBMultiClass
-- Upgrade audit system to handle non-integer primary keys
+- Upgrade the audit system to handle BINARY(16) UUIDs in place of member_id BIGINT(20) on config option
 - Add more docblocks to generated scripts
 
 
