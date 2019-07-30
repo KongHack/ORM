@@ -75,18 +75,13 @@ class Core
         $query = $this->master_common->getDatabase()->prepare($sql);
         $query->execute();
         $fields = $query->fetchAll(PDO::FETCH_ASSOC);
+        $config = $this->config['tables'][$table_name] ?? [];
 
-        $tableConfig = $this->config['tables'][$table_name] ?? [];
-        $overrides   = $tableConfig['overrides'] ?? [];
-        $type_hints  = $tableConfig['type_hints'] ?? [];
-        $uuid_fields = $tableConfig['uuid_fields'] ?? [];
-        $getIgnore   = $tableConfig['getter_ignore_fields'] ?? [];
-        $setIgnore   = $tableConfig['setter_ignore_fields'] ?? [];
+        $config['constructor']  = $config['constructor'] ?? 'public';
+        $config['audit_ignore'] = $config['audit_ignore'] ?? false;
+        $config['fields']       = $config['fields'] ?? [];
 
-        if (!isset($overrides['constructor'])) {
-            $overrides['constructor'] = 'public';
-        }
-
+        $uuid_fields    = false;
         $auto_increment = false;
         $primaries      = [];
         $max_var_name   = 0;
@@ -97,6 +92,7 @@ class Core
             mkdir($path, 0755, true);
         }
 
+        $default = Config::getDefaultFieldConfig();
         foreach ($fields as $i => $row) {
             if (strstr($row['Key'], 'PRI')) {
                 $primaries[] = $row['Field'];
@@ -110,11 +106,27 @@ class Core
             if (strstr($row['Extra'], 'auto_increment')) {
                 $auto_increment = true;
             }
-            if(!in_array($row['Field'], $uuid_fields)
-               && strpos($row['Field'],'_uuid') !== false
+            if(!isset($config['fields'][$row['Field']])) {
+                $config['fields'][$row['Field']] = $default;
+            } else {
+                foreach($default as $k => $v) {
+                    if(!isset($config['fields'][$row['Field']][$k])) {
+                        $config['fields'][$row['Field']][$k] = $v;
+                    }
+                }
+            }
+
+            if(strpos($row['Field'],'_uuid') !== false
                && $row['Type'] == 'binary(16)'
             ) {
-                $uuid_fields[] = $row['Field'];
+                $config['fields'][$row['Field']]['uuid_field'] = true;
+            }
+
+            if(!$uuid_fields
+               && isset($config['fields'][$row['Field']]['uuid_field'])
+               && $config['fields'][$row['Field']]['uuid_field']
+            ) {
+                $uuid_fields = true;
             }
         }
 
@@ -133,7 +145,8 @@ class Core
             $this->fileWrite($fh, 'use \\GCWorld\\ORM\\FieldName;'.PHP_EOL);
         }
         */
-        if(count($uuid_fields) > 0) {
+
+        if($uuid_fields) {
             $this->fileWrite($fh,'use \\Ramsey\\Uuid\\Uuid;'.PHP_EOL);
         }
 
@@ -212,13 +225,15 @@ class Core
         $this->fileBump($fh);
 
         foreach ($fields as $i => $row) {
-            $this->fileWrite($fh, str_pad("'".$row['Field']."'",$max_var_name + 2,' ')." => '".$row['Type'].($row['Comment'] != '' ? ' - '.$row['Comment'] : '')."',".PHP_EOL);
+            $write = str_pad("'".$row['Field']."'",$max_var_name + 2,' ').
+                 " => '".$row['Type'].($row['Comment'] != '' ? ' - '.
+                 $row['Comment'] : '')."',".PHP_EOL;
+            $this->fileWrite($fh, $write);
         }
         $this->fileDrop($fh);
         $this->fileWrite($fh, "];".PHP_EOL);
 
         // CONSTRUCTOR!
-        $conVis = $overrides['constructor'];
         if (count($primaries) == 1) {
             $this->fileWrite($fh, PHP_EOL);
             if ($this->type_hinting) {
@@ -226,15 +241,14 @@ class Core
                 $this->fileWrite($fh, '* @param mixed $primary_id'.PHP_EOL);
                 $this->fileWrite($fh, '* @param array $defaults'.PHP_EOL);
                 $this->fileWrite($fh, '*/'.PHP_EOL);
-                $this->fileWrite(
-                    $fh,
-                    $conVis.' function __construct($primary_id = null, array $defaults = null)'.PHP_EOL
-                );
+                $this->fileWrite($fh,$config['constructor'].
+                                     ' function __construct($primary_id = null, array $defaults = null)'.PHP_EOL);
             } else {
                 $this->fileWrite($fh, '/**'.PHP_EOL);
                 $this->fileWrite($fh, '* @param mixed ...$keys'.PHP_EOL);
                 $this->fileWrite($fh, '*/'.PHP_EOL);
-                $this->fileWrite($fh, $conVis.' function __construct($primary_id = null, $defaults = null)'.PHP_EOL);
+                $this->fileWrite($fh, $config['constructor'].
+                                      ' function __construct($primary_id = null, $defaults = null)'.PHP_EOL);
             }
 
             $this->fileWrite($fh, '{'.PHP_EOL);
@@ -247,7 +261,7 @@ class Core
             $this->fileWrite($fh, '/**'.PHP_EOL);
             $this->fileWrite($fh, '* @param mixed ...$keys'.PHP_EOL);
             $this->fileWrite($fh, '*/'.PHP_EOL);
-            $this->fileWrite($fh, $conVis.' function __construct(...$keys)'.PHP_EOL);
+            $this->fileWrite($fh, $config['constructor'].' function __construct(...$keys)'.PHP_EOL);
             $this->fileWrite($fh, '{'.PHP_EOL);
             $this->fileBump($fh);
             $this->fileWrite($fh, 'parent::__construct(...$keys);'.PHP_EOL);
@@ -257,19 +271,19 @@ class Core
 
         if ($this->get_set_funcs) {
             foreach ($fields as $i => $row) {
-                if(in_array($row['Field'],$getIgnore)) {
+                $fieldConfig = $config['fields'][$row['Field']];
+                if($fieldConfig['getter_ignore']) {
                     continue;
                 }
 
                 $name        = FieldName::nameConversion($row['Field']);
                 $return_type = 'mixed';
-                if ($this->type_hinting) {
+
+                if ($fieldConfig['type_hint'] != '') {
+                    $return_type = $fieldConfig['type_hint'];
+                } elseif ($this->type_hinting) {
                     $return_type = $this->defaultReturn($row['Type']);
                 }
-                if (array_key_exists($row['Field'], $type_hints)) {
-                    $return_type = $type_hints[$row['Field']];
-                }
-
 
                 $this->fileWrite($fh, '/**'.PHP_EOL);
                 $this->fileWrite($fh, '* @return '.$return_type.PHP_EOL);
@@ -280,7 +294,7 @@ class Core
                 $this->fileDrop($fh);
                 $this->fileWrite($fh, "}".PHP_EOL.PHP_EOL);
 
-                if(in_array($row['Field'],$uuid_fields)) {
+                if($fieldConfig['uuid_field']) {
                     $this->fileWrite($fh, '/**'.PHP_EOL);
                     $this->fileWrite($fh, '* @return '.$return_type.PHP_EOL);
                     $this->fileWrite($fh, '*/'.PHP_EOL);
@@ -300,17 +314,18 @@ class Core
             }
 
             foreach ($fields as $i => $row) {
-                if(in_array($row['Field'],$setIgnore)) {
+                $fieldConfig = $config['fields'][$row['Field']];
+                if($fieldConfig['setter_ignore']) {
                     continue;
                 }
 
                 $name        = FieldName::nameConversion($row['Field']);
                 $return_type = 'mixed';
-                if ($this->type_hinting) {
+
+                if ($fieldConfig['type_hint'] != '') {
+                    $return_type = $fieldConfig['type_hint'];
+                } elseif ($this->type_hinting) {
                     $return_type = $this->defaultReturn($row['Type']);
-                }
-                if (array_key_exists($row['Field'], $type_hints)) {
-                    $return_type = $type_hints[$row['Field']];
                 }
 
                 $this->fileWrite($fh, '/**'.PHP_EOL);
@@ -322,10 +337,10 @@ class Core
                 } else {
                     $return_type .= ' ';
                 }
-                $setterVis = $overrides[$row['Field']] ?? 'public';
+                $setterVis = $fieldConfig['visibility']??'public';
                 $this->fileWrite($fh, $setterVis.' function set'.$name.'('.$return_type.'$value) {'.PHP_EOL);
                 $this->fileBump($fh);
-                if(in_array($row['Field'],$uuid_fields)) {
+                if($fieldConfig['uuid_field']) {
                     $now = <<<'NOW'
 if(strlen($value)==36) {
     $value = Uuid::fromString($value)->getBytes();
@@ -354,10 +369,11 @@ NOW;
             $this->fileWrite($fh, 'return ['.PHP_EOL);
             $this->fileBump($fh);
             foreach ($fields as $i => $row) {
-                $fName = $row['Field'];
+                $fName       = $row['Field'];
+                $fieldConfig = $config['fields'][$fName] ?? Config::getDefaultFieldConfig();
                 if ($this->get_set_funcs) {
                     $name = FieldName::getterName($fName);
-                    if(in_array($fName,$uuid_fields)) {
+                    if($fieldConfig['uuid_field']) {
                         $this->fileWrite($fh, "'$fName' => ".'$this->'.$name.'AsString(),'.PHP_EOL);
                         continue;
                     }
@@ -419,13 +435,18 @@ NOW;
                 if (in_array($row['Field'], $primaries)) {
                     continue;
                 }
+                $fieldConfig = $config['fields'][$row['Field']] ?? Config::getDefaultFieldConfig();
+                if($fieldConfig['getter_ignore']) {
+                    continue;
+                }
+
                 $name        = FieldName::nameConversion($row['Field']);
                 $return_type = 'mixed';
-                if ($this->type_hinting) {
+
+                if ($fieldConfig['type_hint'] != '') {
+                    $return_type = $fieldConfig['type_hint'];
+                } elseif ($this->type_hinting) {
                     $return_type = $this->defaultReturn($row['Type']);
-                }
-                if (array_key_exists($row['Field'], $type_hints)) {
-                    $return_type = $type_hints[$row['Field']];
                 }
 
                 $this->fileWrite($fh, '/**'.PHP_EOL);
@@ -437,7 +458,7 @@ NOW;
                 $this->fileDrop($fh);
                 $this->fileWrite($fh, '}'.PHP_EOL.PHP_EOL);
 
-                if(in_array($row['Field'],$uuid_fields)) {
+                if($fieldConfig['uuid_field']) {
                     $this->fileWrite($fh, '/**'.PHP_EOL);
                     $this->fileWrite($fh, '* @return '.$return_type.PHP_EOL);
                     $this->fileWrite($fh, '*/'.PHP_EOL);

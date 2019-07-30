@@ -1,3 +1,4 @@
+version: 4
 general:
     common: \Your\Fully\Qualified\Class\Name\Here
     user: \Your\Fully\Qualified\Class\Name\Here
@@ -12,23 +13,19 @@ options:
 tables:
     EXAMPLE_TABLE:
         audit_ignore: false
-        overrides:
-            constructor: protected
-            field_name: protected
-        type_hints:
-            field1: mixed
-            field2: string
-            field3: bool
-        audit_ignore_fields:
-            - example_field_1
-            - example_field_2
-        uuid_fields:
-            - example_1_uuid
-            - example_2_uuid
-        getter_ignore_fields:
-            - example_field_1
-            - example_field_2
-        setter_ignore_fields:
-            - example_field_1
-            - example_field_2
-            -
+        constructor: protected
+        fields:
+            example_field_1:
+                visibility: protected
+                type_hint: string
+                audit_ignore: true
+                uuid_field: false
+                getter_ignore: true
+                setter_ignore: true
+            example_field_2:
+                visibility: protected
+                type_hint: string
+                audit_ignore: true
+                uuid_field: false
+                getter_ignore: true
+                setter_ignore: true
