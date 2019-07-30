@@ -76,61 +76,60 @@ class Config
             $config['version'] = 4;
             $config['sort']    = true;
 
-            $visibility           = [];
-            $audit_ignore_fields  = [];
-            $getter_ignore_fields = [];
-            $setter_ignore_fields = [];
-            $type_hints           = [];
-            $uuid_fields          = [];
+            foreach($config['tables'] as &$table) {
+                $visibility           = [];
+                $audit_ignore_fields  = [];
+                $getter_ignore_fields = [];
+                $setter_ignore_fields = [];
+                $type_hints           = [];
+                $uuid_fields          = [];
+                $fields               = [];
 
-            $tables = &$config['tables'];
-            foreach($tables as $table) {
-                $fields = [];
-                $sub    = &$config['tables'][$table];
-                if (isset($sub['overrides'])) {
-                    if (isset($sub['overrides']['constructor'])) {
-                        $sub['constructor'] = $sub['overrides']['constructor'];
-                        unset($sub['overrides']['constructor']);
+                if (isset($table['overrides'])) {
+                    if (isset($table['overrides']['constructor'])) {
+                        $table['constructor'] = $table['overrides']['constructor'];
+                        unset($table['overrides']['constructor']);
                     }
-                    foreach ($sub['overrides'] as $k => $v) {
+                    foreach ($table['overrides'] as $k => $v) {
                         $visibility[$k] = $v;
                         $fields[]       = $k;
                     }
+                    unset($table['overrides']);
                 }
-                if (isset($sub['audit_ignore_fields'])) {
-                    foreach ($sub['audit_ignore_fields'] as $field) {
+                if (isset($table['audit_ignore_fields'])) {
+                    foreach ($table['audit_ignore_fields'] as $field) {
                         $audit_ignore_fields[] = $field;
                         $fields[]              = $field;
                     }
-                    unset($sub['audit_ignore_fields']);
+                    unset($table['audit_ignore_fields']);
                 }
-                if (isset($sub['type_hints'])) {
-                    foreach ($sub['type_hints'] as $k => $v) {
+                if (isset($table['type_hints'])) {
+                    foreach ($table['type_hints'] as $k => $v) {
                         $type_hints[$k] = $v;
                         $fields[]       = $k;
                     }
-                    unset($sub['type_hints']);
+                    unset($table['type_hints']);
                 }
-                if(isset($sub['getter_ignore_fields'])) {
-                    foreach($sub['getter_ignore_fields'] as $field) {
+                if(isset($table['getter_ignore_fields'])) {
+                    foreach($table['getter_ignore_fields'] as $field) {
                         $getter_ignore_fields[] = $field;
                         $fields[]               = $field;
                     }
-                    unset($sub['getter_ignore_fields']);
+                    unset($table['getter_ignore_fields']);
                 }
-                if(isset($sub['setter_ignore_fields'])) {
-                    foreach($sub['setter_ignore_fields'] as $field) {
+                if(isset($table['setter_ignore_fields'])) {
+                    foreach($table['setter_ignore_fields'] as $field) {
                         $setter_ignore_fields[] = $field;
                         $fields[]               = $field;
                     }
-                    unset($sub['setter_ignore_fields']);
+                    unset($table['setter_ignore_fields']);
                 }
-                if(isset($sub['uuid_fields'])) {
-                    foreach($sub['uuid_fields'] as $field) {
+                if(isset($table['uuid_fields'])) {
+                    foreach($table['uuid_fields'] as $field) {
                         $uuid_fields[] = $field;
                         $fields[]      = $field;
                     }
-                    unset($sub['uuid_fields']);
+                    unset($table['uuid_fields']);
                 }
 
                 $fConfig = [];
@@ -156,6 +155,12 @@ class Config
                         $fConfig[$field]['uuid_fields'] = true;
                     }
                 }
+
+                if(count($fConfig) > 0) {
+                    $table['fields'] = $fConfig;
+                } else {
+                    unset($table['fields']);
+                }
             }
         }
     }
@@ -171,9 +176,9 @@ class Config
             ksort($config['tables']);
         }
         foreach($config['tables'] as &$table) {
-            if(isset($table['fields'])) {
+            if(isset($table['fields']) && is_array($table['fields'])) {
                 ksort($table['fields']);
-                foreach($config['fields'] as &$field) {
+                foreach($table['fields'] as &$field) {
                     if(is_array($field)) {
                         ksort($field);
                     }
