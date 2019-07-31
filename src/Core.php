@@ -94,6 +94,12 @@ class Core
 
         $default = Config::getDefaultFieldConfig();
         foreach ($fields as $i => $row) {
+            // Do not include virtual fields in the system
+            if(strpos($row['Extra'],'VIRTUAL')!==false) {
+                unset($fields[$i]);
+                continue;
+            }
+
             if (strstr($row['Key'], 'PRI')) {
                 $primaries[] = $row['Field'];
             }

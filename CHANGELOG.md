@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [4.0.1](https://github.com/KongHack/ORM/releases/tag/4.0.1)
+ - @GameCharmer Core now excludes VIRTUAL columns until I can figure out what to do with them
+
+
+
 ## [4.0.0](https://github.com/KongHack/ORM/releases/tag/4.0.0)
  - @GameCharmer Brand new config layout with built in upgrade system!
  - @GameCharmer support for binary(16) uuid fields
