@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [4.0.2](https://github.com/KongHack/ORM/releases/tag/4.0.2)
+ - @GameCharmer Fix namespace usage with UuidException
+
+
+
 ## [4.0.1](https://github.com/KongHack/ORM/releases/tag/4.0.1)
  - @GameCharmer Core now excludes VIRTUAL columns until I can figure out what to do with them
 
