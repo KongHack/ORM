@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [4.0.3](https://github.com/KongHack/ORM/releases/tag/4.0.3)
+ - @GameCharmer Handle setting UUID to blank
+
+
+
 ## [4.0.2](https://github.com/KongHack/ORM/releases/tag/4.0.2)
  - @GameCharmer Fix namespace usage with UuidException
 
