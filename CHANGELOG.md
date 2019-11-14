@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [4.0.4](https://github.com/KongHack/ORM/releases/tag/4.0.4)
+ - @GameCharmer Fix `_changed` functionality so that it clears post-save in all cases
+
+
+
 ## [4.0.3](https://github.com/KongHack/ORM/releases/tag/4.0.3)
  - @GameCharmer Handle setting UUID to blank
 

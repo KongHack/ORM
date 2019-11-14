@@ -343,6 +343,9 @@ abstract class DirectSingle
 
             $this->purgeCache();
 
+            // Now that we have saved everything, there are no remaining changes
+            $this->_changed = [];
+
             return true;
         }
 
