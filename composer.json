@@ -8,20 +8,20 @@
     }
   ],
   "require": {
-    "php": ">=7.1.0",
+    "php": ">=7.2.5",
     "ext-json": "*",
     "ext-pdo": "*",
-    "gcworld/common":"~2.2",
+    "gcworld/common":"^2.5",
     "gcworld/interfaces": ">=3.1.1",
     "gcworld/database": "^2.3.4",
     "composer/composer": "^1.1",
     "composer/installers": "^1.0",
-    "symfony/yaml": "^3.3",
+    "symfony/yaml": "^5.0",
     "ramsey/uuid": "^3.8"
   },
   "require-dev": {
     "gcworld/code_sniffer_contrib": "^1.0",
-    "phpstan/phpstan": "^0.6.4",
+    "phpstan/phpstan": "^0.12.7",
     "phpmd/phpmd": "^2.6"
   },
   "autoload": {
