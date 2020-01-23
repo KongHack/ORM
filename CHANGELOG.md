@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [4.1.1](https://github.com/KongHack/ORM/releases/tag/4.1.1)
+ - @GameCharmer Try/Catch for unserialize exceptions
+
+
+
 ## [4.1.0](https://github.com/KongHack/ORM/releases/tag/4.1.0)
  - @GameCharmer Convert from json_encode to serialize to handle binary data (like UUIDs)
 
