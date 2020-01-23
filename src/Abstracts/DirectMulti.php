@@ -87,9 +87,10 @@ abstract class DirectMulti
                                 $this->$k = $v;
                             }
                         }
+                        return;
                     }
-
-                    return;
+                    // If we made it here, the blob is garbage, delete it
+                    $redis->hDel($this->myName, 'key_'.implode('-', $keys));
                 }
             }
 

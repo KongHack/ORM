@@ -142,6 +142,8 @@ abstract class DirectSingle
                         }
                         return;
                     }
+                    // If we made it here, the blob is garbage, delete it
+                    $this->_cache->hDel($this->myName, 'key_'.$primary_id);
                 }
             }
         }

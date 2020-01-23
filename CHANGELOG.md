@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [4.1.2](https://github.com/KongHack/ORM/releases/tag/4.1.2)
+ - @GameCharmer delete keys that return bad data
+
+
+
 ## [4.1.1](https://github.com/KongHack/ORM/releases/tag/4.1.1)
  - @GameCharmer Try/Catch for unserialize exceptions
 
