@@ -125,13 +125,15 @@ abstract class DirectSingle
             && $primary_id !== ''
         ) {
             if ($this->_cache) {
-                $json = $this->_cache->hGet($this->myName, 'key_'.$primary_id);
-                if (strlen($json) > 2) {
-                    $data       = json_decode($json, true);
-                    $properties = array_keys(get_object_vars($this));
-                    foreach ($data as $k => $v) {
-                        if (in_array($k, $properties)) {
-                            $this->$k = $v;
+                $blob = $this->_cache->hGet($this->myName, 'key_'.$primary_id);
+                if ($blob) {
+                    $data = @unserialize($blob);
+                    if($data !== null) {
+                        $properties = array_keys(get_object_vars($this));
+                        foreach ($data as $k => $v) {
+                            if (in_array($k, $properties)) {
+                                $this->$k = $v;
+                            }
                         }
                     }
 
@@ -171,7 +173,7 @@ abstract class DirectSingle
                         $redis = $this->_common->getCache($this->_cacheName);
                     }
                     if ($redis && $primary_id > 0) {
-                        $redis->hSet($this->myName, 'key_'.$primary_id, json_encode($defaults));
+                        $redis->hSet($this->myName, 'key_'.$primary_id, serialize($defaults));
                     }
                 }
             }
@@ -368,7 +370,7 @@ abstract class DirectSingle
                 foreach ($fields as $field) {
                     $data[$field] = $this->$field;
                 }
-                $this->_cache->hSet($this->myName, 'key_'.$this->$primary_name, json_encode($data));
+                $this->_cache->hSet($this->myName, 'key_'.$this->$primary_name, serialize($data));
             }
         }
     }

@@ -72,13 +72,15 @@ abstract class DirectMulti
 
             $redis = $this->_common->getCache();
             if ($redis) {
-                $json = $redis->hGet($this->myName, 'key_'.implode('-', $keys));
-                if (strlen($json) > 2) {
-                    $data       = json_decode($json, true);
-                    $properties = array_keys(get_object_vars($this));
-                    foreach ($data as $k => $v) {
-                        if (in_array($k, $properties)) {
-                            $this->$k = $v;
+                $blob = $redis->hGet($this->myName, 'key_'.implode('-', $keys));
+                if ($blob) {
+                    $data = @unserialize($blob);
+                    if($data !== null) {
+                        $properties = array_keys(get_object_vars($this));
+                        foreach ($data as $k => $v) {
+                            if (in_array($k, $properties)) {
+                                $this->$k = $v;
+                            }
                         }
                     }
 
@@ -105,7 +107,7 @@ abstract class DirectMulti
                 $redis = $this->_common->getCache();
             }
             if ($redis) {
-                $redis->hSet($this->myName, 'key_'.implode('-', $keys), json_encode($data));
+                $redis->hSet($this->myName, 'key_'.implode('-', $keys), serialize($data));
             }
             $properties = array_keys(get_object_vars($this));
             foreach ($data as $k => $v) {
