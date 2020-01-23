@@ -135,9 +135,8 @@ abstract class DirectSingle
                                 $this->$k = $v;
                             }
                         }
+                        return;
                     }
-
-                    return;
                 }
             }
         }
