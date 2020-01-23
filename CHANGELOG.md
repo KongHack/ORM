@@ -5,6 +5,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [4.2.2](https://github.com/KongHack/ORM/releases/tag/4.2.2)
+ - @GameCharmer Support for YAML 4 - 5 due to composer meltdown
+
+
 ## [4.2.1](https://github.com/KongHack/ORM/releases/tag/4.2.1)
  - @GameCharmer Support for YAML 4 or 5
 
