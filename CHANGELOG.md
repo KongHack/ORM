@@ -5,6 +5,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [4.2.3](https://github.com/KongHack/ORM/releases/tag/4.2.3)
+ - @GameCharmer Downgrade to YAML 4 due to composer "Something's changed, looking at all rules again" bug
+ 
+ 
 ## [4.2.2](https://github.com/KongHack/ORM/releases/tag/4.2.2)
  - @GameCharmer Support for YAML 4 - 5 due to composer meltdown
 
