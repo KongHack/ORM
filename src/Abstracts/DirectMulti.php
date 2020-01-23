@@ -1,6 +1,7 @@
 <?php
 namespace GCWorld\ORM\Abstracts;
 
+use Exception;
 use GCWorld\ORM\CommonLoader;
 use GCWorld\ORM\ORMException;
 
@@ -74,7 +75,11 @@ abstract class DirectMulti
             if ($redis) {
                 $blob = $redis->hGet($this->myName, 'key_'.implode('-', $keys));
                 if ($blob) {
-                    $data = @unserialize($blob);
+                    try {
+                        $data = @unserialize($blob);
+                    } catch(Exception $e) {
+                        $data = null;
+                    }
                     if($data !== null) {
                         $properties = array_keys(get_object_vars($this));
                         foreach ($data as $k => $v) {

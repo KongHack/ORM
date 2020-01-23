@@ -1,6 +1,7 @@
 <?php
 namespace GCWorld\ORM\Abstracts;
 
+use Exception;
 use GCWorld\ORM\Audit;
 use GCWorld\ORM\CommonLoader;
 use GCWorld\ORM\Config;
@@ -127,7 +128,11 @@ abstract class DirectSingle
             if ($this->_cache) {
                 $blob = $this->_cache->hGet($this->myName, 'key_'.$primary_id);
                 if ($blob) {
-                    $data = @unserialize($blob);
+                    try {
+                        $data = @unserialize($blob);
+                    } catch(Exception $e) {
+                        $data = null;
+                    }
                     if($data !== null) {
                         $properties = array_keys(get_object_vars($this));
                         foreach ($data as $k => $v) {
