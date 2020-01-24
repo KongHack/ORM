@@ -127,7 +127,7 @@ abstract class DirectSingle
         ) {
             if ($this->_cache) {
                 $blob = $this->_cache->hGet($this->myName, 'key_'.$primary_id);
-                if ($blob) {
+                if ($blob !== false) {
                     try {
                         $data = @unserialize($blob);
                     } catch(Exception $e) {
@@ -183,7 +183,7 @@ abstract class DirectSingle
                         $redis = $this->_common->getCache($this->_cacheName);
                     }
                     if ($redis && $primary_id > 0) {
-                        $redis->hSet($this->myName, 'key_'.$primary_id, serialize($defaults));
+                        $this->setCacheData();
                     }
                 }
             }
@@ -375,14 +375,23 @@ abstract class DirectSingle
             $this->_cache->hDel($this->myName, 'key_'.$this->$primary_name);
 
             if ($this->_canCacheAfterPurge) {
-                $fields = array_keys(self::$dbInfo);
-                $data   = [];
-                foreach ($fields as $field) {
-                    $data[$field] = $this->$field;
-                }
-                $this->_cache->hSet($this->myName, 'key_'.$this->$primary_name, serialize($data));
+                $this->setCacheData();
             }
         }
+    }
+
+    /**
+     * @return void
+     */
+    protected function setCacheData()
+    {
+        $primary = constant($this->myName.'::CLASS_PRIMARY');
+        $fields  = array_keys(self::$dbInfo);
+        $data    = [];
+        foreach ($fields as $field) {
+            $data[$field] = $this->$field;
+        }
+        $this->_cache->hSet($this->myName, 'key_'.$this->$primary, serialize($data));
     }
 
     /**
