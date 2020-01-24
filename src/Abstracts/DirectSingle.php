@@ -102,22 +102,28 @@ abstract class DirectSingle
         $primary_name  = constant($this->myName.'::CLASS_PRIMARY');
         $this->_common = CommonLoader::getCommon();
 
+        $cLogger->info('ORM: DS: '.$table_name, func_get_args());
+
         if (!is_object($this->_common)) {
+            $cLogger->info('ORM: DS: '.$table_name.': COMMON NOT FOUND', debug_backtrace());
             debug_print_backtrace();
             die('COMMON NOT FOUND<br>'.$table_name.'<br>'.$primary_name.'<br>'.$primary_id);
         }
 
         $this->_db = $this->_common->getDatabase($this->_dbName);
         if (!is_object($this->_db)) {
+            $cLogger->info('ORM: DS: '.$table_name.': DB NOT DEFINED', debug_backtrace());
             debug_print_backtrace();
             die('Database Not Defined<br>'.$table_name.'<br>'.$primary_name.'<br>'.$primary_id);
         }
         $this->_cache = $this->_common->getCache($this->_cacheName);
 
         if ($primary_id !== null && !is_scalar($primary_id)) {
+            $cLogger->info('ORM: DS: '.$table_name.': Primary ID is not scalar', debug_backtrace());
             throw new ORMException('Primary ID is not scalar');
         }
         if ($defaults !== null && !is_array($defaults)) {
+            $cLogger->info('ORM: DS: '.$table_name.': Defaults Array is not an array', debug_backtrace());
             throw new ORMException('Defaults Array is not an array');
         }
 
@@ -129,30 +135,34 @@ abstract class DirectSingle
             && $primary_id !== ''
         ) {
             $blob = $this->_cache->hGet($this->myName, 'key_'.$primary_id);
+            $cLogger->info('ORM: DS: '.$table_name.': Cache1: Blob Acquired', [
+                'key'  => $this->myName,
+                'hash' => 'key_'.$primary_id,
+                'blob' => $blob
+            ]);
             if ($blob !== false) {
-                $cLogger->info('ORM: DS: Cache1: Blob is not false, '.$table_name);
+                $cLogger->info('ORM: DS: '.$table_name.': Cache1: Blob is not false');
                 try {
                     $data = @unserialize($blob);
                 } catch(Exception $e) {
                     $data = null;
                 }
                 if($data !== null && is_array($data) && !empty($data)) {
-                    $cLogger->info('ORM: DS: Cache1: Data is Good, '.$table_name);
+                    $cLogger->info('ORM: DS: '.$table_name.': Cache1: Data is Good');
 
                     $fields = array_keys(static::$dbInfo);
                     if(count($fields) == count($data)) {
-                        $cLogger->info('ORM: DS: Cache1: Count Matches, '.$table_name);
+                        $cLogger->info('ORM: DS: '.$table_name.': Cache1: Count Matches');
                         //$properties = array_keys(get_object_vars($this));
                         foreach ($data as $k => $v) {
                             if (in_array($k, $fields)) {
                                 $this->$k = $v;
                             }
                         }
-
+                        $cLogger->info('ORM: DS: '.$table_name.': Cache1: All Good!');
                         return;
                     }
-                    $cLogger->info('ORM: DS: Cache1: Count does not match, '.$table_name);
-                    $cLogger->debug('ORM: DS: Cache1: Count does not match, ', [
+                    $cLogger->info('ORM: DS: '.$table_name.': Cache1: Count does not match', [
                         $fields,
                         $data,
                     ]);
@@ -160,8 +170,20 @@ abstract class DirectSingle
                 // If we made it here, the blob is garbage, delete it
                 $this->_cache->hDel($this->myName, 'key_'.$primary_id);
             }
-
+        } else {
+            $cLogger->info('ORM: DS: Cache1: '.$table_name.': Bad Options',[
+                $this->_canCache,
+                $this->_cache !== null,
+                $this->_cache !== false,
+                !empty($primary_id),
+                $primary_id !== null,
+                $primary_id !== 0,
+                $primary_id !== '',
+                $primary_id,
+            ]);
         }
+
+        $cLogger->info('ORM: DS: Cache1: '.$table_name.': Exiting Routine');
         if (!empty($primary_id)
             && $primary_id !== null
             && $primary_id !== 0
@@ -172,11 +194,16 @@ abstract class DirectSingle
             } else {
                 $sql = 'SELECT * FROM '.$table_name.' WHERE '.$primary_name.' = :id';
             }
+            $cLogger->info('ORM: DS: SELECT: '.$table_name.': Start',[
+                'sql' => $sql,
+                'id'  => $primary_id,
+            ]);
 
             $query = $this->_db->prepare($sql);
             $query->execute([':id' => $primary_id]);
             $defaults = $query->fetch(\PDO::FETCH_ASSOC);
             if (!is_array($defaults)) {
+                $cLogger->info('ORM: DS: SELECT: '.$table_name.': Data Not Found');
                 if (!$this->_canInsert) {
                     $cConfig = new Config();
                     $config  = $cConfig->getConfig();
@@ -185,26 +212,32 @@ abstract class DirectSingle
                         if (function_exists('d')) {
                             d(func_get_args());
                         }
+                    } else {
+                        $cLogger->info('ORM: DS: SELECT: '.$table_name.': Backtrace',[
+                            'args'  => func_get_args(),
+                            'trace' => debug_backtrace(),
+                        ]);
                     }
                     throw new ORMException($this->myName.' Construct Failed');
                 }
             } else {
-                if ($this->_canCache) {
-                    if (!isset($redis)) {
-                        $redis = $this->_common->getCache($this->_cacheName);
-                    }
-                    if ($redis && $primary_id > 0) {
-                        $this->setCacheData();
-                    }
+                $cLogger->info('ORM: DS: SELECT: '.$table_name.': Select Success', $defaults);
+            }
+        }
+
+        if (is_array($defaults)) {
+            // $properties = array_keys(get_object_vars($this));
+            $fields = array_keys(static::$dbInfo);
+            foreach ($defaults as $k => $v) {
+                if (in_array($k, $fields)) {
+                    $this->$k = $v;
                 }
             }
         }
-        if (is_array($defaults)) {
-            $properties = array_keys(get_object_vars($this));
-            foreach ($defaults as $k => $v) {
-                if (in_array($k, $properties)) {
-                    $this->$k = $v;
-                }
+        if ($this->_canCache) {
+            $cLogger->info('ORM: DS: SELECT: '.$table_name.': Can Cache');
+            if ($primary_id > 0) {
+                $this->setCacheData();
             }
         }
     }
@@ -294,8 +327,8 @@ abstract class DirectSingle
                 $params = [];
                 if (count($fields) > 1) {    // 1 being the primary key
                     $sql = 'INSERT INTO '.$table_name.
-                           ' ('.implode(', ', $fields).
-                           ') VALUES (:'.implode(', :', $fields).') ON DUPLICATE KEY UPDATE ';
+                        ' ('.implode(', ', $fields).
+                        ') VALUES (:'.implode(', :', $fields).') ON DUPLICATE KEY UPDATE ';
                     foreach ($fields as $field) {
                         $params[':'.$field] = ($this->$field == null ? '' : $this->$field);
                         if ($field == $primary_name && !$auto_increment) {
@@ -313,8 +346,8 @@ abstract class DirectSingle
                     $query->closeCursor();
                 } else {
                     $sql = 'INSERT IGNORE INTO '.$table_name.
-                           ' ('.implode(', ', $fields).') VALUES (:'.
-                           implode(', :', $fields).')';
+                        ' ('.implode(', ', $fields).') VALUES (:'.
+                        implode(', :', $fields).')';
                     foreach ($fields as $field) {
                         $params[':'.$field] = ($this->$field == null ? '' : $this->$field);
                         if ($field == $primary_name && !$auto_increment) {
@@ -396,12 +429,15 @@ abstract class DirectSingle
      */
     protected function setCacheData()
     {
-        $primary = constant($this->myName.'::CLASS_PRIMARY');
-        $fields  = array_keys(self::$dbInfo);
-        $data    = [];
+        $table_name = constant($this->myName.'::CLASS_TABLE');
+        $primary    = constant($this->myName.'::CLASS_PRIMARY');
+        $fields     = array_keys(static::$dbInfo);
+        $data       = [];
         foreach ($fields as $field) {
             $data[$field] = $this->$field;
         }
+        ORMLogger::getLogger()->info('ORM: DS: SCD: '.$table_name.': Setting Cache Data', $data);
+
         $this->_cache->hSet($this->myName, 'key_'.$this->$primary, serialize($data));
     }
 
