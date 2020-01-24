@@ -6,6 +6,7 @@ use GCWorld\ORM\Audit;
 use GCWorld\ORM\CommonLoader;
 use GCWorld\ORM\Config;
 use GCWorld\ORM\ORMException;
+use GCWorld\ORM\ORMLogger;
 
 /**
  * Class DirectSingle
@@ -95,6 +96,7 @@ abstract class DirectSingle
      */
     protected function __construct($primary_id = null, array $defaults = null)
     {
+        $cLogger       = ORMLogger::getLogger();
         $this->myName  = get_class($this);
         $table_name    = constant($this->myName.'::CLASS_TABLE');
         $primary_name  = constant($this->myName.'::CLASS_PRIMARY');
@@ -120,36 +122,45 @@ abstract class DirectSingle
         }
 
         if ($this->_canCache
+            && $this->_cache
             && !empty($primary_id)
             && $primary_id !== null
             && $primary_id !== 0
             && $primary_id !== ''
         ) {
-            if ($this->_cache) {
-                $blob = $this->_cache->hGet($this->myName, 'key_'.$primary_id);
-                if ($blob !== false) {
-                    try {
-                        $data = @unserialize($blob);
-                    } catch(Exception $e) {
-                        $data = null;
-                    }
-                    if($data !== null && is_array($data) && !empty($data)) {
-                        $fields = array_keys(static::$dbInfo);
-                        if(count($fields) == count($data)) {
-                            //$properties = array_keys(get_object_vars($this));
-                            foreach ($data as $k => $v) {
-                                if (in_array($k, $fields)) {
-                                    $this->$k = $v;
-                                }
-                            }
-
-                            return;
-                        }
-                    }
-                    // If we made it here, the blob is garbage, delete it
-                    $this->_cache->hDel($this->myName, 'key_'.$primary_id);
+            $blob = $this->_cache->hGet($this->myName, 'key_'.$primary_id);
+            if ($blob !== false) {
+                $cLogger->info('ORM: DS: Cache1: Blob is not false, '.$table_name);
+                try {
+                    $data = @unserialize($blob);
+                } catch(Exception $e) {
+                    $data = null;
                 }
+                if($data !== null && is_array($data) && !empty($data)) {
+                    $cLogger->info('ORM: DS: Cache1: Data is Good, '.$table_name);
+
+                    $fields = array_keys(static::$dbInfo);
+                    if(count($fields) == count($data)) {
+                        $cLogger->info('ORM: DS: Cache1: Count Matches, '.$table_name);
+                        //$properties = array_keys(get_object_vars($this));
+                        foreach ($data as $k => $v) {
+                            if (in_array($k, $fields)) {
+                                $this->$k = $v;
+                            }
+                        }
+
+                        return;
+                    }
+                    $cLogger->info('ORM: DS: Cache1: Count does not match, '.$table_name);
+                    $cLogger->debug('ORM: DS: Cache1: Count does not match, ', [
+                        $fields,
+                        $data,
+                    ]);
+                }
+                // If we made it here, the blob is garbage, delete it
+                $this->_cache->hDel($this->myName, 'key_'.$primary_id);
             }
+
         }
         if (!empty($primary_id)
             && $primary_id !== null
