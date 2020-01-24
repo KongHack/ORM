@@ -133,14 +133,18 @@ abstract class DirectSingle
                     } catch(Exception $e) {
                         $data = null;
                     }
-                    if($data !== null) {
-                        $properties = array_keys(get_object_vars($this));
-                        foreach ($data as $k => $v) {
-                            if (in_array($k, $properties)) {
-                                $this->$k = $v;
+                    if($data !== null && is_array($data) && !empty($data)) {
+                        $fields = array_keys(static::$dbInfo);
+                        if(count($fields) == count($data)) {
+                            //$properties = array_keys(get_object_vars($this));
+                            foreach ($data as $k => $v) {
+                                if (in_array($k, $fields)) {
+                                    $this->$k = $v;
+                                }
                             }
+
+                            return;
                         }
-                        return;
                     }
                     // If we made it here, the blob is garbage, delete it
                     $this->_cache->hDel($this->myName, 'key_'.$primary_id);

@@ -5,16 +5,24 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [4.2.4](https://github.com/KongHack/ORM/releases/tag/4.2.4)
+ - @GameCharmer Patch on unserialize for oddly empty arrays (may need additional work)
+
+
+
 ## [4.2.3](https://github.com/KongHack/ORM/releases/tag/4.2.3)
  - @GameCharmer Downgrade to YAML 4 due to composer "Something's changed, looking at all rules again" bug
+
  
  
 ## [4.2.2](https://github.com/KongHack/ORM/releases/tag/4.2.2)
  - @GameCharmer Support for YAML 4 - 5 due to composer meltdown
 
 
+
 ## [4.2.1](https://github.com/KongHack/ORM/releases/tag/4.2.1)
  - @GameCharmer Support for YAML 4 or 5
+
 
 
 ## [4.2.0](https://github.com/KongHack/ORM/releases/tag/4.2.0)
