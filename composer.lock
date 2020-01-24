@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d6ecb9ac28f1af26c4249b42628176c3",
+    "content-hash": "d7ff2e823ecf2d21025d6005e261e0a1",
     "packages": [
         {
             "name": "composer/ca-bundle",
@@ -431,16 +431,16 @@
         },
         {
             "name": "gcworld/common",
-            "version": "2.5.2",
+            "version": "2.5.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/KongHack/Common.git",
-                "reference": "fe14e2a291232be69a65aec574560afc5822272d"
+                "reference": "18fd4d5175a24ef5882d0f3d97e14b28af044963"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/KongHack/Common/zipball/fe14e2a291232be69a65aec574560afc5822272d",
-                "reference": "fe14e2a291232be69a65aec574560afc5822272d",
+                "url": "https://api.github.com/repos/KongHack/Common/zipball/18fd4d5175a24ef5882d0f3d97e14b28af044963",
+                "reference": "18fd4d5175a24ef5882d0f3d97e14b28af044963",
                 "shasum": ""
             },
             "require": {
@@ -448,7 +448,7 @@
                 "gcworld/errorhandlers": "^1.2.0",
                 "gcworld/interfaces": ">=3.1.1",
                 "php": ">=7.2.5",
-                "symfony/yaml": "4 - 5"
+                "symfony/yaml": "^4.0"
             },
             "require-dev": {
                 "gcworld/code_sniffer_contrib": "^1.0",
@@ -472,7 +472,7 @@
                 }
             ],
             "description": "GCWorld Industries Common",
-            "time": "2020-01-23T18:34:39+00:00"
+            "time": "2020-01-23T18:50:03+00:00"
         },
         {
             "name": "gcworld/database",
