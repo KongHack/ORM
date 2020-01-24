@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [4.2.8](https://github.com/KongHack/ORM/releases/tag/4.2.8)
+ - @GameCharmer Fix Caching Issues!
+
+
+
 ## [4.2.7](https://github.com/KongHack/ORM/releases/tag/4.2.7)
  - @GameCharmer adjust monolog requirement
 
