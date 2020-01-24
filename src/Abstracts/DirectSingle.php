@@ -140,7 +140,7 @@ abstract class DirectSingle
                 'hash' => 'key_'.$primary_id,
                 'blob' => $blob
             ]);
-            if ($blob !== false) {
+            if ($blob !== false && $blob !== null && !empty($blob)) {
                 $cLogger->info('ORM: DS: '.$table_name.': Cache1: Blob is not false');
                 try {
                     $data = @unserialize($blob);
