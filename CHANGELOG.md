@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [4.2.6](https://github.com/KongHack/ORM/releases/tag/4.2.6)
+ - @GameCharmer Added logging for DirectSingle
+
+
+
 ## [4.2.5](https://github.com/KongHack/ORM/releases/tag/4.2.5)
  - @GameCharmer Standardize setCacheData for DirectSingle
 
