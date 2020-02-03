@@ -141,7 +141,7 @@ abstract class DirectSingle
                 'blob' => $blob
             ]);
             if ($blob !== false && $blob !== null && !empty($blob)) {
-                $cLogger->info('ORM: DS: '.$table_name.': Cache1: Blob is not false');
+                $cLogger->info('ORM: DS: '.$table_name.': Cache1: Blob is not false, not null, and not empty');
                 try {
                     $data = @unserialize($blob);
                 } catch(Exception $e) {
