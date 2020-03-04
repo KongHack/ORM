@@ -560,7 +560,7 @@ NOW;
                 $vars[] = $item['Column_name'];
             }
             $this->fileWrite($fh,' *'.PHP_EOL);
-            $this->fileWrite($fh,' * @return static');
+            $this->fileWrite($fh,' * @return static'.PHP_EOL);
             $this->fileWrite($fh,' */'.PHP_EOL);
 
             $str = '$'.implode(', $',$vars);
