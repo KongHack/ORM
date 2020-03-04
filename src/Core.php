@@ -224,6 +224,7 @@ class Core
             }
         }
         $this->fileWrite($fh, PHP_EOL);
+        $this->fileWrite($fh, PHP_EOL);
         $this->fileWrite($fh, '/**'.PHP_EOL);
         $this->fileWrite($fh, '* @var array'.PHP_EOL);
         $this->fileWrite($fh, '* Contains an array of all fields and the database notation for field type'.PHP_EOL);
@@ -337,7 +338,7 @@ class Core
 
                 $this->fileWrite($fh, '/**'.PHP_EOL);
                 $this->fileWrite($fh, '* @param '.$return_type.' $value'.PHP_EOL);
-                $this->fileWrite($fh, '* @return $this'.PHP_EOL);
+                $this->fileWrite($fh, '* @return static'.PHP_EOL);
                 $this->fileWrite($fh, '*/'.PHP_EOL);
                 if ($return_type == 'mixed') {
                     $return_type = '';
