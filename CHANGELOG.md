@@ -5,6 +5,13 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [4.3.0](https://github.com/KongHack/ORM/releases/tag/4.3.0)
+ - @GameCharmer auto-generate factory methods for uniques
+ - @GameCharmer all classes are now abstract
+ - @GameCharmer all constants now have public visibility defined
+
+
+
 ## [4.2.9](https://github.com/KongHack/ORM/releases/tag/4.2.9)
  - @GameCharmer Fix Null Caching Issue...
 
