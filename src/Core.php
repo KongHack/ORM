@@ -145,6 +145,7 @@ class Core
 
         $this->fileWrite($fh, '<?php'.PHP_EOL);
         $this->fileWrite($fh, 'namespace GCWorld\\ORM\\Generated;'.PHP_EOL.PHP_EOL);
+        $this->fileWrite($fh, 'use \\GCWORLD\\ORM\\CommonLoader;'.PHP_EOL);
 
         /* Not needed as a use, it's just fine how it is
         if ($this->json_serialize) {
@@ -177,10 +178,10 @@ class Core
                 'class '.$table_name.' extends dbc implements dbi, dbd'.($this->json_serialize ? ', \\JsonSerializable' : '').PHP_EOL.'{'.PHP_EOL
             );
             $this->fileBump($fh);
-            $this->fileWrite($fh, "CONST ".str_pad('CLASS_TABLE', $max_var_name, ' ')."   = '$table_name';".PHP_EOL);
+            $this->fileWrite($fh, "PUBLIC CONST ".str_pad('CLASS_TABLE', $max_var_name, ' ')."   = '$table_name';".PHP_EOL);
             $this->fileWrite(
                 $fh,
-                "CONST ".str_pad('CLASS_PRIMARY', $max_var_name, ' ')."   = '".$primaries[0]."';".PHP_EOL
+                "PUBLIC CONST ".str_pad('CLASS_PRIMARY', $max_var_name, ' ')."   = '".$primaries[0]."';".PHP_EOL
             );
         } else {
             // Multiple primary keys!!!
@@ -192,18 +193,18 @@ class Core
                 $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Interfaces\\PublicDBInterface as dbd;'.PHP_EOL);
             }
             $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Interfaces\\GeneratedMultiInterface AS dbi;'.PHP_EOL.PHP_EOL);
-            $this->fileWrite($fh, 'class '.$table_name." extends dbc implements dbi, dbd".PHP_EOL."{".PHP_EOL);
+            $this->fileWrite($fh, 'abstract class '.$table_name." extends dbc implements dbi, dbd".PHP_EOL."{".PHP_EOL);
             $this->fileBump($fh);
-            $this->fileWrite($fh, "CONST ".str_pad('CLASS_TABLE', $max_var_name, ' ')."   = '$table_name';".PHP_EOL);
+            $this->fileWrite($fh, "PUBLIC CONST ".str_pad('CLASS_TABLE', $max_var_name, ' ')."   = '$table_name';".PHP_EOL);
             $this->fileWrite(
                 $fh,
-                "CONST ".str_pad('CLASS_PRIMARIES', $max_var_name, ' ')."   = ".var_export($primaries, true).";".PHP_EOL
+                "PUBLIC CONST ".str_pad('CLASS_PRIMARIES', $max_var_name, ' ')."   = ".var_export($primaries, true).";".PHP_EOL
             );
         }
 
         $this->fileWrite(
             $fh,
-            'CONST '.str_pad('AUTO_INCREMENT', $max_var_name,
+            'PUBLIC CONST '.str_pad('AUTO_INCREMENT', $max_var_name,
                 ' ').'   = '.($auto_increment ? 'true' : 'false').";".PHP_EOL
         );
 
@@ -398,6 +399,8 @@ NOW;
             $this->fileWrite($fh, "}".PHP_EOL);
         }
 
+        // Not for traits
+        $this->doFactory($fh, $table_name);
 
         $this->fileDrop($fh);
         $this->fileWrite($fh, "}".PHP_EOL.PHP_EOL);
@@ -496,6 +499,161 @@ NOW;
     }
 
     /**
+     * @param $fh
+     * @param $table_name
+     *
+     * @return void
+     */
+    protected function doFactory($fh, $table_name)
+    {
+        $sql   = 'SHOW INDEX FROM '.$table_name;
+        $query = $this->master_common->getDatabase()->prepare($sql);
+        $query->execute();
+        $indexes = $query->fetchAll(PDO::FETCH_ASSOC);
+
+        // Factory Stuff
+        if(count($indexes) < 2) {
+            return;
+        }
+
+        $uniques = [];
+        $primary = null;
+
+        foreach($indexes as $v) {
+            if($v['Non_unique']) {
+                continue;
+            }
+            if($v['Key_name'] == 'PRIMARY') {
+                $primary = $v['Column_name'];
+                continue;
+            }
+            if(!isset($uniques[$v['Key_name']])) {
+                $uniques[$v['Key_name']] = [];
+            }
+            $uniques[$v['Key_name']][] = $v;
+        }
+
+        if($primary === null || empty($uniques)) {
+            return;
+        }
+
+        foreach($uniques as $k => $v) {
+            if(count($v) < 2) {
+                unset($uniques[$k]);
+                continue;
+            }
+
+            uasort($v, function ($a, $b){
+                return $a['Seq_in_index'] <=> $b['Seq_in_index'];
+            });
+            $uniques[$k] = $v;
+        }
+
+        foreach($uniques as $key => $unique) {
+            $name = str_replace(' ','',ucwords(str_replace('_',' ',$key)));
+            $vars = [];
+
+            $this->fileWrite($fh, PHP_EOL);
+            $this->fileWrite($fh,'/**'.PHP_EOL);
+            foreach($unique as $item) {
+                $this->fileWrite($fh, ' * @param mixed $'.$item['Column_name'].PHP_EOL);
+                $vars[] = $item['Column_name'];
+            }
+            $this->fileWrite($fh,' *'.PHP_EOL);
+            $this->fileWrite($fh,' * @return static');
+            $this->fileWrite($fh,' */'.PHP_EOL);
+
+            $str = '$'.implode(', $',$vars);
+            $this->fileWrite($fh, 'public static function factory'.$name.'All('.$str.')'.PHP_EOL);
+            $this->fileWrite($fh, '{'.PHP_EOL);
+            $this->fileBump($fh);
+            $this->fileWrite($fh, '$id = self::find'.$name.'('.$str.');'.PHP_EOL);
+            $this->fileWrite($fh, 'if(!empty($id)) {'.PHP_EOL);
+            $this->fileBump($fh);
+            $this->fileWrite($fh,'return new static($id);'.PHP_EOL);
+            $this->fileDrop($fh);
+            $this->fileWrite($fh,'}'.PHP_EOL);
+            $this->fileWrite($fh, PHP_EOL);
+            $this->fileWrite($fh, '$cObj = new static();'.PHP_EOL);
+            foreach($vars as $var) {
+                $setter = FieldName::setterName($var);
+                $this->fileWrite($fh, '$cObj->'.$setter.'($'.$var.');'.PHP_EOL);
+            }
+            $this->fileWrite($fh,PHP_EOL);
+            $this->fileWrite($fh,'return $cObj;'.PHP_EOL);
+            $this->fileDrop($fh);
+            $this->fileWrite($fh, '}'.PHP_EOL);
+            $this->fileWrite($fh,PHP_EOL.PHP_EOL);
+
+            $this->fileWrite($fh, '/**'.PHP_EOL);
+            $this->fileWrite($fh, ' * @param mixed $'.$primary.PHP_EOL);
+            $this->fileWrite($fh, ' *'.PHP_EOL);
+            $this->fileWrite($fh, ' * @throws \Exception'.PHP_EOL);
+            $this->fileWrite($fh, ' *'.PHP_EOL);
+            $this->fileWrite($fh, ' * @return static'.PHP_EOL);
+            $this->fileWrite($fh, ' */'.PHP_EOL);
+            $this->fileWrite($fh, 'public static function factory'.$name.'($'.$primary.')'.PHP_EOL);
+            $this->fileWrite($fh, '{'.PHP_EOL);
+            $this->fileBump($fh);
+            $this->fileWrite($fh, 'if(empty($'.$primary.')) {'.PHP_EOL);
+            $this->fileBump($fh);
+            $this->fileWrite($fh, 'throw new \\Exception(\'Primary cannot be empty\');'.PHP_EOL);
+            $this->fileDrop($fh);
+            $this->fileWrite($fh, '}'.PHP_EOL);
+            $this->fileWrite($fh, PHP_EOL);
+            $this->fileWrite($fh, 'return new static($'.$primary.');'.PHP_EOL);
+            $this->fileDrop($fh);
+            $this->fileWrite($fh, '}'.PHP_EOL);
+            $this->fileWrite($fh,PHP_EOL.PHP_EOL);
+
+            // Find Join Function
+            $this->fileWrite($fh, '/**'.PHP_EOL);
+            foreach($vars as $var) {
+                $this->fileWrite($fh, ' * @param mixed $'.$var.PHP_EOL);
+            }
+            $this->fileWrite($fh, ' *'.PHP_EOL);
+            $this->fileWrite($fh, ' * @return mixed'.PHP_EOL);
+            $this->fileWrite($fh, ' */'.PHP_EOL);
+            $this->fileWrite($fh, 'public static function find'.$name.'('.$str.')'.PHP_EOL);
+            $this->fileWrite($fh, '{'.PHP_EOL);
+            $this->fileBump($fh);
+
+            $params = [];
+            $where  = [];
+            foreach($vars as $var) {
+                $where[] = $var.' = :'.$var;
+                $params[] = '\':'.$var.'\' => $'.$var.','.PHP_EOL;
+            }
+            $sWhere = 'WHERE '.implode(' AND ', $where);
+
+            $this->fileWrite($fh, '$sql   = \'SELECT '.$primary.' FROM '.$table_name.PHP_EOL);
+            $this->fileWrite($fh, '          '.$sWhere.'\';'.PHP_EOL);
+            $this->fileWrite($fh, '$query = CommonLoader::getCommon()->getDatabase()->prepare($sql);'.PHP_EOL);
+            $this->fileWrite($fh, '$query->execute(['.PHP_EOL);
+            $this->fileBump($fh);
+            foreach($params as $param) {
+                $this->fileWrite($fh, $param);
+            }
+            $this->fileDrop($fh);
+            $this->fileWrite($fh, ']);'.PHP_EOL);
+            $this->fileWrite($fh, '$row = $query->fetch();'.PHP_EOL);
+            $this->fileWrite($fh, '$query->closeCursor();'.PHP_EOL);
+            $this->fileWrite($fh, 'if($row) {'.PHP_EOL);
+            $this->fileBump($fh);
+            $this->fileWrite($fh, 'return $row[\''.$primary.'\'];'.PHP_EOL);
+            $this->fileDrop($fh);
+            $this->fileWrite($fh, '}'.PHP_EOL);
+            $this->fileWrite($fh, PHP_EOL);
+            $this->fileWrite($fh, 'return null;'.PHP_EOL);
+            $this->fileDrop($fh);
+            $this->fileWrite($fh, '}'.PHP_EOL);
+
+            // $this->fileWrite($fh, ''.PHP_EOL);
+        }
+    }
+
+
+    /**
      * @param string $filename
      * @return mixed
      */
@@ -561,10 +719,7 @@ NOW;
         $args[0] = $this->master_common;
 
         $reflectionClass = new ReflectionClass($class_name);
-        $module          = $reflectionClass->newInstanceArgs($args);
-
-        return $module;
-        //$handler = call_user_func_array($class_name, $args);
+        return $reflectionClass->newInstanceArgs($args);
     }
 
     /**
