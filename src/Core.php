@@ -485,6 +485,10 @@ NOW;
         $uniques = $keys['uniques'];
         $primary = $keys['primary'];
 
+        if(count($uniques) > 0) {
+            $cNamespace->addUse('GCWorld\\ORM\\CommonLoader');
+        }
+
         foreach($uniques as $key => $unique) {
             $name = str_replace(' ','',ucwords(str_replace('_',' ',$key)));
             $vars = [];
@@ -596,8 +600,6 @@ NOW;
         if(count($columns) < 1) {
             return;
         }
-        // Not needed at this time
-        // $cNamespace->addUse('GCWorld\\ORM\\CommonLoader');
         $cNamespace->addUse('GCWorld\\ORM\\Exceptions\\ModelSaveExceptions');
         $cNamespace->addUse('GCWorld\\ORM\\Exceptions\\ModelRequiredFieldException');
 
