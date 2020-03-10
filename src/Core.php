@@ -483,6 +483,11 @@ NOW;
         $uniques = $keys['uniques'];
         $primary = $keys['primary'];
 
+        // We don't have a primary key.  That can't be good.
+        if ($primary == null) {
+            return;
+        }
+
         if (count($uniques) > 0) {
             $cNamespace->addUse('GCWorld\\ORM\\CommonLoader');
         }
