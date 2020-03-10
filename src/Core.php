@@ -5,8 +5,9 @@ use GCWorld\Interfaces\Common;
 use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\PhpNamespace;
 use Nette\PhpGenerator\PsrPrinter;
-use \ReflectionClass;
-use \PDO;
+use ReflectionClass;
+use PDO;
+use Exception;
 
 /**
  * Class Core
@@ -68,7 +69,7 @@ class Core
     /**
      * @param string $table_name
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
     public function generate(string $table_name)
     {

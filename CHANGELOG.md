@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [5.0.5](https://github.com/KongHack/ORM/releases/tag/5.0.5)
+ - @GameCharmer implement git hooks for added cleanliness 
+
+
+
 ## [5.0.4](https://github.com/KongHack/ORM/releases/tag/5.0.4)
  - @GameCharmer Fix missed primary
 
