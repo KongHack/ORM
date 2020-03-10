@@ -499,6 +499,7 @@ NOW;
             $cMethod->setStatic(true);
             $cMethod->addComment('@return static');
             foreach($unique as $item) {
+                $cMethod->addComment('@param mixed '.$item['Column_name']);
                 $cMethod->addParameter($item['Column_name']);
                 $vars[] = $item['Column_name'];
             }
