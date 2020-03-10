@@ -584,11 +584,12 @@ NOW;
                 $columns[] = $id;
             }
         }
-        if(count($columns) < 1) {
-            $keys    = $this->getKeys($cClass->getName());
-            $uniques = $keys['uniques'];
-            $primary = $keys['primary'];
 
+        $keys    = $this->getKeys($cClass->getName());
+        $uniques = $keys['uniques'];
+        $primary = $keys['primary'];
+
+        if(count($columns) < 1) {
             foreach ($uniques as $unique) {
                 foreach ($unique as $item) {
                     $columns[] = $item['Column_name'];
