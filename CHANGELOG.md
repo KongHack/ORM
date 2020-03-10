@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [5.0.3](https://github.com/KongHack/ORM/releases/tag/5.0.3)
+ - @GameCharmer Required indicator on fields as an override to current required system
+
+
+
 ## [5.0.2](https://github.com/KongHack/ORM/releases/tag/5.0.2)
  - @GameCharmer Add missing param doc block for factory all method
 
