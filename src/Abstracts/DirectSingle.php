@@ -269,7 +269,7 @@ abstract class DirectSingle
     /**
      * @param string $key
      * @param mixed  $val
-     * @return $this
+     * @return static
      */
     protected function set(string $key, $val)
     {
@@ -285,7 +285,7 @@ abstract class DirectSingle
 
     /**
      * @param array $data
-     * @return $this
+     * @return static
      */
     protected function setArray(array $data)
     {

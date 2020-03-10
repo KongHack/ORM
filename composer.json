@@ -18,7 +18,8 @@
     "composer/installers": "^1.0",
     "symfony/yaml": "^4.0",
     "ramsey/uuid": "^3.8",
-    "monolog/monolog": "^1.1 || ^2.0"
+    "monolog/monolog": "^1.1 || ^2.0",
+    "nette/php-generator": "^3.3"
   },
   "require-dev": {
     "gcworld/code_sniffer_contrib": "^1.0",

@@ -2,6 +2,9 @@
 namespace GCWorld\ORM;
 
 use GCWorld\Interfaces\Common;
+use Nette\PhpGenerator\ClassType;
+use Nette\PhpGenerator\PhpNamespace;
+use Nette\PhpGenerator\PsrPrinter;
 use \ReflectionClass;
 use \PDO;
 
@@ -16,8 +19,6 @@ class Core
     protected $master_common    = null;
     protected $master_location  = null;
     protected $config           = [];
-    private   $open_files       = [];
-    private   $open_files_level = [];
 
     protected $get_set_funcs          = true;
     protected $var_visibility         = 'public';
@@ -136,145 +137,99 @@ class Core
             }
         }
 
-        $filename = $table_name.'.php';
-        $fh       = $this->fileOpen($path.$filename);
-
         if (count($primaries) < 1) {
             return false;
         }
 
-        $this->fileWrite($fh, '<?php'.PHP_EOL);
-        $this->fileWrite($fh, 'namespace GCWorld\\ORM\\Generated;'.PHP_EOL.PHP_EOL);
-        $this->fileWrite($fh, 'use \\GCWORLD\\ORM\\CommonLoader;'.PHP_EOL);
-
-        /* Not needed as a use, it's just fine how it is
-        if ($this->json_serialize) {
-            $this->fileWrite($fh, 'use \\GCWorld\\ORM\\FieldName;'.PHP_EOL);
-        }
-        */
-
+        $filename   = $table_name.'.php';
+        $cNamespace = new PhpNamespace('GCWorld\\ORM\\Generated');
+        $cClass = new ClassType($table_name, $cNamespace);
+        $cClass->setAbstract(true);
+        $cClass->addConstant('CLASS_TABLE', $table_name)->setPublic();
+        $cClass->addComment('Generated Class for Table '.$table_name);
+        $cNamespace->addUse('GCWorld\\ORM\\CommonLoader');
         if($uuid_fields) {
-            $this->fileWrite($fh,'use \\Ramsey\\Uuid\\Uuid;'.PHP_EOL);
+            $cNamespace->addUse('Ramsey\\Uuid\\Uuid');
         }
 
         if (count($primaries) == 1) {
             // Single PK Classes get a simple set of functions.
             if ($this->get_set_funcs) {
-                $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Abstracts\\DirectSingle AS dbc;'.PHP_EOL);
-                $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Interfaces\\ProtectedDBInterface as dbd;'.PHP_EOL);
+                $cNamespace->addUse('GCWorld\\ORM\\Abstracts\\DirectSingle', 'dbc');
+                $cNamespace->addUse('GCWorld\\ORM\\Interfaces\\ProtectedDBInterface', 'dbd');
             } else {
-                $this->fileWrite($fh, 'use \\GCWorld\\ORM\\DirectDBClass AS dbc;'.PHP_EOL);
-                $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Interfaces\\PublicDBInterface as dbd;'.PHP_EOL);
+                $cNamespace->addUse('GCWorld\\ORM\\Abstracts\\DirectDBClass', 'dbc');
+                $cNamespace->addUse('GCWorld\\ORM\\Interfaces\\PublicDBInterface', 'dbd');
             }
+            $cNamespace->addUse('GCWorld\\ORM\\Interfaces\\GeneratedInterface', 'dbi');
+            $cClass->addConstant('CLASS_PRIMARY', $primaries[0])->setPublic();
 
-            $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Interfaces\\GeneratedInterface AS dbi;'.PHP_EOL.PHP_EOL);
-
-            $this->fileWrite($fh, '/**'.PHP_EOL);
-            $this->fileWrite($fh, '* Class '.$table_name.PHP_EOL);
-            $this->fileWrite($fh, '* @package GCWorld\ORM\Generated'.PHP_EOL);
-            $this->fileWrite($fh, '*/'.PHP_EOL);
-            $this->fileWrite(
-                $fh,
-                'class '.$table_name.' extends dbc implements dbi, dbd'.($this->json_serialize ? ', \\JsonSerializable' : '').PHP_EOL.'{'.PHP_EOL
-            );
-            $this->fileBump($fh);
-            $this->fileWrite($fh, "PUBLIC CONST ".str_pad('CLASS_TABLE', $max_var_name, ' ')."   = '$table_name';".PHP_EOL);
-            $this->fileWrite(
-                $fh,
-                "PUBLIC CONST ".str_pad('CLASS_PRIMARY', $max_var_name, ' ')."   = '".$primaries[0]."';".PHP_EOL
-            );
         } else {
             // Multiple primary keys!!!
             if ($this->get_set_funcs) {
-                $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Abstracts\\DirectMulti AS dbc;'.PHP_EOL);
-                $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Interfaces\\ProtectedDBInterface as dbd;'.PHP_EOL);
+                $cNamespace->addUse('GCWorld\\ORM\\Abstracts\\DirectMulti', 'dbc');
+                $cNamespace->addUse('GCWorld\\ORM\\Interfaces\\ProtectedDBInterface', 'dbd');
             } else {
-                $this->fileWrite($fh, 'use \\GCWorld\\ORM\\DirectDBMultiClass AS dbc;'.PHP_EOL);
-                $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Interfaces\\PublicDBInterface as dbd;'.PHP_EOL);
+                $cNamespace->addUse('GCWorld\\ORM\\Abstracts\\DirectDBMultiClass', 'dbc');
+                $cNamespace->addUse('GCWorld\\ORM\\Interfaces\\PublicDBInterface', 'dbd');
             }
-            $this->fileWrite($fh, 'use \\GCWorld\\ORM\\Interfaces\\GeneratedMultiInterface AS dbi;'.PHP_EOL.PHP_EOL);
-            $this->fileWrite($fh, 'abstract class '.$table_name." extends dbc implements dbi, dbd".PHP_EOL."{".PHP_EOL);
-            $this->fileBump($fh);
-            $this->fileWrite($fh, "PUBLIC CONST ".str_pad('CLASS_TABLE', $max_var_name, ' ')."   = '$table_name';".PHP_EOL);
-            $this->fileWrite(
-                $fh,
-                "PUBLIC CONST ".str_pad('CLASS_PRIMARIES', $max_var_name, ' ')."   = ".var_export($primaries, true).";".PHP_EOL
-            );
+            $cNamespace->addUse('GCWorld\\ORM\\Interfaces\\GeneratedMultiInterface', 'dbi');
+            $cClass->addConstant('CLASS_PRIMARIES', $primaries)->setPublic();
         }
 
-        $this->fileWrite(
-            $fh,
-            'PUBLIC CONST '.str_pad('AUTO_INCREMENT', $max_var_name,
-                ' ').'   = '.($auto_increment ? 'true' : 'false').";".PHP_EOL
-        );
+        $cClass->addExtend('dbc');
+        $cClass->addImplement('dbi');
+        $cClass->addImplement('dbd');
+        if($this->json_serialize) {
+            $cNamespace->addUse('JsonSerializable');
+            $cClass->addImplement('JsonSerializable');
+        }
+        $cClass->addConstant('AUTO_INCREMENT', $auto_increment)->setPublic();
 
         foreach ($fields as $i => $row) {
             $type = (stristr($row['Type'], 'int') ? 'int   ' : 'string');
-            $this->fileWrite($fh, PHP_EOL.PHP_EOL);
-            $this->fileWrite($fh, '/**'.PHP_EOL);
-            $this->fileWrite($fh, '* @var '.$type.PHP_EOL);
-            $this->fileWrite($fh, '* @db-info '.$row['Type'].PHP_EOL);
-            $this->fileWrite($fh, '*/'.PHP_EOL);
-            if ($this->use_defaults) {
-                $this->fileWrite($fh, $this->var_visibility.' $'.str_pad($row['Field'],$max_var_name,
-                        ' '
-                    ).' = '.$this->formatDefault($row).';');
-            } else {
-                $this->fileWrite($fh, $this->var_visibility.' $'.str_pad($row['Field'], $max_var_name, ' ').' = null;');
-            }
-        }
-        $this->fileWrite($fh, PHP_EOL);
-        $this->fileWrite($fh, PHP_EOL);
-        $this->fileWrite($fh, '/**'.PHP_EOL);
-        $this->fileWrite($fh, '* @var array'.PHP_EOL);
-        $this->fileWrite($fh, '* Contains an array of all fields and the database notation for field type'.PHP_EOL);
-        $this->fileWrite($fh, '*/'.PHP_EOL);
-        $this->fileWrite($fh, 'public static $dbInfo = ['.PHP_EOL);
-        $this->fileBump($fh);
 
-        foreach ($fields as $i => $row) {
-            $write = str_pad("'".$row['Field']."'",$max_var_name + 2,' ').
-                 " => '".$row['Type'].($row['Comment'] != '' ? ' - '.
-                 $row['Comment'] : '')."',".PHP_EOL;
-            $this->fileWrite($fh, $write);
+            $default = null;
+            if ($this->use_defaults) {
+                $default = $this->formatDefault($row);
+            }
+
+            $cProperty = $cClass->addProperty($row['Field'], $default);
+            $cProperty->setVisibility($this->var_visibility);
+            $cProperty->addComment('@var '.$type);
+            $cProperty->addComment('@db-info '.$row['Type']);
         }
-        $this->fileDrop($fh);
-        $this->fileWrite($fh, "];".PHP_EOL);
+
+        $arr = [];
+        foreach($fields as $i => $row) {
+            $arr[$row['Field']] = $row['Type'].($row['Comment'] != '' ? ' - '.$row['Comment'] : '');
+        }
+        $cProperty = $cClass->addProperty('dbInfo', $arr);
+        $cProperty->setStatic(true);
+        $cProperty->addComment('Contains an array of all fields and the database notation for field type');
+        $cProperty->addComment('@var array');
+
+        $cMethodConstructor = $cClass->addMethod('__construct');
 
         // CONSTRUCTOR!
         if (count($primaries) == 1) {
-            $this->fileWrite($fh, PHP_EOL);
-            if ($this->type_hinting) {
-                $this->fileWrite($fh, '/**'.PHP_EOL);
-                $this->fileWrite($fh, '* @param mixed $primary_id'.PHP_EOL);
-                $this->fileWrite($fh, '* @param array $defaults'.PHP_EOL);
-                $this->fileWrite($fh, '*/'.PHP_EOL);
-                $this->fileWrite($fh,$config['constructor'].
-                                     ' function __construct($primary_id = null, array $defaults = null)'.PHP_EOL);
-            } else {
-                $this->fileWrite($fh, '/**'.PHP_EOL);
-                $this->fileWrite($fh, '* @param mixed ...$keys'.PHP_EOL);
-                $this->fileWrite($fh, '*/'.PHP_EOL);
-                $this->fileWrite($fh, $config['constructor'].
-                                      ' function __construct($primary_id = null, $defaults = null)'.PHP_EOL);
-            }
 
-            $this->fileWrite($fh, '{'.PHP_EOL);
-            $this->fileBump($fh);
-            $this->fileWrite($fh, 'parent::__construct($primary_id, $defaults);'.PHP_EOL);
-            $this->fileDrop($fh);
-            $this->fileWrite($fh, '}'.PHP_EOL.PHP_EOL);
+            if ($this->type_hinting) {
+                // TODO: Get type of primary and swap out mixed
+                $cMethodConstructor->addComment('@param mixed $primary_id');
+                $cMethodConstructor->addComment('@param array $defaults');
+            } else {
+                $cMethodConstructor->addComment('@param mixed $primary_id');
+                $cMethodConstructor->addComment('@param mixed $defaults');
+            }
+            $cMethodConstructor->addParameter('primary_id', null)->setNullable(true);
+            $cMethodConstructor->addParameter('defaults', null)->setNullable(true);
+            $cMethodConstructor->setVisibility($config['constructor']);
+            $cMethodConstructor->setBody('parent::__construct($primary_id, $defaults);');
         } else {
-            $this->fileWrite($fh, PHP_EOL);
-            $this->fileWrite($fh, '/**'.PHP_EOL);
-            $this->fileWrite($fh, '* @param mixed ...$keys'.PHP_EOL);
-            $this->fileWrite($fh, '*/'.PHP_EOL);
-            $this->fileWrite($fh, $config['constructor'].' function __construct(...$keys)'.PHP_EOL);
-            $this->fileWrite($fh, '{'.PHP_EOL);
-            $this->fileBump($fh);
-            $this->fileWrite($fh, 'parent::__construct(...$keys);'.PHP_EOL);
-            $this->fileDrop($fh);
-            $this->fileWrite($fh, '}'.PHP_EOL.PHP_EOL);
+            $cMethodConstructor->setVisibility($config['constructor']);
+            $cMethodConstructor->addComment('@param mixed ...$keys');
+            $cMethodConstructor->setBody('parent::__construct(...func_get_args());');
         }
 
         if ($this->get_set_funcs) {
@@ -293,31 +248,23 @@ class Core
                     $return_type = $this->defaultReturn($row['Type']);
                 }
 
-                $this->fileWrite($fh, '/**'.PHP_EOL);
-                $this->fileWrite($fh, '* @return '.$return_type.PHP_EOL);
-                $this->fileWrite($fh, '*/'.PHP_EOL);
-                $this->fileWrite($fh, 'public function get'.$name.'() {'.PHP_EOL);
-                $this->fileBump($fh);
-                $this->fileWrite($fh, 'return $this->get(\''.$row['Field']."');".PHP_EOL);
-                $this->fileDrop($fh);
-                $this->fileWrite($fh, "}".PHP_EOL.PHP_EOL);
+                $cClass->addMethod('get'.$name)
+                    ->setPublic()
+                    ->addComment('@return '.$return_type)
+                    ->setBody('return $this->get(\''.$row['Field'].'\');');
 
                 if($fieldConfig['uuid_field']) {
-                    $this->fileWrite($fh, '/**'.PHP_EOL);
-                    $this->fileWrite($fh, '* @return '.$return_type.PHP_EOL);
-                    $this->fileWrite($fh, '*/'.PHP_EOL);
-                    $this->fileWrite($fh, 'public function get'.$name.'AsString() {'.PHP_EOL);
-                    $this->fileBump($fh);
-                    $this->fileWrite($fh, '$value = $this->get(\''.$row['Field']."');".PHP_EOL);
-                    $this->fileWrite($fh, 'if(empty($value)) {'.PHP_EOL);
-                    $this->fileBump($fh);
-                    $this->fileWrite($fh,'return \'\';'.PHP_EOL);
-                    $this->fileDrop($fh);
-                    $this->fileWrite($fh,'}'.PHP_EOL);
-                    $this->fileWrite($fh, PHP_EOL);
-                    $this->fileWrite($fh,'return (Uuid::fromBytes($value))->toString();'.PHP_EOL);
-                    $this->fileDrop($fh);
-                    $this->fileWrite($fh, "}".PHP_EOL.PHP_EOL);
+                    $body  = '$value = $this->get(\''.$row['Field'].'\');'.PHP_EOL;
+                    $body .= 'if(empty($value)) { '.PHP_EOL;
+                    $body .= '    return \'\';'.PHP_EOL;
+                    $body .= '}'.PHP_EOL;
+                    $body .= PHP_EOL;
+                    $body .= 'return (Uuid::fromBytes($value))->toString();';
+
+                    $cClass->addMethod('get'.$name.'AsString')
+                        ->setPublic()
+                        ->addComment('@return string')
+                        ->setBody($body);
                 }
             }
 
@@ -336,20 +283,16 @@ class Core
                     $return_type = $this->defaultReturn($row['Type']);
                 }
 
-                $this->fileWrite($fh, '/**'.PHP_EOL);
-                $this->fileWrite($fh, '* @param '.$return_type.' $value'.PHP_EOL);
-                $this->fileWrite($fh, '* @return static'.PHP_EOL);
-                $this->fileWrite($fh, '*/'.PHP_EOL);
-                if ($return_type == 'mixed') {
-                    $return_type = '';
-                } else {
-                    $return_type .= ' ';
-                }
-                $setterVis = $fieldConfig['visibility']??'public';
-                $this->fileWrite($fh, $setterVis.' function set'.$name.'('.$return_type.'$value) {'.PHP_EOL);
-                $this->fileBump($fh);
+                $cSetter = $cClass->addMethod('set'.$name);
+                $cSetter->addComment('@param '.$return_type.' $value');
+                $cSetter->addComment('@return static');
+                $cSetter->addParameter('value')->setType($return_type == 'mixed' ? '' : $return_type);
+                $cSetter->setVisibility($fieldConfig['visibility']??'public');
+
+                $body = '';
+
                 if($fieldConfig['uuid_field']) {
-                    $now = <<<'NOW'
+                    $body = <<<'NOW'
 if(strlen($value)==36) {
     $value = Uuid::fromString($value)->getBytes();
 } elseif (empty($value)) {
@@ -358,54 +301,50 @@ if(strlen($value)==36) {
     throw new \GCWorld\ORM\Exceptions\UuidException('UUID must be a binary 16');
 }
 NOW;
-                    $tmp = explode(PHP_EOL,$now);
-                    foreach($tmp as $item) {
-                        $this->fileWrite($fh,$item.PHP_EOL);
-                    }
                 }
-                $this->fileWrite($fh, 'return $this->set(\''.$row['Field'].'\', $value);'.PHP_EOL);
-                $this->fileDrop($fh);
-                $this->fileWrite($fh, "}".PHP_EOL.PHP_EOL);
+                $body .= PHP_EOL.'return $this->set(\''.$row['Field'].'\', $value);';
+                $cSetter->setBody($body);
             }
         }
 
         if ($this->json_serialize) {
-            $this->fileWrite($fh, '/**'.PHP_EOL);
-            $this->fileWrite($fh, '* @return array'.PHP_EOL);
-            $this->fileWrite($fh, '*/'.PHP_EOL);
-            $this->fileWrite($fh, 'public function jsonSerialize() {'.PHP_EOL);
-            $this->fileBump($fh);
+            $cMethod = $cClass->addMethod('jsonSerialize');
+            $cMethod->addComment('@return array');
 
-            $this->fileWrite($fh, 'return ['.PHP_EOL);
-            $this->fileBump($fh);
+            $body = 'return ['.PHP_EOL;
+
             foreach ($fields as $i => $row) {
                 $fName       = $row['Field'];
                 $fieldConfig = $config['fields'][$fName] ?? Config::getDefaultFieldConfig();
                 if ($this->get_set_funcs) {
                     $name = FieldName::getterName($fName);
                     if($fieldConfig['uuid_field']) {
-                        $this->fileWrite($fh, "'$fName' => ".'$this->'.$name.'AsString(),'.PHP_EOL);
+                        $body .= "    '$fName' => ".'$this->'.$name.'AsString(),'.PHP_EOL;
                         continue;
                     }
-                    $this->fileWrite($fh, "'$fName' => ".'$this->'.$name.'(),'.PHP_EOL);
+                    $body .= "    '$fName' => ".'$this->'.$name.'(),'.PHP_EOL;
                     continue;
                 }
-                $this->fileWrite($fh, "'$fName' => ".'$this->'.$fName.','.PHP_EOL);
+                $body .= "    '$fName' => ".'$this->'.$fName.','.PHP_EOL;
 
             }
-            $this->fileDrop($fh);
-            $this->fileWrite($fh, '];'.PHP_EOL);
-
-            $this->fileDrop($fh);
-            $this->fileWrite($fh, "}".PHP_EOL);
+            $body .= '];';
+            $cMethod->setBody($body);
         }
 
-        // Not for traits
-        $this->doFactory($fh, $table_name);
 
-        $this->fileDrop($fh);
-        $this->fileWrite($fh, "}".PHP_EOL.PHP_EOL);
-        $this->fileClose($fh);
+        // Not for traits
+        $this->doFactory($cClass, $cNamespace);
+        $this->doBaseExceptions($cClass, $cNamespace, $config['fields']);
+
+
+        $cPrinter  = new PsrPrinter();
+        $contents  = '<?php'.PHP_EOL;
+        $contents .= $cPrinter->printNamespace($cNamespace);
+        $contents .= $cPrinter->printClass($cClass);
+
+        file_put_contents($path.$filename, $contents);
+
 
         //Create a trait version
         $path     = $this->master_location.DIRECTORY_SEPARATOR.'Generated/Traits/';
@@ -414,33 +353,22 @@ NOW;
             mkdir($path, 0755, true);
         }
 
-        $fh = $this->fileOpen($path.$filename);
-        $this->fileWrite($fh, "<?php\n");
-        $this->fileWrite($fh, 'namespace GCWorld\\ORM\\Generated\\Traits;'.PHP_EOL.PHP_EOL);
-        $this->fileWrite($fh, 'trait '.$table_name." \n{\n");
-        $this->fileBump($fh);
+        $cTraitNamespace = new PhpNamespace('GCWorld\\ORM\\Generated\\Traits');
+        $cTraitClass     = new ClassType($table_name, $cTraitNamespace);
+        $cTraitClass->setTrait();
 
         foreach ($fields as $i => $row) {
             if (in_array($row['Field'], $primaries)) {
                 continue;
             }
             $type = (stristr($row['Type'], 'int') ? 'int   ' : 'string');
-            $this->fileWrite($fh, "\n\n");
-            $this->fileWrite($fh, '/**'.PHP_EOL);
-            $this->fileWrite($fh, '* @var '.$type.PHP_EOL);
-            $this->fileWrite($fh, '* @db-info '.$row['Type'].PHP_EOL);
-            $this->fileWrite($fh, '*/'.PHP_EOL);
-            if ($this->use_defaults) {
-                $this->fileWrite($fh, $this->var_visibility.' $'.str_pad(
-                        $row['Field'],
-                        $max_var_name,
-                        ' '
-                    ).' = '.$this->formatDefault($row).';');
-            } else {
-                $this->fileWrite($fh, $this->var_visibility.' $'.str_pad($row['Field'], $max_var_name, ' ').' = null;');
-            }
+
+            $cProperty = $cTraitClass->addProperty($row['Field']);
+            $cProperty->addComment('@var '.$type);
+            $cProperty->addComment('@db-info '.$row['Type']);
+            $cProperty->setVisibility($this->var_visibility);
+            $cProperty->setValue($this->use_defaults ? $this->formatDefault($row) : null);
         }
-        $this->fileWrite($fh, PHP_EOL);
 
         if ($this->get_set_funcs || $this->var_visibility == 'protected') {
             foreach ($fields as $i => $row) {
@@ -461,64 +389,54 @@ NOW;
                     $return_type = $this->defaultReturn($row['Type']);
                 }
 
-                $this->fileWrite($fh, '/**'.PHP_EOL);
-                $this->fileWrite($fh, '* @return '.$return_type.PHP_EOL);
-                $this->fileWrite($fh, '*/'.PHP_EOL);
-                $this->fileWrite($fh, 'public function get'.$name.'() {'.PHP_EOL);
-                $this->fileBump($fh);
-                $this->fileWrite($fh, 'return $this->'.$row['Field'].";".PHP_EOL);
-                $this->fileDrop($fh);
-                $this->fileWrite($fh, '}'.PHP_EOL.PHP_EOL);
+                $cMethod = $cTraitClass->addMethod('get'.$name);
+                $cMethod->addComment('@return '.$return_type);
+                $cMethod->setBody('return $this->'.$row['Field'].';');
 
                 if($fieldConfig['uuid_field']) {
-                    $this->fileWrite($fh, '/**'.PHP_EOL);
-                    $this->fileWrite($fh, '* @return '.$return_type.PHP_EOL);
-                    $this->fileWrite($fh, '*/'.PHP_EOL);
-                    $this->fileWrite($fh, 'public function get'.$name.'AsString() {'.PHP_EOL);
-                    $this->fileBump($fh);
-                    $this->fileWrite($fh, '$value = $this->get(\''.$row['Field']."');".PHP_EOL);
-                    $this->fileWrite($fh, 'if(empty($value)) {'.PHP_EOL);
-                    $this->fileBump($fh);
-                    $this->fileWrite($fh,'return \'\';'.PHP_EOL);
-                    $this->fileDrop($fh);
-                    $this->fileWrite($fh,'}'.PHP_EOL);
-                    $this->fileWrite($fh, PHP_EOL);
-                    $this->fileWrite($fh,'return (Uuid::fromBytes($value))->toString();'.PHP_EOL);
-                    $this->fileDrop($fh);
-                    $this->fileWrite($fh, "}".PHP_EOL.PHP_EOL);
+                    $cMethod = $cTraitClass->addMethod('get'.$name.'AsString');
+                    $cMethod->addComment('@return string');
+                    $body  = '$value = $this->get(\''.$row['Field']."');".PHP_EOL;
+                    $body .= 'if(empty($value)) {'.PHP_EOL;
+                    $body .= '    return \'\';'.PHP_EOL;
+                    $body .= '}'.PHP_EOL.PHP_EOL;
+                    $body .= 'return (Uuid::fromBytes($value))->toString();'.PHP_EOL;
+                    $cMethod->setBody($body);
                 }
-
             }
-            $this->fileWrite($fh, PHP_EOL);
         }
 
-        $this->fileDrop($fh);
-        $this->fileWrite($fh, '}'.PHP_EOL.PHP_EOL);
-        $this->fileClose($fh);
+        $cPrinter  = new PsrPrinter();
+        $contents  = '<?php'.PHP_EOL;
+        $contents .= $cPrinter->printNamespace($cNamespace);
+        $contents .= $cPrinter->printClass($cClass);
+
+        file_put_contents($path.$filename, $contents);
 
         return true;
     }
 
     /**
-     * @param $fh
-     * @param $table_name
+     * @param string $table_name
      *
-     * @return void
+     * @return array
      */
-    protected function doFactory($fh, $table_name)
+    public function getKeys(string $table_name)
     {
         $sql   = 'SHOW INDEX FROM '.$table_name;
         $query = $this->master_common->getDatabase()->prepare($sql);
         $query->execute();
         $indexes = $query->fetchAll(PDO::FETCH_ASSOC);
-
-        // Factory Stuff
-        if(count($indexes) < 2) {
-            return;
-        }
-
         $uniques = [];
         $primary = null;
+
+        // Factory Stuff
+        if(count($indexes) < 1) {
+            return [
+                'uniques' => $uniques,
+                'primary' => $primary,
+            ];
+        }
 
         foreach($indexes as $v) {
             if($v['Non_unique']) {
@@ -535,7 +453,10 @@ NOW;
         }
 
         if($primary === null || empty($uniques)) {
-            return;
+            return [
+                'uniques' => $uniques,
+                'primary' => $primary,
+            ];
         }
 
         foreach($uniques as $k => $v) {
@@ -550,160 +471,136 @@ NOW;
             $uniques[$k] = $v;
         }
 
+        return [
+            'uniques' => $uniques,
+            'primary' => $primary,
+        ];
+    }
+
+    /**
+     * @param ClassType    $cClass
+     * @param PhpNamespace $cNamespace
+     *
+     * @return void
+     */
+    protected function doFactory(ClassType $cClass, PhpNamespace $cNamespace)
+    {
+        $keys    = $this->getKeys($cClass->getName());
+        $uniques = $keys['uniques'];
+        $primary = $keys['primary'];
+
         foreach($uniques as $key => $unique) {
             $name = str_replace(' ','',ucwords(str_replace('_',' ',$key)));
             $vars = [];
 
-            $this->fileWrite($fh, PHP_EOL);
-            $this->fileWrite($fh,'/**'.PHP_EOL);
+            // Factory All Method =====================================================================================
+            $cMethod = $cClass->addMethod('factory'.$name.'All');
+            $cMethod->setPublic();
+            $cMethod->setStatic(true);
+            $cMethod->addComment('@return static');
             foreach($unique as $item) {
-                $this->fileWrite($fh, ' * @param mixed $'.$item['Column_name'].PHP_EOL);
+                $cMethod->addParameter($item['Column_name']);
                 $vars[] = $item['Column_name'];
             }
-            $this->fileWrite($fh,' *'.PHP_EOL);
-            $this->fileWrite($fh,' * @return static'.PHP_EOL);
-            $this->fileWrite($fh,' */'.PHP_EOL);
-
-            $str = '$'.implode(', $',$vars);
-            $this->fileWrite($fh, 'public static function factory'.$name.'All('.$str.')'.PHP_EOL);
-            $this->fileWrite($fh, '{'.PHP_EOL);
-            $this->fileBump($fh);
-            $this->fileWrite($fh, '$id = self::find'.$name.'('.$str.');'.PHP_EOL);
-            $this->fileWrite($fh, 'if(!empty($id)) {'.PHP_EOL);
-            $this->fileBump($fh);
-            $this->fileWrite($fh,'return new static($id);'.PHP_EOL);
-            $this->fileDrop($fh);
-            $this->fileWrite($fh,'}'.PHP_EOL);
-            $this->fileWrite($fh, PHP_EOL);
-            $this->fileWrite($fh, '$cObj = new static();'.PHP_EOL);
+            $str   = '$'.implode(', $',$vars);
+            $body  = '$id = self::find'.$name.'('.$str.');'.PHP_EOL;
+            $body .= 'if(!empty($id)) {'.PHP_EOL;
+            $body .= '    return new static($id);'.PHP_EOL;
+            $body .= '}'.PHP_EOL.PHP_EOL;
+            $body .= '$cObj = new static();'.PHP_EOL;
             foreach($vars as $var) {
                 $setter = FieldName::setterName($var);
-                $this->fileWrite($fh, '$cObj->'.$setter.'($'.$var.');'.PHP_EOL);
+                $body .= '$cObj->'.$setter.'($'.$var.');'.PHP_EOL;
             }
-            $this->fileWrite($fh,PHP_EOL);
-            $this->fileWrite($fh,'return $cObj;'.PHP_EOL);
-            $this->fileDrop($fh);
-            $this->fileWrite($fh, '}'.PHP_EOL);
-            $this->fileWrite($fh,PHP_EOL.PHP_EOL);
+            $body .= PHP_EOL;
+            $body .= 'return $cObj;'.PHP_EOL;
+            $cMethod->setBody($body);
 
-            $this->fileWrite($fh, '/**'.PHP_EOL);
-            $this->fileWrite($fh, ' * @param mixed $'.$primary.PHP_EOL);
-            $this->fileWrite($fh, ' *'.PHP_EOL);
-            $this->fileWrite($fh, ' * @throws \Exception'.PHP_EOL);
-            $this->fileWrite($fh, ' *'.PHP_EOL);
-            $this->fileWrite($fh, ' * @return static'.PHP_EOL);
-            $this->fileWrite($fh, ' */'.PHP_EOL);
-            $this->fileWrite($fh, 'public static function factory'.$name.'($'.$primary.')'.PHP_EOL);
-            $this->fileWrite($fh, '{'.PHP_EOL);
-            $this->fileBump($fh);
-            $this->fileWrite($fh, 'if(empty($'.$primary.')) {'.PHP_EOL);
-            $this->fileBump($fh);
-            $this->fileWrite($fh, 'throw new \\Exception(\'Primary cannot be empty\');'.PHP_EOL);
-            $this->fileDrop($fh);
-            $this->fileWrite($fh, '}'.PHP_EOL);
-            $this->fileWrite($fh, PHP_EOL);
-            $this->fileWrite($fh, 'return new static($'.$primary.');'.PHP_EOL);
-            $this->fileDrop($fh);
-            $this->fileWrite($fh, '}'.PHP_EOL);
-            $this->fileWrite($fh,PHP_EOL.PHP_EOL);
 
-            // Find Join Function
-            $this->fileWrite($fh, '/**'.PHP_EOL);
+            // Factory ID Method ======================================================================================
+            $cMethod = $cClass->addMethod('factory'.$name);
+            $cMethod->setPublic();
+            $cMethod->setStatic(true);
+            $cMethod->addParameter($primary);
+            $cMethod->addComment('@param mixed $'.$primary);
+            $cMethod->addComment('@return static');
+
+            $body  = 'if(empty($'.$primary.')) {'.PHP_EOL;
+            $body .= '    throw new \\Exception(\'Primary cannot be empty\');'.PHP_EOL;
+            $body .= '}'.PHP_EOL.PHP_EOL;
+            $body .= 'return new static($'.$primary.');'.PHP_EOL;
+            $cMethod->setBody($body);
+
+
+            // Find Primary Function ==================================================================================
+            $cMethod = $cClass->addMethod('find'.$name);
+            $cMethod->setPublic();
+            $cMethod->setStatic(true);
+            $cMethod->addComment('@return mixed');
             foreach($vars as $var) {
-                $this->fileWrite($fh, ' * @param mixed $'.$var.PHP_EOL);
+                $cMethod->addComment('@param mixed $'.$var);
+                $cMethod->addParameter($var);
             }
-            $this->fileWrite($fh, ' *'.PHP_EOL);
-            $this->fileWrite($fh, ' * @return mixed'.PHP_EOL);
-            $this->fileWrite($fh, ' */'.PHP_EOL);
-            $this->fileWrite($fh, 'public static function find'.$name.'('.$str.')'.PHP_EOL);
-            $this->fileWrite($fh, '{'.PHP_EOL);
-            $this->fileBump($fh);
 
             $params = [];
             $where  = [];
             foreach($vars as $var) {
-                $where[] = $var.' = :'.$var;
+                $where[]  = $var.' = :'.$var;
                 $params[] = '\':'.$var.'\' => $'.$var.','.PHP_EOL;
             }
             $sWhere = 'WHERE '.implode(' AND ', $where);
 
-            $this->fileWrite($fh, '$sql   = \'SELECT '.$primary.' FROM '.$table_name.PHP_EOL);
-            $this->fileWrite($fh, '          '.$sWhere.'\';'.PHP_EOL);
-            $this->fileWrite($fh, '$query = CommonLoader::getCommon()->getDatabase()->prepare($sql);'.PHP_EOL);
-            $this->fileWrite($fh, '$query->execute(['.PHP_EOL);
-            $this->fileBump($fh);
+            $body  = '$sql   = \'SELECT '.$primary.' FROM '.$cClass->getName().PHP_EOL;
+            $body .= '          '.$sWhere.'\';'.PHP_EOL;
+            $body .= '$query = CommonLoader::getCommon()->getDatabase()->prepare($sql);'.PHP_EOL;
+            $body .= '$query->execute(['.PHP_EOL;
             foreach($params as $param) {
-                $this->fileWrite($fh, $param);
+                $body .= '    '.$param;
             }
-            $this->fileDrop($fh);
-            $this->fileWrite($fh, ']);'.PHP_EOL);
-            $this->fileWrite($fh, '$row = $query->fetch();'.PHP_EOL);
-            $this->fileWrite($fh, '$query->closeCursor();'.PHP_EOL);
-            $this->fileWrite($fh, 'if($row) {'.PHP_EOL);
-            $this->fileBump($fh);
-            $this->fileWrite($fh, 'return $row[\''.$primary.'\'];'.PHP_EOL);
-            $this->fileDrop($fh);
-            $this->fileWrite($fh, '}'.PHP_EOL);
-            $this->fileWrite($fh, PHP_EOL);
-            $this->fileWrite($fh, 'return null;'.PHP_EOL);
-            $this->fileDrop($fh);
-            $this->fileWrite($fh, '}'.PHP_EOL);
-
-            // $this->fileWrite($fh, ''.PHP_EOL);
+            $body .= ']);'.PHP_EOL;
+            $body .= '$row = $query->fetch();'.PHP_EOL;
+            $body .= '$query->closeCursor();'.PHP_EOL;
+            $body .= 'if($row) {'.PHP_EOL;
+            $body .= '    return $row[\''.$primary.'\'];'.PHP_EOL;
+            $body .= '}'.PHP_EOL.PHP_EOL;
+            $body .= 'return null;'.PHP_EOL;
+            $cMethod->setBody($body);
         }
     }
 
-
     /**
-     * @param string $filename
-     * @return mixed
-     */
-    protected function fileOpen(string $filename)
-    {
-        $key                          = str_replace('.', '', microtime(true));
-        $this->open_files[$key]       = fopen($filename, 'w');
-        $this->open_files_level[$key] = 0;
-
-        return $key;
-    }
-
-    /**
-     * @param mixed  $key
-     * @param string $string
+     * @param ClassType $cClass
+     * @param PhpNamespace $cNamespace
+     * @param array $config
+     *
      * @return void
      */
-    protected function fileWrite($key, string $string)
+    protected function doBaseExceptions(ClassType $cClass, PhpNamespace $cNamespace, array $config)
     {
-        fwrite($this->open_files[$key], str_repeat(' ', $this->open_files_level[$key] * 4).$string);
-    }
 
-    /**
-     * @param mixed $key
-     * @return void
-     */
-    protected function fileBump($key)
-    {
-        ++$this->open_files_level[$key];
-    }
+        $columns = [];
+        $keys    = $this->getKeys($cClass->getName());
+        $uniques = $keys['uniques'];
 
-    /**
-     * @param mixed $key
-     * @return void
-     */
-    protected function fileDrop($key)
-    {
-        --$this->open_files_level[$key];
-    }
+        foreach($uniques as $unique) {
+            foreach($unique as $item) {
+                $columns[] = $item['Column_name'];
+            }
+        }
+        foreach($config as $key => $field) {
+            if(isset($field['visibility']) && $field['visibility'] == 'protected') {
+                $columns[] = $key;
+            }
+        }
 
-    /**
-     * @param mixed $key
-     * @return void
-     */
-    protected function fileClose($key)
-    {
-        fclose($this->open_files[$key]);
-        unset($this->open_files[$key]);
-        unset($this->open_files_level[$key]);
+        $columns = array_unique($columns);
+        sort($columns);
+
+        if(count($columns) < 1) {
+            return;
+        }
+
+
     }
 
     /**
@@ -746,7 +643,7 @@ NOW;
             return intval($default);
         }
 
-        return var_export($default, true);
+        return $default;
     }
 
     /**
