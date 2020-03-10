@@ -1,5 +1,5 @@
 <?php
-namespace MHC\ACE2\Exceptions;
+namespace GCWorld\ORM\Exceptions;
 
 use GCWorld\ORM\Interfaces\FieldException;
 
