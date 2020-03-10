@@ -408,8 +408,8 @@ NOW;
 
         $cPrinter  = new PsrPrinter();
         $contents  = '<?php'.PHP_EOL;
-        $contents .= $cPrinter->printNamespace($cNamespace);
-        $contents .= $cPrinter->printClass($cClass);
+        $contents .= $cPrinter->printNamespace($cTraitNamespace);
+        $contents .= $cPrinter->printClass($cTraitClass);
 
         file_put_contents($path.$filename, $contents);
 
