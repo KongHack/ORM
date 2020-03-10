@@ -5,6 +5,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [5.0.0](https://github.com/KongHack/ORM/releases/tag/5.0.0)
+ - @GameCharmer Core Rewrite to use Nette PHP Generator
+ - @GameCharmer new saveTest method for pre-generating repetitive exceptions
+
+
+
 ## [4.3.0](https://github.com/KongHack/ORM/releases/tag/4.3.0)
  - @GameCharmer auto-generate factory methods for uniques
  - @GameCharmer all classes are now abstract
