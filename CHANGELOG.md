@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [5.0.4](https://github.com/KongHack/ORM/releases/tag/5.0.4)
+ - @GameCharmer Fix missed primary
+
+
+
 ## [5.0.3](https://github.com/KongHack/ORM/releases/tag/5.0.3)
  - @GameCharmer Required indicator on fields as an override to current required system
 
