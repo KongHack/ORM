@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [5.0.1](https://github.com/KongHack/ORM/releases/tag/5.0.1)
+ - @GameCharmer various fixes to removals I thought I had wrong but were actually correct :P
+
+
+
 ## [5.0.0](https://github.com/KongHack/ORM/releases/tag/5.0.0)
  - @GameCharmer Core Rewrite to use Nette PHP Generator
  - @GameCharmer new saveTest method for pre-generating repetitive exceptions
