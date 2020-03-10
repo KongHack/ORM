@@ -15,10 +15,10 @@ use \PDO;
 class Core
 {
     protected $master_namespace = '\\';
-    /** @var \GCWorld\Common\Common */
-    protected $master_common    = null;
-    protected $master_location  = null;
-    protected $config           = [];
+    /** @var Common|\GCWorld\Common\Common */
+    protected $master_common   = null;
+    protected $master_location = null;
+    protected $config          = [];
 
     protected $get_set_funcs          = true;
     protected $var_visibility         = 'public';
@@ -47,7 +47,7 @@ class Core
             }
         }
         if (isset($config['options']['var_visibility'])
-            && in_array($config['options']['var_visibility'],['public', 'protected'])
+            && in_array($config['options']['var_visibility'], ['public', 'protected'])
         ) {
             $this->var_visibility = $config['options']['var_visibility'];
         }
@@ -96,7 +96,7 @@ class Core
         $default = Config::getDefaultFieldConfig();
         foreach ($fields as $i => $row) {
             // Do not include virtual fields in the system
-            if(strpos($row['Extra'],'VIRTUAL')!==false) {
+            if (strpos($row['Extra'], 'VIRTUAL') !== false) {
                 unset($fields[$i]);
                 continue;
             }
@@ -113,20 +113,20 @@ class Core
             if (strstr($row['Extra'], 'auto_increment')) {
                 $auto_increment = true;
             }
-            if(!isset($config['fields'][$row['Field']])) {
+            if (!isset($config['fields'][$row['Field']])) {
                 $config['fields'][$row['Field']] = $default;
             } else {
-                foreach($default as $k => $v) {
-                    if(!isset($config['fields'][$row['Field']][$k])) {
+                foreach ($default as $k => $v) {
+                    if (!isset($config['fields'][$row['Field']][$k])) {
                         $config['fields'][$row['Field']][$k] = $v;
                     }
                 }
             }
 
-            $config['fields'][$row['Field']]['uuid_field'] = strpos($row['Field'],'_uuid') !== false
+            $config['fields'][$row['Field']]['uuid_field'] = strpos($row['Field'], '_uuid') !== false
                                                              && $row['Type'] == 'binary(16)';
 
-            if(!$uuid_fields
+            if (!$uuid_fields
                && isset($config['fields'][$row['Field']]['uuid_field'])
                && $config['fields'][$row['Field']]['uuid_field']
             ) {
@@ -140,11 +140,11 @@ class Core
 
         $filename   = $table_name.'.php';
         $cNamespace = new PhpNamespace('GCWorld\\ORM\\Generated');
-        $cClass = new ClassType($table_name, $cNamespace);
+        $cClass     = new ClassType($table_name, $cNamespace);
         $cClass->setAbstract(true);
         $cClass->addConstant('CLASS_TABLE', $table_name)->setPublic();
         $cClass->addComment('Generated Class for Table '.$table_name);
-        if($uuid_fields) {
+        if ($uuid_fields) {
             $cNamespace->addUse('Ramsey\\Uuid\\Uuid');
         }
 
@@ -159,7 +159,6 @@ class Core
             }
             $cNamespace->addUse('GCWorld\\ORM\\Interfaces\\GeneratedInterface', 'dbi');
             $cClass->addConstant('CLASS_PRIMARY', $primaries[0])->setPublic();
-
         } else {
             // Multiple primary keys!!!
             if ($this->get_set_funcs) {
@@ -176,7 +175,7 @@ class Core
         $cClass->addExtend('dbc');
         $cClass->addImplement('dbi');
         $cClass->addImplement('dbd');
-        if($this->json_serialize) {
+        if ($this->json_serialize) {
             $cNamespace->addUse('JsonSerializable');
             $cClass->addImplement('JsonSerializable');
         }
@@ -197,7 +196,7 @@ class Core
         }
 
         $arr = [];
-        foreach($fields as $i => $row) {
+        foreach ($fields as $i => $row) {
             $arr[$row['Field']] = $row['Type'].($row['Comment'] != '' ? ' - '.$row['Comment'] : '');
         }
         $cProperty = $cClass->addProperty('dbInfo', $arr);
@@ -209,7 +208,6 @@ class Core
 
         // CONSTRUCTOR!
         if (count($primaries) == 1) {
-
             if ($this->type_hinting) {
                 // TODO: Get type of primary and swap out mixed
                 $cMethodConstructor->addComment('@param mixed $primary_id');
@@ -231,7 +229,7 @@ class Core
         if ($this->get_set_funcs) {
             foreach ($fields as $i => $row) {
                 $fieldConfig = $config['fields'][$row['Field']];
-                if($fieldConfig['getter_ignore']) {
+                if ($fieldConfig['getter_ignore']) {
                     continue;
                 }
 
@@ -249,7 +247,7 @@ class Core
                     ->addComment('@return '.$return_type)
                     ->setBody('return $this->get(\''.$row['Field'].'\');');
 
-                if($fieldConfig['uuid_field']) {
+                if ($fieldConfig['uuid_field']) {
                     $body  = '$value = $this->get(\''.$row['Field'].'\');'.PHP_EOL;
                     $body .= 'if(empty($value)) { '.PHP_EOL;
                     $body .= '    return \'\';'.PHP_EOL;
@@ -266,7 +264,7 @@ class Core
 
             foreach ($fields as $i => $row) {
                 $fieldConfig = $config['fields'][$row['Field']];
-                if($fieldConfig['setter_ignore']) {
+                if ($fieldConfig['setter_ignore']) {
                     continue;
                 }
 
@@ -283,11 +281,11 @@ class Core
                 $cSetter->addComment('@param '.$return_type.' $value');
                 $cSetter->addComment('@return static');
                 $cSetter->addParameter('value')->setType($return_type == 'mixed' ? '' : $return_type);
-                $cSetter->setVisibility($fieldConfig['visibility']??'public');
+                $cSetter->setVisibility($fieldConfig['visibility'] ?? 'public');
 
                 $body = '';
 
-                if($fieldConfig['uuid_field']) {
+                if ($fieldConfig['uuid_field']) {
                     $body = <<<'NOW'
 if(strlen($value)==36) {
     $value = Uuid::fromString($value)->getBytes();
@@ -314,7 +312,7 @@ NOW;
                 $fieldConfig = $config['fields'][$fName] ?? Config::getDefaultFieldConfig();
                 if ($this->get_set_funcs) {
                     $name = FieldName::getterName($fName);
-                    if($fieldConfig['uuid_field']) {
+                    if ($fieldConfig['uuid_field']) {
                         $body .= "    '$fName' => ".'$this->'.$name.'AsString(),'.PHP_EOL;
                         continue;
                     }
@@ -322,7 +320,6 @@ NOW;
                     continue;
                 }
                 $body .= "    '$fName' => ".'$this->'.$fName.','.PHP_EOL;
-
             }
             $body .= '];';
             $cMethod->setBody($body);
@@ -372,7 +369,7 @@ NOW;
                     continue;
                 }
                 $fieldConfig = $config['fields'][$row['Field']] ?? Config::getDefaultFieldConfig();
-                if($fieldConfig['getter_ignore']) {
+                if ($fieldConfig['getter_ignore']) {
                     continue;
                 }
 
@@ -389,7 +386,7 @@ NOW;
                 $cMethod->addComment('@return '.$return_type);
                 $cMethod->setBody('return $this->'.$row['Field'].';');
 
-                if($fieldConfig['uuid_field']) {
+                if ($fieldConfig['uuid_field']) {
                     $cMethod = $cTraitClass->addMethod('get'.$name.'AsString');
                     $cMethod->addComment('@return string');
                     $body  = '$value = $this->get(\''.$row['Field']."');".PHP_EOL;
@@ -427,41 +424,41 @@ NOW;
         $primary = null;
 
         // Factory Stuff
-        if(count($indexes) < 1) {
+        if (count($indexes) < 1) {
             return [
                 'uniques' => $uniques,
                 'primary' => $primary,
             ];
         }
 
-        foreach($indexes as $v) {
-            if($v['Non_unique']) {
+        foreach ($indexes as $v) {
+            if ($v['Non_unique']) {
                 continue;
             }
-            if($v['Key_name'] == 'PRIMARY') {
+            if ($v['Key_name'] == 'PRIMARY') {
                 $primary = $v['Column_name'];
                 continue;
             }
-            if(!isset($uniques[$v['Key_name']])) {
+            if (!isset($uniques[$v['Key_name']])) {
                 $uniques[$v['Key_name']] = [];
             }
             $uniques[$v['Key_name']][] = $v;
         }
 
-        if($primary === null || empty($uniques)) {
+        if ($primary === null || empty($uniques)) {
             return [
                 'uniques' => $uniques,
                 'primary' => $primary,
             ];
         }
 
-        foreach($uniques as $k => $v) {
-            if(count($v) < 2) {
+        foreach ($uniques as $k => $v) {
+            if (count($v) < 2) {
                 unset($uniques[$k]);
                 continue;
             }
 
-            uasort($v, function ($a, $b){
+            uasort($v, function ($a, $b) {
                 return $a['Seq_in_index'] <=> $b['Seq_in_index'];
             });
             $uniques[$k] = $v;
@@ -485,12 +482,12 @@ NOW;
         $uniques = $keys['uniques'];
         $primary = $keys['primary'];
 
-        if(count($uniques) > 0) {
+        if (count($uniques) > 0) {
             $cNamespace->addUse('GCWorld\\ORM\\CommonLoader');
         }
 
-        foreach($uniques as $key => $unique) {
-            $name = str_replace(' ','',ucwords(str_replace('_',' ',$key)));
+        foreach ($uniques as $key => $unique) {
+            $name = str_replace(' ', '', ucwords(str_replace('_', ' ', $key)));
             $vars = [];
 
             // Factory All Method =====================================================================================
@@ -498,20 +495,20 @@ NOW;
             $cMethod->setPublic();
             $cMethod->setStatic(true);
             $cMethod->addComment('@return static');
-            foreach($unique as $item) {
+            foreach ($unique as $item) {
                 $cMethod->addComment('@param mixed '.$item['Column_name']);
                 $cMethod->addParameter($item['Column_name']);
                 $vars[] = $item['Column_name'];
             }
-            $str   = '$'.implode(', $',$vars);
+            $str   = '$'.implode(', $', $vars);
             $body  = '$id = self::find'.$name.'('.$str.');'.PHP_EOL;
             $body .= 'if(!empty($id)) {'.PHP_EOL;
             $body .= '    return new static($id);'.PHP_EOL;
             $body .= '}'.PHP_EOL.PHP_EOL;
             $body .= '$cObj = new static();'.PHP_EOL;
-            foreach($vars as $var) {
+            foreach ($vars as $var) {
                 $setter = FieldName::setterName($var);
-                $body .= '$cObj->'.$setter.'($'.$var.');'.PHP_EOL;
+                $body  .= '$cObj->'.$setter.'($'.$var.');'.PHP_EOL;
             }
             $body .= PHP_EOL;
             $body .= 'return $cObj;'.PHP_EOL;
@@ -538,14 +535,14 @@ NOW;
             $cMethod->setPublic();
             $cMethod->setStatic(true);
             $cMethod->addComment('@return mixed');
-            foreach($vars as $var) {
+            foreach ($vars as $var) {
                 $cMethod->addComment('@param mixed $'.$var);
                 $cMethod->addParameter($var);
             }
 
             $params = [];
             $where  = [];
-            foreach($vars as $var) {
+            foreach ($vars as $var) {
                 $where[]  = $var.' = :'.$var;
                 $params[] = '\':'.$var.'\' => $'.$var.','.PHP_EOL;
             }
@@ -555,7 +552,7 @@ NOW;
             $body .= '          '.$sWhere.'\';'.PHP_EOL;
             $body .= '$query = CommonLoader::getCommon()->getDatabase()->prepare($sql);'.PHP_EOL;
             $body .= '$query->execute(['.PHP_EOL;
-            foreach($params as $param) {
+            foreach ($params as $param) {
                 $body .= '    '.$param;
             }
             $body .= ']);'.PHP_EOL;
@@ -570,17 +567,17 @@ NOW;
     }
 
     /**
-     * @param ClassType $cClass
+     * @param ClassType    $cClass
      * @param PhpNamespace $cNamespace
-     * @param array $fields
+     * @param array        $fields
      *
      * @return void
      */
     protected function doBaseExceptions(ClassType $cClass, PhpNamespace $cNamespace, array $fields)
     {
         $columns = [];
-        foreach($fields as $id => $field) {
-            if(isset($field['required']) && $field['required']) {
+        foreach ($fields as $id => $field) {
+            if (isset($field['required']) && $field['required']) {
                 $columns[] = $id;
             }
         }
@@ -589,7 +586,7 @@ NOW;
         $uniques = $keys['uniques'];
         $primary = $keys['primary'];
 
-        if(count($columns) < 1) {
+        if (count($columns) < 1) {
             foreach ($uniques as $unique) {
                 foreach ($unique as $item) {
                     $columns[] = $item['Column_name'];
@@ -604,7 +601,7 @@ NOW;
             $columns = array_unique($columns);
         }
 
-        if(count($columns) < 1) {
+        if (count($columns) < 1) {
             return;
         }
         sort($columns);
@@ -613,12 +610,12 @@ NOW;
         $cNamespace->addUse('GCWorld\\ORM\\Exceptions\\ModelRequiredFieldException');
 
         $uuid_fields = false;
-        foreach($columns as $k => $column) {
-            if($column == $primary) {
+        foreach ($columns as $k => $column) {
+            if ($column == $primary) {
                 unset($columns[$k]);
                 continue;
             }
-            if(isset($fields[$column]['uuid_field']) && $fields[$column]['uuid_field']) {
+            if (isset($fields[$column]['uuid_field']) && $fields[$column]['uuid_field']) {
                 $uuid_fields = true;
             }
         }
@@ -628,8 +625,8 @@ NOW;
         $cMethod->addComment('@throws ModelSaveExceptions');
         $cMethod->setPublic();
 
-        $body  = '$cExceptions = new ModelSaveExceptions();'.PHP_EOL;
-        foreach($columns as $column) {
+        $body = '$cExceptions = new ModelSaveExceptions();'.PHP_EOL;
+        foreach ($columns as $column) {
             $body .= 'if(empty($this->'.$column.')) {'.PHP_EOL;
             $body .= '    $cExceptions->addException(new ModelRequiredFieldException(\''.$column.'\'));'.PHP_EOL;
             $body .= '}'.PHP_EOL;
@@ -638,12 +635,12 @@ NOW;
         $body .= '    throw $cExceptions;'.PHP_EOL;
         $body .= '}'.PHP_EOL.PHP_EOL;
 
-        if($uuid_fields) {
+        if ($uuid_fields) {
             $cNamespace->addUse('GCWorld\\ORM\\Exceptions\\ModelInvalidUUIDFormatException');
             $cNamespace->addUse('Exception');
 
-            foreach($columns as $column) {
-                if(!isset($config[$column]['uuid_field']) || !$config[$column]['uuid_field']) {
+            foreach ($columns as $column) {
+                if (!isset($fields[$column]['uuid_field']) || !$fields[$column]['uuid_field']) {
                     continue;
                 }
 
@@ -706,7 +703,7 @@ NOW;
 
     /**
      * @param mixed $type
-     * @return null|string
+     * @return mixed
      */
     private function defaultData($type)
     {

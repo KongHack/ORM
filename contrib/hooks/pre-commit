@@ -1,0 +1,128 @@
+#!/usr/bin/env bash
+
+PROJECT=`php -r "echo dirname(dirname(dirname(realpath('$0'))));"`
+STAGED_FILES_CMD=`git diff --cached --name-only --diff-filter=ACMR HEAD | grep \\\\.php`
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m' # No Color
+
+# Determine if a file list is passed
+if [ "$#" -eq 1 ]
+then
+	oIFS=$IFS
+	IFS='
+	'
+	SFILES="$1"
+	IFS=$oIFS
+fi
+SFILES=${SFILES:-$STAGED_FILES_CMD}
+
+# Full paths please
+
+for FILE in $SFILES
+do
+	if [ ${FILE: -4} == ".php" ]
+	then
+		if [[ "$FILE" =~ src/.* ]]
+		then
+			FILES="$FILES $PROJECT/$FILE"
+		fi
+	fi
+done
+
+# ============================================================================================================ PHP LINT
+echo "Checking PHP Lint..."
+for FILE in $FILES
+do
+	php -l -d display_errors=0 $FILE
+	if [ $? != 0 ]
+	then
+		echo "Fix the error before commit."
+		exit 2
+	fi
+done
+
+
+# ============================================================================================= PHP Sanitizers and such
+if [ "$FILES" != "" ]
+then
+	echo "Starting entire validation process"
+	printf '=%.0s' {1..150}
+
+	ISSUE=false
+	OUTSMART=''
+	for FILE in $FILES
+	do
+		FILE_ISSUE=false;
+		FILE_ISSUE_TEXT=''
+		printf "\nAnalyzing File: ${FILE}\n";
+
+		printf "PHPMD        - ";
+		OUTLINE=$(vendor/bin/phpmd $FILE text phpmd_local.xml)
+		if [ $? != 0 ]
+		then
+			printf "${RED}[BAD]${NC}\n";
+			FILE_ISSUE=true
+			FILE_ISSUE_TEXT="$FILE_ISSUE_TEXT\n[PHP Mess Detector]\n$OUTLINE"
+		else
+			printf "${GREEN}[OK!]${NC}\n";
+		fi
+
+		printf "PHPStan      - "
+		OUTLINE=$(vendor/bin/phpstan analyse --no-progress -l 4 -c  phpstan.neon $FILE 2>&1)
+		if [ $? != 0 ]
+		then
+			printf "${RED}[BAD]${NC}\n";
+			FILE_ISSUE=true
+			FILE_ISSUE_TEXT="$FILE_ISSUE_TEXT\n[PHP Static Analysis]\n$OUTLINE"
+		else
+			printf "${GREEN}[OK!]${NC}\n";
+		fi
+
+		printf "PHP-CS-Fixer - ";
+		OUTLINE=$(vendor/bin/php-cs-fixer fix $FILE --allow-risky=yes --dry-run --using-cache=no --show-progress=none -v 2>/dev/null)
+		if [ $? != 0 ]
+		then
+			OUTLINE=$(vendor/bin/php-cs-fixer fix $FILE --allow-risky=yes --using-cache=no -v 2>/dev/null)
+			printf "${RED}[BAD]${NC}\n";
+			FILE_ISSUE=true
+			FILE_ISSUE_TEXT="$FILE_ISSUE_TEXT\n[PHP CS Fixer]\n$OUTLINE"
+		else
+			printf "${GREEN}[OK!]${NC}\n";
+		fi
+
+		# Must be at the bottom, since it does the CBF automatically
+		printf "PHPCS        - ";
+		OUTLINE=$(vendor/bin/phpcs --standard=phpcs_local.xml $FILE)
+		if [ $? != 0 ]
+		then
+			vendor/bin/phpcbf --standard=phpcs_local.xml $FILE
+			printf "${RED}[BAD]${NC}\n";
+			FILE_ISSUE=true
+			FILE_ISSUE_TEXT="$FILE_ISSUE_TEXT\n[PHP Code Sniffer]\n$OUTLINE"
+		else
+			printf "${GREEN}[OK!]${NC}\n";
+		fi
+
+		if [ "$FILE_ISSUE" = true ]
+		then
+		    ISSUE=true
+		    OUTSMART="$OUTSMART\nInspection Results On: $FILE\n$FILE_ISSUE_TEXT\n"
+		fi
+		printf '=%.0s' {1..150}
+	done
+	if [ "$ISSUE" = true ]
+	then
+		printf "\n${RED}\n";
+		cat contrib/ascii-bad.txt
+		printf "${NC}\n";
+		printf "${OUTSMART}\n";
+		exit 2
+	else
+		printf "\n${GREEN}\n";
+		cat contrib/ascii-good.txt
+		printf "${NC}\n";
+	fi
+fi
+
+exit $?

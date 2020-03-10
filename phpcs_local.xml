@@ -12,8 +12,6 @@
 
     <rule ref="vendor/gcworld/code_sniffer_contrib/CodeSnifferContrib/">
         <exclude name="CodeSnifferContrib.Arrays"/>
-        <exclude name="CodeSnifferContrib.Commenting.FunctionComment.InvalidNoReturn"/>
-        <exclude name="CodeSnifferContrib.Commenting.ClassComment.TagNotAllowed"/>
         <exclude name="Squiz.Commenting.FunctionCommentThrowTag.WrongNumber"/>
     </rule>
     <rule ref="Generic.Files.LineLength">

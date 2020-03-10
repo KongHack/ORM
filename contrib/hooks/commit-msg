@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+MESSAGE=$(cat "$1")
+BRANCH=$(git rev-parse --abbrev-ref HEAD);
+ISSUE_NUM=(${BRANCH//-/ })
+
+is_num() { awk -v a="$1" 'BEGIN {print (a == a + 0)}'; }
+res=`is_num "$ISSUE_NUM"`
+if [ "$res" == "1" ] ; then
+	ISSUE_NAME="#${ISSUE_NUM}"
+	if ! [[ "$MESSAGE" =~ "$ISSUE_NAME" ]];then
+        echo "Missing Issue Number From Commit Message"
+        exit 1;
+	fi
+else
+	echo "$ISSUE_NUM"
+fi

@@ -22,16 +22,22 @@
     "nette/php-generator": "^3.3"
   },
   "require-dev": {
-    "gcworld/code_sniffer_contrib": "^1.0",
-    "phpstan/phpstan": "^0.12.7",
-    "phpmd/phpmd": "^2.6"
+    "gcworld/code_sniffer_contrib": "^2.0.1",
+    "phpstan/phpstan": "^0.12",
+    "phpmd/phpmd": "^2.6",
+    "phpstan/phpstan-deprecation-rules": "^0.12",
+    "friendsofphp/php-cs-fixer": "^2.15.1"
   },
   "autoload": {
     "psr-4": {"GCWorld\\ORM\\": "src/"}
   },
   "scripts": {
     "post-autoload-dump": [
+      "bash contrib/setup.sh",
       "GCWorld\\ORM\\ComposerInstaller::setupConfig"
+    ],
+    "post-install-cmd": [
+      "bash contrib/setup.sh"
     ]
   },
   "license":"GPL-3.0"

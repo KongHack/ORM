@@ -5,3 +5,4 @@ parameters:
 	ignoreErrors:
 		- '#stdClass#'
 		- '#Function d not found.#'
+		- '#Call to an undefined method GCWorld\\Interfaces\\Database::prepare().#'

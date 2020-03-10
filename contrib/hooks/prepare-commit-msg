@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+COMMIT_EDITMSG=$1
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+MSG=$(cat $COMMIT_EDITMSG | egrep -v "^\s*(#|$)")
+
+
+getIssueNumber() {
+  BRANCH=$(git rev-parse --abbrev-ref HEAD)
+  ISSUE_NUM=(${BRANCH//-/ })
+  is_num() { awk -v a="$1" 'BEGIN {print (a == a + 0)}'; }
+  res=`is_num "$ISSUE_NUM"`
+  if [ "$res" == "1" ] ; then
+     ISSUE_NAME="#${ISSUE_NUM}"
+  	 if [[ ${COMMIT_EDITMSG} != *"$ISSUE_NAME"* ]]; then
+        retval="$ISSUE_NAME"
+     fi
+  fi
+}
+
+getIssueNumber
+NUM="$retval"
+OUT="[$BRANCH]:"
+if [[ $MSG == *"$OUT"* ]]; then
+	echo -e "$MSG" > $COMMIT_EDITMSG
+else
+	OUT="$OUT $MSG $NUM \n"
+
+	echo -e "$OUT" > $COMMIT_EDITMSG
+fi
