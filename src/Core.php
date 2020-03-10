@@ -123,11 +123,8 @@ class Core
                 }
             }
 
-            if(strpos($row['Field'],'_uuid') !== false
-               && $row['Type'] == 'binary(16)'
-            ) {
-                $config['fields'][$row['Field']]['uuid_field'] = true;
-            }
+            $config['fields'][$row['Field']]['uuid_field'] = strpos($row['Field'],'_uuid') !== false
+                                                             && $row['Type'] == 'binary(16)';
 
             if(!$uuid_fields
                && isset($config['fields'][$row['Field']]['uuid_field'])
@@ -147,7 +144,6 @@ class Core
         $cClass->setAbstract(true);
         $cClass->addConstant('CLASS_TABLE', $table_name)->setPublic();
         $cClass->addComment('Generated Class for Table '.$table_name);
-        $cNamespace->addUse('GCWorld\\ORM\\CommonLoader');
         if($uuid_fields) {
             $cNamespace->addUse('Ramsey\\Uuid\\Uuid');
         }
@@ -581,6 +577,7 @@ NOW;
         $columns = [];
         $keys    = $this->getKeys($cClass->getName());
         $uniques = $keys['uniques'];
+        $primary = $keys['primary'];
 
         foreach($uniques as $unique) {
             foreach($unique as $item) {
@@ -599,8 +596,58 @@ NOW;
         if(count($columns) < 1) {
             return;
         }
+        // Not needed at this time
+        // $cNamespace->addUse('GCWorld\\ORM\\CommonLoader');
+        $cNamespace->addUse('GCWorld\\ORM\\Exceptions\\ModelSaveExceptions');
+        $cNamespace->addUse('GCWorld\\ORM\\Exceptions\\ModelRequiredFieldException');
 
+        $uuid_fields = false;
+        foreach($columns as $k => $column) {
+            if($column == $primary) {
+                unset($columns[$k]);
+                continue;
+            }
+            if(isset($config[$column]['uuid_field']) && $config[$column]['uuid_field']) {
+                $uuid_fields = true;
+            }
+        }
 
+        $cMethod = $cClass->addMethod('saveTest');
+        $cMethod->addComment('@return void');
+        $cMethod->addComment('@throws ModelSaveExceptions');
+        $cMethod->setPublic();
+
+        $body  = '$cExceptions = new ModelSaveExceptions();'.PHP_EOL;
+        foreach($columns as $column) {
+            $body .= 'if(empty($this->'.$column.')) {'.PHP_EOL;
+            $body .= '    $cExceptions->addException(new ModelRequiredFieldException(\''.$column.'\'));'.PHP_EOL;
+            $body .= '}'.PHP_EOL;
+        }
+        $body .= 'if($cExceptions->isThrowable()){'.PHP_EOL;
+        $body .= '    throw $cExceptions;'.PHP_EOL;
+        $body .= '}'.PHP_EOL.PHP_EOL;
+
+        if($uuid_fields) {
+            $cNamespace->addUse('GCWorld\\ORM\\Exceptions\\ModelInvalidUUIDFormatException');
+            $cNamespace->addUse('Exception');
+
+            foreach($columns as $column) {
+                if(!isset($config[$column]['uuid_field']) || !$config[$column]['uuid_field']) {
+                    continue;
+                }
+
+                $body .= 'try {'.PHP_EOL;
+                $body .= '    Uuid::fromBytes($this->'.$column.');'.PHP_EOL;
+                $body .= '} catch (Exception $e) {'.PHP_EOL;
+                $body .= '    $cExceptions->addException(new ModelInvalidUUIDFormatException(\''.$column.'\'));'.PHP_EOL;
+                $body .= '}'.PHP_EOL;
+            }
+            $body .= 'if($cExceptions->isThrowable()){'.PHP_EOL;
+            $body .= '    throw $cExceptions;'.PHP_EOL;
+            $body .= '}'.PHP_EOL.PHP_EOL;
+        }
+
+        $cMethod->setBody($body);
     }
 
     /**
