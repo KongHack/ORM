@@ -572,35 +572,42 @@ NOW;
     /**
      * @param ClassType $cClass
      * @param PhpNamespace $cNamespace
-     * @param array $config
+     * @param array $fields
      *
      * @return void
      */
-    protected function doBaseExceptions(ClassType $cClass, PhpNamespace $cNamespace, array $config)
+    protected function doBaseExceptions(ClassType $cClass, PhpNamespace $cNamespace, array $fields)
     {
-
         $columns = [];
-        $keys    = $this->getKeys($cClass->getName());
-        $uniques = $keys['uniques'];
-        $primary = $keys['primary'];
-
-        foreach($uniques as $unique) {
-            foreach($unique as $item) {
-                $columns[] = $item['Column_name'];
+        foreach($fields as $id => $field) {
+            if(isset($field['required']) && $field['required']) {
+                $columns[] = $id;
             }
         }
-        foreach($config as $key => $field) {
-            if(isset($field['visibility']) && $field['visibility'] == 'protected') {
-                $columns[] = $key;
-            }
-        }
+        if(count($columns) < 1) {
+            $keys    = $this->getKeys($cClass->getName());
+            $uniques = $keys['uniques'];
+            $primary = $keys['primary'];
 
-        $columns = array_unique($columns);
-        sort($columns);
+            foreach ($uniques as $unique) {
+                foreach ($unique as $item) {
+                    $columns[] = $item['Column_name'];
+                }
+            }
+            foreach ($fields as $key => $field) {
+                if (isset($field['visibility']) && $field['visibility'] == 'protected') {
+                    $columns[] = $key;
+                }
+            }
+
+            $columns = array_unique($columns);
+        }
 
         if(count($columns) < 1) {
             return;
         }
+        sort($columns);
+
         $cNamespace->addUse('GCWorld\\ORM\\Exceptions\\ModelSaveExceptions');
         $cNamespace->addUse('GCWorld\\ORM\\Exceptions\\ModelRequiredFieldException');
 
@@ -610,7 +617,7 @@ NOW;
                 unset($columns[$k]);
                 continue;
             }
-            if(isset($config[$column]['uuid_field']) && $config[$column]['uuid_field']) {
+            if(isset($fields[$column]['uuid_field']) && $fields[$column]['uuid_field']) {
                 $uuid_fields = true;
             }
         }
