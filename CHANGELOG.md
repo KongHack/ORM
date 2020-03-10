@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [5.0.2](https://github.com/KongHack/ORM/releases/tag/5.0.2)
+ - @GameCharmer Add missing param doc block for factory all method
+
+
+
 ## [5.0.1](https://github.com/KongHack/ORM/releases/tag/5.0.1)
  - @GameCharmer various fixes to removals I thought I had wrong but were actually correct :P
 
