@@ -224,7 +224,9 @@ class Core
         } else {
             $cMethodConstructor->setVisibility($config['constructor']);
             $cMethodConstructor->addComment('@param mixed ...$keys');
-            $cMethodConstructor->setBody('parent::__construct(...func_get_args());');
+            $cMethodConstructor->isVariadic();
+            $cMethodConstructor->addParameter('keys');
+            $cMethodConstructor->setBody('parent::__construct(...$keys);');
         }
 
         if ($this->get_set_funcs) {
