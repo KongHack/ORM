@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [5.0.8](https://github.com/KongHack/ORM/releases/tag/5.0.8)
+ - @GameCharmer Set some defaults I guess.  I'm curious as to WTF changed...
+
+
+
 ## [5.0.7](https://github.com/KongHack/ORM/releases/tag/5.0.7)
  - @GameCharmer Remove null argument from addParameter
 

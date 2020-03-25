@@ -217,17 +217,18 @@ class Core
                 $cMethodConstructor->addComment('@param mixed $primary_id');
                 $cMethodConstructor->addComment('@param mixed $defaults');
             }
-            $cMethodConstructor->addParameter('primary_id')->setNullable(true);
-            $cMethodConstructor->addParameter('defaults')->setNullable(true);
+            $cMethodConstructor->addParameter('primary_id', '')->setNullable(true);
+            $cMethodConstructor->addParameter('defaults', [])->setNullable(true);
             $cMethodConstructor->setVisibility($config['constructor']);
             $cMethodConstructor->setBody('parent::__construct($primary_id, $defaults);');
         } else {
             $cMethodConstructor->setVisibility($config['constructor']);
             $cMethodConstructor->addComment('@param mixed ...$keys');
             $cMethodConstructor->isVariadic();
-            $cMethodConstructor->addParameter('keys');
+            $cMethodConstructor->addParameter('keys', [])->setNullable(true);
             $cMethodConstructor->setBody('parent::__construct(...$keys);');
         }
+
 
         if ($this->get_set_funcs) {
             foreach ($fields as $i => $row) {
