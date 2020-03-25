@@ -217,8 +217,8 @@ class Core
                 $cMethodConstructor->addComment('@param mixed $primary_id');
                 $cMethodConstructor->addComment('@param mixed $defaults');
             }
-            $cMethodConstructor->addParameter('primary_id', null)->setNullable(true);
-            $cMethodConstructor->addParameter('defaults', null)->setNullable(true);
+            $cMethodConstructor->addParameter('primary_id')->setNullable(true);
+            $cMethodConstructor->addParameter('defaults')->setNullable(true);
             $cMethodConstructor->setVisibility($config['constructor']);
             $cMethodConstructor->setBody('parent::__construct($primary_id, $defaults);');
         } else {
