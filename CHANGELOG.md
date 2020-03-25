@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [5.0.9](https://github.com/KongHack/ORM/releases/tag/5.0.9)
+ - @GameCharmer Composer Update, revert back to nulls since those work again...
+
+
+
 ## [5.0.8](https://github.com/KongHack/ORM/releases/tag/5.0.8)
  - @GameCharmer Set some defaults I guess.  I'm curious as to WTF changed...
 
