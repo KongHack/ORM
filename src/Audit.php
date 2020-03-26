@@ -1,7 +1,8 @@
 <?php
 namespace GCWorld\ORM;
 
-use GCWorld\Common\Common;
+use GCWorld\Database\Database;
+use GCWorld\Globals\Globals;
 use Ramsey\Uuid\Uuid;
 
 /**
@@ -10,11 +11,8 @@ use Ramsey\Uuid\Uuid;
  */
 class Audit
 {
-
-
     private static $overrideMemberId = null;
 
-    /** @var \GCWorld\Common\Common */
     protected $common     = null;
     protected $database   = null;
     protected $connection = 'default';
@@ -30,9 +28,8 @@ class Audit
     /**
      * @param \GCWorld\Interfaces\Common $common
      */
-    public function __construct(Common $common)
+    public function __construct(\GCWorld\Interfaces\Common $common)
     {
-        /** @var \GCWorld\Common\Common common */
         $this->common = $common;
         /** @var array $audit */
         $audit = $common->getConfig('audit');
@@ -42,7 +39,6 @@ class Audit
             $this->connection = $audit['connection'];
             $this->prefix     = $audit['prefix'];
         }
-
     }
 
     /**
@@ -59,7 +55,7 @@ class Audit
      */
     public static function clearOverrideMemberId()
     {
-        self::$overrideMemberId  = null;
+        self::$overrideMemberId = null;
     }
 
     /**
@@ -78,19 +74,21 @@ class Audit
         }
 
         $cConfig = new Config();
-        $config  = $cConfig->getConfig()['tables']??[];
+        $config  = $cConfig->getConfig()['tables'] ?? [];
         if (array_key_exists($table, $config)) {
             $tableConfig = $config[$table];
             // Check to see if we are auditing this table at all
-            if(isset($tableConfig['audit_ignore']) && $tableConfig['audit_ignore']) {
+            if (isset($tableConfig['audit_ignore']) && $tableConfig['audit_ignore']) {
                 return 0;
             }
 
-            if (array_key_exists('audit_ignore_fields', $tableConfig)) {
-                $fields = $tableConfig['audit_ignore_fields'];
-                foreach ($fields as $field) {
-                    unset($before[$field]);
-                    unset($after[$field]);
+            if (array_key_exists('fields', $tableConfig)) {
+                $fields = $tableConfig['fields'];
+                foreach ($fields as $field => $fieldConfig) {
+                    if (isset($fieldConfig['audit_ignore']) && $fieldConfig['audit_ignore']) {
+                        unset($before[$field]);
+                        unset($after[$field]);
+                    }
                 }
             }
         }
@@ -111,7 +109,7 @@ class Audit
         }
 
         $storeTable = $this->prefix.$table;
-        if($this->database != null) {
+        if ($this->database != null) {
             $storeTable = $this->database.'.'.$storeTable;
         }
         /** @var Database $db */
@@ -129,29 +127,32 @@ class Audit
 
                 // Overrides
 
-                if(strpos($k,'_uuid')!==false && strlen($v)==16) {
+                if (strpos($k, '_uuid') !== false && strlen($v) == 16) {
                     $B[$k] = Uuid::fromBytes($v)->toString();
-                } elseif(self::isBinary($v)) {
+                } elseif (self::isBinary($v)) {
                     $B[$k] = base64_encode($v);
                 }
-                if(strpos($k,'_uuid')!==false && strlen($after[$k])==16) {
+                if (strpos($k, '_uuid') !== false && strlen($after[$k]) == 16) {
                     $A[$k] = Uuid::fromBytes($after[$k])->toString();
-                } elseif(self::isBinary($after[$k])) {
+                } elseif (self::isBinary($after[$k])) {
                     $A[$k] = base64_encode($after[$k]);
                 }
             }
         }
 
         if (count($A) > 0) {
+            $cGlobals = new Globals();
+            $request  = $cGlobals->string()->SERVER('REQUEST_URI') ?? $this->getTopScript();
+
             $sql   = 'INSERT INTO '.$storeTable.'
-            (primary_id, member_id, log_request_uri, log_before, log_after)
-            VALUES
-            (:pid, :mid, :uri, :logB, :logA)';
+                      (primary_id, member_id, log_request_uri, log_before, log_after)
+                      VALUES
+                      (:pid, :mid, :uri, :logB, :logA)';
             $query = $db->prepare($sql);
             $query->execute([
                 ':pid'  => $primaryId,
                 ':mid'  => $memberId,
-                ':uri'  => (isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : $this->getTopScript()),
+                ':uri'  => $request,
                 ':logB' => json_encode($B),
                 ':logA' => json_encode($A)
             ]);
@@ -220,7 +221,7 @@ class Audit
      */
     protected function determineMemberId()
     {
-        if(self::$overrideMemberId !== null) {
+        if (self::$overrideMemberId !== null) {
             return intval(self::$overrideMemberId);
         }
 
@@ -232,7 +233,7 @@ class Audit
             return 0;
         }
 
-        if(method_exists($user,'getRealMemberUuid')) {
+        if (method_exists($user, 'getRealMemberUuid')) {
             return $user->getRealMemberUuid();
         }
 
@@ -261,9 +262,16 @@ class Audit
         return 0;
     }
 
+    /**
+     * @param mixed $str
+     * @return bool
+     */
     public function isBinary($str)
     {
-        if(mb_detect_encoding($str)) {
+        if (!is_scalar($str)) {
+            return true;
+        }
+        if (mb_detect_encoding($str)) {
             return false;
         }
         return preg_match('~[^\x20-\x7E\t\r\n]~', $str) > 0;

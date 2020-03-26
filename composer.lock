@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2ac7772cacedf452749465cafd7481be",
+    "content-hash": "b6253d50ebd059b90f1a1069063089cc",
     "packages": [
         {
             "name": "composer/ca-bundle",
@@ -559,6 +559,52 @@
             "time": "2019-03-06T16:16:19+00:00"
         },
         {
+            "name": "gcworld/globals",
+            "version": "2.0.11",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/KongHack/Globals.git",
+                "reference": "fda7aa8e175c3c2e6b5267576ee42f6f55f42731"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/KongHack/Globals/zipball/fda7aa8e175c3c2e6b5267576ee42f6f55f42731",
+                "reference": "fda7aa8e175c3c2e6b5267576ee42f6f55f42731",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "neitanod/forceutf8": "^2.0",
+                "php": ">=7.1",
+                "ramsey/uuid": "^3.8"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "GCWorld\\Globals\\": "src/",
+                    "Coercive\\Utility\\Globals\\": "src_transition/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "GameCharmer",
+                    "email": "admin@gamecharmer.com"
+                },
+                {
+                    "name": "Anthony Moral",
+                    "email": "contact@coercive.fr",
+                    "homepage": "http://coercive.fr"
+                }
+            ],
+            "description": "Globals",
+            "homepage": "http://gamecharmer.com",
+            "time": "2019-10-01T12:00:07+00:00"
+        },
+        {
             "name": "gcworld/interfaces",
             "version": "3.3.2",
             "source": {
@@ -815,6 +861,43 @@
                 "psr-3"
             ],
             "time": "2019-12-20T14:22:59+00:00"
+        },
+        {
+            "name": "neitanod/forceutf8",
+            "version": "v2.0.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/neitanod/forceutf8.git",
+                "reference": "c1fbe70bfb5ad41b8ec5785056b0e308b40d4831"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/neitanod/forceutf8/zipball/c1fbe70bfb5ad41b8ec5785056b0e308b40d4831",
+                "reference": "c1fbe70bfb5ad41b8ec5785056b0e308b40d4831",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "ForceUTF8\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Sebastián Grignoli",
+                    "email": "grignoli@gmail.com"
+                }
+            ],
+            "description": "PHP Class Encoding featuring popular Encoding::toUTF8() function --formerly known as forceUTF8()-- that fixes mixed encoded strings.",
+            "homepage": "https://github.com/neitanod/forceutf8",
+            "time": "2019-12-10T14:09:14+00:00"
         },
         {
             "name": "nette/php-generator",
