@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [5.0.11](https://github.com/KongHack/ORM/releases/tag/5.0.11)
+ - @GameCharmer allow nullable UUID in setters
+
+
+
 ## [5.0.10](https://github.com/KongHack/ORM/releases/tag/5.0.10)
  - @GameCharmer Fix audit_ignore in fields
 
