@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b6253d50ebd059b90f1a1069063089cc",
+    "content-hash": "e63f49c6feddd6cf1c5e272f9d0474c1",
     "packages": [
         {
             "name": "composer/ca-bundle",
@@ -560,16 +560,16 @@
         },
         {
             "name": "gcworld/globals",
-            "version": "2.0.11",
+            "version": "3.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/KongHack/Globals.git",
-                "reference": "fda7aa8e175c3c2e6b5267576ee42f6f55f42731"
+                "reference": "fe58e40ea9335ee167c5300e3a95ecfa4c851e8a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/KongHack/Globals/zipball/fda7aa8e175c3c2e6b5267576ee42f6f55f42731",
-                "reference": "fda7aa8e175c3c2e6b5267576ee42f6f55f42731",
+                "url": "https://api.github.com/repos/KongHack/Globals/zipball/fe58e40ea9335ee167c5300e3a95ecfa4c851e8a",
+                "reference": "fe58e40ea9335ee167c5300e3a95ecfa4c851e8a",
                 "shasum": ""
             },
             "require": {
@@ -581,8 +581,7 @@
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "GCWorld\\Globals\\": "src/",
-                    "Coercive\\Utility\\Globals\\": "src_transition/"
+                    "GCWorld\\Globals\\": "src/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -593,16 +592,11 @@
                 {
                     "name": "GameCharmer",
                     "email": "admin@gamecharmer.com"
-                },
-                {
-                    "name": "Anthony Moral",
-                    "email": "contact@coercive.fr",
-                    "homepage": "http://coercive.fr"
                 }
             ],
             "description": "Globals",
             "homepage": "http://gamecharmer.com",
-            "time": "2019-10-01T12:00:07+00:00"
+            "time": "2020-04-20T15:43:22+00:00"
         },
         {
             "name": "gcworld/interfaces",

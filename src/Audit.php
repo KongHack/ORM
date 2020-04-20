@@ -2,7 +2,7 @@
 namespace GCWorld\ORM;
 
 use GCWorld\Database\Database;
-use GCWorld\Globals\Globals;
+use GCWorld\ORM\Globals;
 use Ramsey\Uuid\Uuid;
 
 /**
