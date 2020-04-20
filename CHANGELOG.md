@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [5.0.12](https://github.com/KongHack/ORM/releases/tag/5.0.12)
+ - @GameCharmer Update Globals
+
+
+
 ## [5.0.11](https://github.com/KongHack/ORM/releases/tag/5.0.11)
  - @GameCharmer allow nullable UUID in setters
 
