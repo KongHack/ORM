@@ -24,25 +24,44 @@ class Config
     public function __construct()
     {
         // Test for yml.  If not found, test for ini
-        $file = rtrim(dirname(__FILE__), DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR;
+        $file  = rtrim(dirname(__FILE__), DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR;
         $file .= 'config'.DIRECTORY_SEPARATOR.'config.yml';
-        if (!file_exists($file)) {
-            throw new Exception('YML Config File Not Found');
-        }
-        $config = Yaml::parse(file_get_contents($file));
-        if(array_key_exists('config_path', $config)) {
-            $file = __DIR__.DIRECTORY_SEPARATOR.$config['config_path'];
-            $config = Yaml::parse(file_get_contents($file));
+
+        $config = [];
+        $cache  = str_replace('.yml', '.php', $file);
+        if (file_exists($cache)) {
+            if (filemtime($file) < filemtime($cache)) {
+                $config = require $cache;
+            }
         }
 
-        if(!isset($config['version'])) {
+        if (empty($config)) {
+            if (!file_exists($file)) {
+                throw new Exception('YML Config File Not Found');
+            }
+            $config = Yaml::parseFile($file);
+            file_put_contents($cache, '<?php'.PHP_EOL.PHP_EOL.'return '.var_export($config, true).';'.PHP_EOL);
+        }
+
+        if (array_key_exists('config_path', $config)) {
+            $file  = __DIR__.DIRECTORY_SEPARATOR.$config['config_path'];
+            $cache = str_replace('.yml', '.php', $file);
+            if (file_exists($cache) && filemtime($file) < filemtime($cache)) {
+                $config = require $cache;
+            } else {
+                $config = Yaml::parseFile($file);
+                file_put_contents($cache, '<?php'.PHP_EOL.PHP_EOL.'return '.var_export($config, true).';'.PHP_EOL);
+            }
+        }
+
+        if (!isset($config['version'])) {
             $config['version'] = 0;
         }
 
-        if($config['version'] < self::VERSION) {
+        if ($config['version'] < self::VERSION) {
             $this->upgradeConfig($config);
         }
-        if(isset($config['sort']) && $config['sort']) {
+        if (isset($config['sort']) && $config['sort']) {
             $this->sortConfig($config);
             $new = Yaml::dump($config, 6);
             file_put_contents($file, $new);
@@ -72,11 +91,11 @@ class Config
      */
     protected function upgradeConfig(array &$config)
     {
-        if($config['version'] < 4) {
+        if ($config['version'] < 4) {
             $config['version'] = 4;
             $config['sort']    = true;
 
-            foreach($config['tables'] as &$table) {
+            foreach ($config['tables'] as &$table) {
                 $visibility           = [];
                 $audit_ignore_fields  = [];
                 $getter_ignore_fields = [];
@@ -110,22 +129,22 @@ class Config
                     }
                     unset($table['type_hints']);
                 }
-                if(isset($table['getter_ignore_fields'])) {
-                    foreach($table['getter_ignore_fields'] as $field) {
+                if (isset($table['getter_ignore_fields'])) {
+                    foreach ($table['getter_ignore_fields'] as $field) {
                         $getter_ignore_fields[] = $field;
                         $fields[]               = $field;
                     }
                     unset($table['getter_ignore_fields']);
                 }
-                if(isset($table['setter_ignore_fields'])) {
-                    foreach($table['setter_ignore_fields'] as $field) {
+                if (isset($table['setter_ignore_fields'])) {
+                    foreach ($table['setter_ignore_fields'] as $field) {
                         $setter_ignore_fields[] = $field;
                         $fields[]               = $field;
                     }
                     unset($table['setter_ignore_fields']);
                 }
-                if(isset($table['uuid_fields'])) {
-                    foreach($table['uuid_fields'] as $field) {
+                if (isset($table['uuid_fields'])) {
+                    foreach ($table['uuid_fields'] as $field) {
                         $uuid_fields[] = $field;
                         $fields[]      = $field;
                     }
@@ -134,29 +153,29 @@ class Config
 
                 $fConfig = [];
                 $fields  = array_unique($fields);
-                foreach($fields as $field) {
+                foreach ($fields as $field) {
                     $fConfig[$field] = [];
-                    if(isset($visibility[$field])) {
+                    if (isset($visibility[$field])) {
                         $fConfig[$field]['visibility'] = $visibility[$field];
                     }
-                    if(isset($type_hints[$field])) {
+                    if (isset($type_hints[$field])) {
                         $fConfig[$field]['type_hint'] = $type_hints[$field];
                     }
-                    if(in_array($field, $audit_ignore_fields)) {
+                    if (in_array($field, $audit_ignore_fields)) {
                         $fConfig[$field]['audit_ignore'] = true;
                     }
-                    if(in_array($field, $getter_ignore_fields)) {
+                    if (in_array($field, $getter_ignore_fields)) {
                         $fConfig[$field]['getter_ignore'] = true;
                     }
-                    if(in_array($field, $setter_ignore_fields)) {
+                    if (in_array($field, $setter_ignore_fields)) {
                         $fConfig[$field]['setter_ignore'] = true;
                     }
-                    if(in_array($field, $uuid_fields)) {
+                    if (in_array($field, $uuid_fields)) {
                         $fConfig[$field]['uuid_fields'] = true;
                     }
                 }
 
-                if(count($fConfig) > 0) {
+                if (count($fConfig) > 0) {
                     $table['fields'] = $fConfig;
                 } else {
                     unset($table['fields']);
@@ -172,14 +191,14 @@ class Config
     protected function sortConfig(array &$config)
     {
         unset($config['sort']);
-        if(isset($config['tables'])) {
+        if (isset($config['tables'])) {
             ksort($config['tables']);
         }
-        foreach($config['tables'] as &$table) {
-            if(isset($table['fields']) && is_array($table['fields'])) {
+        foreach ($config['tables'] as &$table) {
+            if (isset($table['fields']) && is_array($table['fields'])) {
                 ksort($table['fields']);
-                foreach($table['fields'] as &$field) {
-                    if(is_array($field)) {
+                foreach ($table['fields'] as &$field) {
+                    if (is_array($field)) {
                         ksort($field);
                     }
                 }
