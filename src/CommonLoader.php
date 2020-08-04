@@ -27,7 +27,6 @@ class CommonLoader
     public static function getCommon()
     {
         if (self::$common == null) {
-            // Attempt loading from a config.ini
             $cConfig = new Config();
             $config  = $cConfig->getConfig();
 

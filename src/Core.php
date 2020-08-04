@@ -184,6 +184,9 @@ class Core
 
         foreach ($fields as $i => $row) {
             $type = (stristr($row['Type'], 'int') ? 'int   ' : 'string');
+            if ($row['Null'] == 'YES') {
+                $type .= '|null';
+            }
 
             $default = null;
             if ($this->use_defaults) {
@@ -245,6 +248,9 @@ class Core
                 } elseif ($this->type_hinting) {
                     $return_type = $this->defaultReturn($row['Type']);
                 }
+                if ($row['Null'] == 'YES') {
+                    $return_type = '?'.$return_type;
+                }
 
                 $cClass->addMethod('get'.$name)
                     ->setPublic()
@@ -254,14 +260,14 @@ class Core
                 if ($fieldConfig['uuid_field']) {
                     $body  = '$value = $this->get(\''.$row['Field'].'\');'.PHP_EOL;
                     $body .= 'if(empty($value)) { '.PHP_EOL;
-                    $body .= '    return \'\';'.PHP_EOL;
+                    $body .= '    return null;'.PHP_EOL;
                     $body .= '}'.PHP_EOL;
                     $body .= PHP_EOL;
                     $body .= 'return (Uuid::fromBytes($value))->toString();';
 
                     $cClass->addMethod('get'.$name.'AsString')
                         ->setPublic()
-                        ->addComment('@return string')
+                        ->addComment('@return string|null')
                         ->setBody($body);
                 }
             }
