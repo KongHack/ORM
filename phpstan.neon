@@ -1,8 +1,5 @@
 parameters:
-	autoload_directories:
-		- %rootDir%/../../../src
-
 	ignoreErrors:
 		- '#stdClass#'
 		- '#Function d not found.#'
-		- '#Call to an undefined method GCWorld\\Interfaces\\Database::prepare().#'
+		- '#GCWorld\\Interfaces\\Database::prepare.#'

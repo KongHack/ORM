@@ -83,6 +83,12 @@ class Core
         $config['audit_ignore'] = $config['audit_ignore'] ?? false;
         $config['fields']       = $config['fields'] ?? [];
 
+        $save_hook      = $this->config['options']['save_hook'] ?? false;
+        $save_hook_call = $this->config['general']['save_hook'] ?? '';
+        if ($save_hook && empty($save_hook_call)) {
+            $save_hook = false;
+        }
+
         $uuid_fields    = false;
         $auto_increment = false;
         $primaries      = [];
@@ -210,6 +216,14 @@ class Core
 
         $cMethodConstructor = $cClass->addMethod('__construct');
 
+        // Let's add some variable defaults to make life easier on us
+        if ($config['audit_ignore']) {
+            $cProperty = $cClass->addProperty('_audit', false);
+            $cProperty->setVisibility('protected');
+            $cProperty->addComment('Disabled via ORM Config');
+            $cProperty->addComment('@var bool');
+        }
+
         // CONSTRUCTOR!
         if (count($primaries) == 1) {
             if ($this->type_hinting) {
@@ -333,6 +347,20 @@ NOW;
             $cMethod->setBody($body);
         }
 
+
+        if ($save_hook) {
+            $cMethod = $cClass->addMethod('saveHook');
+            $cMethod->addParameter('before')->setType('array');
+            $cMethod->addParameter('after')->setType('array');
+            $cMethod->addParameter('changed')->setType('array');
+            $cMethod->setVisibility('protected');
+            $body  = '$table_name    = constant($this->myName.\'::CLASS_TABLE\');'.PHP_EOL;
+            $body .= '$primary_name  = constant($this->myName.\'::CLASS_PRIMARY\');'.PHP_EOL;
+            $body .= '$primary_id    = $this->$primary_name;'.PHP_EOL;
+            $body .= PHP_EOL;
+            $body .= $save_hook_call.'($table_name, $primary_id, $before, $after, $changed);';
+            $cMethod->setBody($body);
+        }
 
         // Not for traits
         $this->doFactory($cClass, $cNamespace);

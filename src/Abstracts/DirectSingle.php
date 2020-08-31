@@ -37,13 +37,13 @@ abstract class DirectSingle
     protected $_cacheName = null;
 
     /**
-     * @var boolean
+     * @var bool
      * Set to false if you want to omit this object from your memory cache all together.
      */
     protected $_canCache = true;
 
     /**
-     * @var boolean
+     * @var bool
      * Set this to false in your class when you don't want to auto re-cache after a purge
      */
     protected $_canCacheAfterPurge = true;
@@ -60,7 +60,7 @@ abstract class DirectSingle
 
     /**
      * Set this to false in your class when you don't want to log changes
-     * @var boolean
+     * @var bool
      */
     protected $_audit = true;
 
@@ -73,7 +73,7 @@ abstract class DirectSingle
     /**
      * Setting this to true will enable insert on duplicate key update features.
      * This also includes not throwing an error on 0 id construct.
-     * @var boolean
+     * @var bool
      */
     protected $_canInsert = false;
 
@@ -122,7 +122,7 @@ abstract class DirectSingle
             $cLogger->info('ORM: DS: '.$table_name.': Primary ID is not scalar', debug_backtrace());
             throw new ORMException('Primary ID is not scalar');
         }
-        if ($defaults !== null && !is_array($defaults)) {
+        if ($defaults !== null) {
             $cLogger->info('ORM: DS: '.$table_name.': Defaults Array is not an array', debug_backtrace());
             throw new ORMException('Defaults Array is not an array');
         }
@@ -144,14 +144,14 @@ abstract class DirectSingle
                 $cLogger->info('ORM: DS: '.$table_name.': Cache1: Blob is not false, not null, and not empty');
                 try {
                     $data = @unserialize($blob);
-                } catch(Exception $e) {
+                } catch (Exception $e) {
                     $data = null;
                 }
-                if($data !== null && is_array($data) && !empty($data)) {
+                if ($data !== null && is_array($data) && !empty($data)) {
                     $cLogger->info('ORM: DS: '.$table_name.': Cache1: Data is Good');
 
                     $fields = array_keys(static::$dbInfo);
-                    if(count($fields) == count($data)) {
+                    if (count($fields) == count($data)) {
                         $cLogger->info('ORM: DS: '.$table_name.': Cache1: Count Matches');
                         //$properties = array_keys(get_object_vars($this));
                         foreach ($data as $k => $v) {
@@ -171,7 +171,7 @@ abstract class DirectSingle
                 $this->_cache->hDel($this->myName, 'key_'.$primary_id);
             }
         } else {
-            $cLogger->info('ORM: DS: Cache1: '.$table_name.': Bad Options',[
+            $cLogger->info('ORM: DS: Cache1: '.$table_name.': Bad Options', [
                 $this->_canCache,
                 $this->_cache !== null,
                 $this->_cache !== false,
@@ -194,7 +194,7 @@ abstract class DirectSingle
             } else {
                 $sql = 'SELECT * FROM '.$table_name.' WHERE '.$primary_name.' = :id';
             }
-            $cLogger->info('ORM: DS: SELECT: '.$table_name.': Start',[
+            $cLogger->info('ORM: DS: SELECT: '.$table_name.': Start', [
                 'sql' => $sql,
                 'id'  => $primary_id,
             ]);
@@ -210,10 +210,11 @@ abstract class DirectSingle
                     if (isset($config['options']['enable_backtrace']) && $config['options']['enable_backtrace']) {
                         debug_print_backtrace();
                         if (function_exists('d')) {
+                            // @phpstan-ignore-next-line
                             d(func_get_args());
                         }
                     } else {
-                        $cLogger->info('ORM: DS: SELECT: '.$table_name.': Backtrace',[
+                        $cLogger->info('ORM: DS: SELECT: '.$table_name.': Backtrace', [
                             'args'  => func_get_args(),
                             'trace' => debug_backtrace(),
                         ]);
@@ -304,108 +305,113 @@ abstract class DirectSingle
         $table_name   = constant($this->myName.'::CLASS_TABLE');
         $primary_name = constant($this->myName.'::CLASS_PRIMARY');
 
-        if (count($this->_changed) > 0) {
-            $before = [];
-            $after  = [];
-
-            // ============================================================================== Audit
-            if ($this->_audit) {
-                $sql   = "SELECT * FROM $table_name WHERE $primary_name = :primary";
-                $query = $this->_db->prepare($sql);
-                $query->execute([':primary' => $this->$primary_name]);
-                $before = $query->fetch(\PDO::FETCH_ASSOC);
-                $query->closeCursor();
-            }
-
-            // ============================================================================== Write Logic
-            if ($this->_canInsert) {
-                $auto_increment = constant($this->myName.'::CLASS_PRIMARY');
-                $fields         = array_keys(static::$dbInfo);
-                if (!in_array($primary_name, $fields)) {
-                    $fields[] = $primary_name;
-                }
-                $params = [];
-                if (count($fields) > 1) {    // 1 being the primary key
-                    $sql = 'INSERT INTO '.$table_name.
-                        ' ('.implode(', ', $fields).
-                        ') VALUES (:'.implode(', :', $fields).') ON DUPLICATE KEY UPDATE ';
-                    foreach ($fields as $field) {
-                        $params[':'.$field] = ($this->$field == null ? '' : $this->$field);
-                        if ($field == $primary_name && !$auto_increment) {
-                            continue;
-                        }
-                        $sql .= "$field = VALUES($field), \n";
-                    }
-                    $sql   = rtrim($sql, ", \n");
-                    $query = $this->_db->prepare($sql);
-                    $query->execute($params);
-                    $newId = $this->_db->lastInsertId();
-                    if ($newId > 0) {
-                        $this->$primary_name = $newId;
-                    }
-                    $query->closeCursor();
-                } else {
-                    $sql = 'INSERT IGNORE INTO '.$table_name.
-                        ' ('.implode(', ', $fields).') VALUES (:'.
-                        implode(', :', $fields).')';
-                    foreach ($fields as $field) {
-                        $params[':'.$field] = ($this->$field == null ? '' : $this->$field);
-                        if ($field == $primary_name && !$auto_increment) {
-                            continue;
-                        }
-                        $sql .= "$field = VALUES($field), \n";
-                    }
-                    $sql   = rtrim($sql, ", \n");
-                    $query = $this->_db->prepare($sql);
-                    $query->execute($params);
-                    $newId = $this->_db->lastInsertId();
-                    if ($newId > 0) {
-                        $this->$primary_name = $newId;
-                    }
-                    $query->closeCursor();
-                }
-            } else {
-                $sql                       = 'UPDATE '.$table_name.' SET ';
-                $params[':'.$primary_name] = $this->$primary_name;
-                foreach ($this->_changed as $key) {
-                    $sql             .= $key.' = :'.$key.', ';
-                    $params[':'.$key] = $this->$key;
-                }
-                $sql  = substr($sql, 0, -2);   //Remove last ', ';
-                $sql .= ' WHERE '.$primary_name.' = :'.$primary_name;
-
-                $query = $this->_db->prepare($sql);
-                $query->execute($params);
-                $query->closeCursor();
-            }
-
-            // ============================================================================== Audit
-            if ($this->_audit) {
-                $sql   = 'SELECT * FROM '.$table_name.' WHERE '.$primary_name.' = :primary';
-                $query = $this->_db->prepare($sql);
-                $query->execute([
-                    ':primary' => $this->$primary_name
-                ]);
-                $after = $query->fetch(\PDO::FETCH_ASSOC);
-                $query->closeCursor();
-
-                // The is_array check solves issues with canInsert style objects
-                if (is_array($before) && is_array($after)) {
-                    $audit = new Audit($this->_common);
-                    $audit->storeLog($table_name, $this->$primary_name, $before, $after);
-                    $this->_lastAuditObject = $audit;
-                }
-            }
-
-            $this->purgeCache();
-
-            // Now that we have saved everything, there are no remaining changes
-            $this->_changed = [];
-
-            return true;
+        if (empty($this->_changed)) {
+            return false;
         }
 
-        return false;
+        $save_hook = method_exists($this, 'saveHook');
+        $before    = [];
+        $after     = [];
+
+        // ============================================================================== Audit
+        if ($this->_audit || $save_hook) {
+            $sql   = "SELECT * FROM $table_name WHERE $primary_name = :primary";
+            $query = $this->_db->prepare($sql);
+            $query->execute([':primary' => $this->$primary_name]);
+            $before = $query->fetch(\PDO::FETCH_ASSOC);
+            $query->closeCursor();
+        }
+
+        // ============================================================================== Write Logic
+        if ($this->_canInsert) {
+            $auto_increment = constant($this->myName.'::CLASS_PRIMARY');
+            $fields         = array_keys(static::$dbInfo);
+            if (!in_array($primary_name, $fields)) {
+                $fields[] = $primary_name;
+            }
+            $params = [];
+            if (count($fields) > 1) {    // 1 being the primary key
+                $sql = 'INSERT INTO '.$table_name.
+                    ' ('.implode(', ', $fields).
+                    ') VALUES (:'.implode(', :', $fields).') ON DUPLICATE KEY UPDATE ';
+                foreach ($fields as $field) {
+                    $params[':'.$field] = ($this->$field == null ? '' : $this->$field);
+                    if ($field == $primary_name && !$auto_increment) {
+                        continue;
+                    }
+                    $sql .= "$field = VALUES($field), \n";
+                }
+                $sql   = rtrim($sql, ", \n");
+                $query = $this->_db->prepare($sql);
+                $query->execute($params);
+                $newId = $this->_db->lastInsertId();
+                if ($newId > 0) {
+                    $this->$primary_name = $newId;
+                }
+                $query->closeCursor();
+            } else {
+                $sql = 'INSERT IGNORE INTO '.$table_name.
+                    ' ('.implode(', ', $fields).') VALUES (:'.
+                    implode(', :', $fields).')';
+                foreach ($fields as $field) {
+                    $params[':'.$field] = ($this->$field == null ? '' : $this->$field);
+                    if ($field == $primary_name && !$auto_increment) {
+                        continue;
+                    }
+                    $sql .= "$field = VALUES($field), \n";
+                }
+                $sql   = rtrim($sql, ", \n");
+                $query = $this->_db->prepare($sql);
+                $query->execute($params);
+                $newId = $this->_db->lastInsertId();
+                if ($newId > 0) {
+                    $this->$primary_name = $newId;
+                }
+                $query->closeCursor();
+            }
+        } else {
+            $sql                       = 'UPDATE '.$table_name.' SET ';
+            $params[':'.$primary_name] = $this->$primary_name;
+            foreach ($this->_changed as $key) {
+                $sql             .= $key.' = :'.$key.', ';
+                $params[':'.$key] = $this->$key;
+            }
+            $sql  = substr($sql, 0, -2);   //Remove last ', ';
+            $sql .= ' WHERE '.$primary_name.' = :'.$primary_name;
+
+            $query = $this->_db->prepare($sql);
+            $query->execute($params);
+            $query->closeCursor();
+        }
+
+        // ============================================================================== Audit
+        if ($this->_audit || $save_hook) {
+            $sql   = 'SELECT * FROM '.$table_name.' WHERE '.$primary_name.' = :primary';
+            $query = $this->_db->prepare($sql);
+            $query->execute([
+                ':primary' => $this->$primary_name
+            ]);
+            $after = $query->fetch(\PDO::FETCH_ASSOC);
+            $query->closeCursor();
+
+            // The is_array check solves issues with canInsert style objects
+            if (is_array($before) && is_array($after)) {
+                $audit = new Audit($this->_common);
+                $audit->storeLog($table_name, $this->$primary_name, $before, $after);
+                $this->_lastAuditObject = $audit;
+            }
+        }
+
+        if ($save_hook && method_exists($this, 'saveHook')) {
+            $this->saveHook($before, $after, $this->_changed);
+        }
+
+        $this->purgeCache();
+
+        // Now that we have saved everything, there are no remaining changes
+        $this->_changed = [];
+
+        return true;
     }
 
     /**
