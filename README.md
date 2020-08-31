@@ -33,6 +33,7 @@ The GCWorld ORM builds extensible classes used for selecting and updating object
 
 
 ###### Todo
+- Update Save Hook system to allow setting independently per table
 - Upgrade the audit system to handle BINARY(16) UUIDs in place of member_id BIGINT(20) on config option
 - Add more docblocks to generated scripts
 
