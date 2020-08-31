@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [5.1.2](https://github.com/KongHack/ORM/releases/tag/5.1.2)
+ - @GameCharmer Save Hook System
+
+
+
 ## [5.1.1](https://github.com/KongHack/ORM/releases/tag/5.1.1)
  - @GameCharmer Add Nullable Support
 
