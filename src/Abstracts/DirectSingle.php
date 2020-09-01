@@ -122,10 +122,6 @@ abstract class DirectSingle
             $cLogger->info('ORM: DS: '.$table_name.': Primary ID is not scalar', debug_backtrace());
             throw new ORMException('Primary ID is not scalar');
         }
-        if ($defaults !== null) {
-            $cLogger->info('ORM: DS: '.$table_name.': Defaults Array is not an array', debug_backtrace());
-            throw new ORMException('Defaults Array is not an array');
-        }
 
         if ($this->_canCache
             && $this->_cache
