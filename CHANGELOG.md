@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [5.1.4](https://github.com/KongHack/ORM/releases/tag/5.1.4)
+ - @GameCharmer Add getExceptions method to ModelSaveExceptions
+
+
+
 ## [5.1.3](https://github.com/KongHack/ORM/releases/tag/5.1.3)
  - @GameCharmer patch up bad code suggestion
 
