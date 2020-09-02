@@ -17,8 +17,8 @@ class ModelSaveExceptions extends Exception
     /**
      * ModelRequiredFieldException constructor.
      *
-     * @param string          $message
-     * @param int             $code
+     * @param string         $message
+     * @param int            $code
      * @param Exception|null $previous
      */
     public function __construct(string $message = '', int $code = 0, Exception $previous = null)
@@ -68,5 +68,13 @@ class ModelSaveExceptions extends Exception
     public function isThrowable()
     {
         return \count($this->exceptArray) > 0;
+    }
+
+    /**
+     * @return Exception[]
+     */
+    public function getExceptions()
+    {
+        return $this->exceptArray;
     }
 }
