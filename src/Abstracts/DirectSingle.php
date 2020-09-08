@@ -314,7 +314,7 @@ abstract class DirectSingle
             $sql   = "SELECT * FROM $table_name WHERE $primary_name = :primary";
             $query = $this->_db->prepare($sql);
             $query->execute([':primary' => $this->$primary_name]);
-            $before = $query->fetch(\PDO::FETCH_ASSOC);
+            $before = $query->fetch(\PDO::FETCH_ASSOC) ?? [];
             $query->closeCursor();
         }
 
@@ -387,7 +387,7 @@ abstract class DirectSingle
             $query->execute([
                 ':primary' => $this->$primary_name
             ]);
-            $after = $query->fetch(\PDO::FETCH_ASSOC);
+            $after = $query->fetch(\PDO::FETCH_ASSOC) ?? [];
             $query->closeCursor();
 
             // The is_array check solves issues with canInsert style objects
@@ -399,6 +399,13 @@ abstract class DirectSingle
         }
 
         if ($save_hook && method_exists($this, 'saveHook')) {
+            if (!is_array($before)) {
+                $before = [];
+            }
+            if (!is_array($after)) {
+                $after = [];
+            }
+
             $this->saveHook($before, $after, $this->_changed);
         }
 
