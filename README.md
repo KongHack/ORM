@@ -19,7 +19,6 @@ The GCWorld ORM builds extensible classes used for selecting and updating object
   - Audit User tracking via Common getUser() function
   - Redis smart caching
   - Read More About The Config Options [HERE](docs/Config.md)
-  - Multi-Primary key support!
   - Auto-loading of common via config file
   - Insertable type single-key objects (using on duplicate key update)
   - DBInterface for keeping DirectDB systems in line and universal
@@ -29,11 +28,10 @@ The GCWorld ORM builds extensible classes used for selecting and updating object
 
 
 ### Version
-5.1.6
+5.2.0
 
 
 ###### Todo
-- Update Save Hook system to allow setting independently per table
 - Upgrade the audit system to handle BINARY(16) UUIDs in place of member_id BIGINT(20) on config option
 - Add more docblocks to generated scripts
 

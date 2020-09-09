@@ -5,6 +5,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [5.2.0](https://github.com/KongHack/ORM/releases/tag/5.2.0)
+ - @GameCharmer Remove Multi Primary Support
+ - @GameCharmer Update Docs
+
+
+
 ## [5.1.6](https://github.com/KongHack/ORM/releases/tag/5.1.6)
  - @GameCharmer Move save_hook into individual model definitions
 

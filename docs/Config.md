@@ -37,13 +37,15 @@ The config will NOT update itself to add missing values upon update. Below is th
    
 ### [tables]
    - TABLE_NAME
-     - overrides
-       - constructor: protected *(Default constructor visibility, default is public, so only set if you need a protected constructor for things like factory implementation)*
-       - field_name: public/protected *(Sets visibility on the setter functions.  Useful if you want a field only handled internally within your class)*
-     - type_hints
-       - field_name: type *(mixed is applicable)*
-     - audit_ignore *(will ignore these fields all together in the audit process)*
-       - ``- field 1``
-       - ``- field 2``
-       - ``- field 3``
-     
+     - audit_ignore (bool) - Completely ignore this table from auditing
+     - constructor: (protected/public) - Adjust constructor visibility
+     - save_hook: (string) - Path to hook method post-save
+     - fields:
+       - name_of_field:
+         - visibility (protected/public) - Adjust setter visibility
+         - type_hint (string) define a type_hint
+         - audit_ignore (boolean) ignore just this field from the audit system
+         - uuid_field (boolean) define fields as uuid fields that don't contain `_uuid` in the field name
+         - getter_ignore (boolean) do not generate a getter if true
+         - setter_ignore (boolean) do not generate a setter if true
+         - required (boolean) Add this field to base exception checks if not part of a unique key
