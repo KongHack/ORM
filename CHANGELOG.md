@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [5.1.6](https://github.com/KongHack/ORM/releases/tag/5.1.6)
+ - @GameCharmer Move save_hook into individual model definitions
+
+
+
 ## [5.1.5](https://github.com/KongHack/ORM/releases/tag/5.1.5)
  - @GameCharmer Fix issue with Before/After returning null/false instead of arrays
 

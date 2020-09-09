@@ -225,7 +225,6 @@ abstract class DirectSingle
         }
 
         if (is_array($defaults)) {
-            // $properties = array_keys(get_object_vars($this));
             $fields = array_keys(static::$dbInfo);
             foreach ($defaults as $k => $v) {
                 if (in_array($k, $fields)) {
@@ -315,7 +314,9 @@ abstract class DirectSingle
         if ($this->_audit || $save_hook) {
             $sql   = "SELECT * FROM $table_name WHERE $primary_name = :primary";
             $query = $this->_db->prepare($sql);
-            $query->execute([':primary' => $this->$primary_name]);
+            $query->execute([
+                ':primary' => $this->$primary_name,
+            ]);
             $before = $query->fetch(\PDO::FETCH_ASSOC) ?? [];
             $query->closeCursor();
             unset($query);
