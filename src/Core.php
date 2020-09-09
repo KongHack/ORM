@@ -77,6 +77,7 @@ class Core
         $query = $this->master_common->getDatabase()->prepare($sql);
         $query->execute();
         $fields = $query->fetchAll(PDO::FETCH_ASSOC);
+        unset($query);
         $config = $this->config['tables'][$table_name] ?? [];
 
         $config['constructor']  = $config['constructor'] ?? 'public';
@@ -141,7 +142,7 @@ class Core
             }
         }
 
-        if (count($primaries) < 1) {
+        if (count($primaries) !== 1) {
             return false;
         }
 
@@ -155,29 +156,15 @@ class Core
             $cNamespace->addUse('Ramsey\\Uuid\\Uuid');
         }
 
-        if (count($primaries) == 1) {
-            // Single PK Classes get a simple set of functions.
-            if ($this->get_set_funcs) {
-                $cNamespace->addUse('GCWorld\\ORM\\Abstracts\\DirectSingle', 'dbc');
-                $cNamespace->addUse('GCWorld\\ORM\\Interfaces\\ProtectedDBInterface', 'dbd');
-            } else {
-                $cNamespace->addUse('GCWorld\\ORM\\Abstracts\\DirectDBClass', 'dbc');
-                $cNamespace->addUse('GCWorld\\ORM\\Interfaces\\PublicDBInterface', 'dbd');
-            }
-            $cNamespace->addUse('GCWorld\\ORM\\Interfaces\\GeneratedInterface', 'dbi');
-            $cClass->addConstant('CLASS_PRIMARY', $primaries[0])->setPublic();
+        if ($this->get_set_funcs) {
+            $cNamespace->addUse('GCWorld\\ORM\\Abstracts\\DirectSingle', 'dbc');
+            $cNamespace->addUse('GCWorld\\ORM\\Interfaces\\ProtectedDBInterface', 'dbd');
         } else {
-            // Multiple primary keys!!!
-            if ($this->get_set_funcs) {
-                $cNamespace->addUse('GCWorld\\ORM\\Abstracts\\DirectMulti', 'dbc');
-                $cNamespace->addUse('GCWorld\\ORM\\Interfaces\\ProtectedDBInterface', 'dbd');
-            } else {
-                $cNamespace->addUse('GCWorld\\ORM\\Abstracts\\DirectDBMultiClass', 'dbc');
-                $cNamespace->addUse('GCWorld\\ORM\\Interfaces\\PublicDBInterface', 'dbd');
-            }
-            $cNamespace->addUse('GCWorld\\ORM\\Interfaces\\GeneratedMultiInterface', 'dbi');
-            $cClass->addConstant('CLASS_PRIMARIES', $primaries)->setPublic();
+            $cNamespace->addUse('GCWorld\\ORM\\Abstracts\\DirectDBClass', 'dbc');
+            $cNamespace->addUse('GCWorld\\ORM\\Interfaces\\PublicDBInterface', 'dbd');
         }
+        $cNamespace->addUse('GCWorld\\ORM\\Interfaces\\GeneratedInterface', 'dbi');
+        $cClass->addConstant('CLASS_PRIMARY', $primaries[0])->setPublic();
 
         $cClass->addExtend('dbc');
         $cClass->addImplement('dbi');
@@ -225,26 +212,19 @@ class Core
         }
 
         // CONSTRUCTOR!
-        if (count($primaries) == 1) {
-            if ($this->type_hinting) {
-                // TODO: Get type of primary and swap out mixed
-                $cMethodConstructor->addComment('@param mixed $primary_id');
-                $cMethodConstructor->addComment('@param array $defaults');
-            } else {
-                $cMethodConstructor->addComment('@param mixed $primary_id');
-                $cMethodConstructor->addComment('@param mixed $defaults');
-            }
-            $cMethodConstructor->addParameter('primary_id', null)->setNullable(true);
-            $cMethodConstructor->addParameter('defaults', null)->setNullable(true);
-            $cMethodConstructor->setVisibility($config['constructor']);
-            $cMethodConstructor->setBody('parent::__construct($primary_id, $defaults);');
+        if ($this->type_hinting) {
+            // TODO: Get type of primary and swap out mixed
+            $cMethodConstructor->addComment('@param mixed $primary_id');
+            $cMethodConstructor->addComment('@param array $defaults');
         } else {
-            $cMethodConstructor->setVisibility($config['constructor']);
-            $cMethodConstructor->addComment('@param mixed ...$keys');
-            $cMethodConstructor->isVariadic();
-            $cMethodConstructor->addParameter('keys', []);
-            $cMethodConstructor->setBody('parent::__construct(...$keys);');
+            $cMethodConstructor->addComment('@param mixed $primary_id');
+            $cMethodConstructor->addComment('@param mixed $defaults');
         }
+        $cMethodConstructor->addParameter('primary_id', null)->setNullable(true);
+        $cMethodConstructor->addParameter('defaults', null)->setNullable(true);
+        $cMethodConstructor->setVisibility($config['constructor']);
+        $cMethodConstructor->setBody('parent::__construct($primary_id, $defaults);');
+
 
 
         if ($this->get_set_funcs) {
@@ -459,6 +439,7 @@ NOW;
         $query = $this->master_common->getDatabase()->prepare($sql);
         $query->execute();
         $indexes = $query->fetchAll(PDO::FETCH_ASSOC);
+        unset($query);
         $uniques = [];
         $primary = null;
 
@@ -602,6 +583,7 @@ NOW;
             $body .= ']);'.PHP_EOL;
             $body .= '$row = $query->fetch();'.PHP_EOL;
             $body .= '$query->closeCursor();'.PHP_EOL;
+            $body .= 'unset($query);'.PHP_EOL;
             $body .= 'if($row) {'.PHP_EOL;
             $body .= '    return $row[\''.$primary.'\'];'.PHP_EOL;
             $body .= '}'.PHP_EOL.PHP_EOL;
