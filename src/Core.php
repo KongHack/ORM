@@ -83,8 +83,8 @@ class Core
         $config['audit_ignore'] = $config['audit_ignore'] ?? false;
         $config['fields']       = $config['fields'] ?? [];
 
-        $save_hook      = $this->config['options']['save_hook'] ?? false;
-        $save_hook_call = $this->config['general']['save_hook'] ?? '';
+        $save_hook      = isset($config['save_hook']);
+        $save_hook_call = $config['save_hook'] ?? '';
         if ($save_hook && empty($save_hook_call)) {
             $save_hook = false;
         }

@@ -2,7 +2,6 @@ version: 4
 general:
     common: \Your\Fully\Qualified\Class\Name\Here
     user: \Your\Fully\Qualified\Class\Name\Here
-    save_hook: \Your\Fully\Qualified\Class\Name\Here::method
 options:
     get_set_funcs: true
     var_visibility: public
@@ -11,7 +10,6 @@ options:
     use_defaults: true
     defaults_override_null: true
     type_hinting: false
-    save_hook: false
 tables:
     EXAMPLE_TABLE:
         audit_ignore: false
@@ -33,3 +31,4 @@ tables:
                 getter_ignore: true
                 setter_ignore: true
                 required: false
+        save_hook: \Your\Fully\Qualified\Class\Name\Here::method
