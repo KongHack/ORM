@@ -350,6 +350,9 @@ NOW;
 
         if ($save_hook) {
             $cMethod = $cClass->addMethod('saveHook');
+            $cMethod->addComment('@param array $before');
+            $cMethod->addComment('@param array $after');
+            $cMethod->addComment('@param array $changed');
             $cMethod->addParameter('before')->setType('array');
             $cMethod->addParameter('after')->setType('array');
             $cMethod->addParameter('changed')->setType('array');
