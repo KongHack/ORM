@@ -198,6 +198,8 @@ abstract class DirectSingle
             $query = $this->_db->prepare($sql);
             $query->execute([':id' => $primary_id]);
             $defaults = $query->fetch(\PDO::FETCH_ASSOC);
+            $query->closeCursor();
+            unset($query);
             if (!is_array($defaults)) {
                 $cLogger->info('ORM: DS: SELECT: '.$table_name.': Data Not Found');
                 if (!$this->_canInsert) {
@@ -316,6 +318,7 @@ abstract class DirectSingle
             $query->execute([':primary' => $this->$primary_name]);
             $before = $query->fetch(\PDO::FETCH_ASSOC) ?? [];
             $query->closeCursor();
+            unset($query);
         }
 
         // ============================================================================== Write Logic
@@ -345,6 +348,7 @@ abstract class DirectSingle
                     $this->$primary_name = $newId;
                 }
                 $query->closeCursor();
+                unset($query);
             } else {
                 $sql = 'INSERT IGNORE INTO '.$table_name.
                     ' ('.implode(', ', $fields).') VALUES (:'.
@@ -364,6 +368,7 @@ abstract class DirectSingle
                     $this->$primary_name = $newId;
                 }
                 $query->closeCursor();
+                unset($query);
             }
         } else {
             $sql                       = 'UPDATE '.$table_name.' SET ';
@@ -378,6 +383,7 @@ abstract class DirectSingle
             $query = $this->_db->prepare($sql);
             $query->execute($params);
             $query->closeCursor();
+            unset($query);
         }
 
         // ============================================================================== Audit
@@ -389,6 +395,7 @@ abstract class DirectSingle
             ]);
             $after = $query->fetch(\PDO::FETCH_ASSOC) ?? [];
             $query->closeCursor();
+            unset($query);
 
             // The is_array check solves issues with canInsert style objects
             if (is_array($before) && is_array($after)) {
