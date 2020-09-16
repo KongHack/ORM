@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [5.2.1](https://github.com/KongHack/ORM/releases/tag/5.2.1)
+ - @GameCharmer disable primary alter statement in audit system
+
+
+
 ## [5.2.0](https://github.com/KongHack/ORM/releases/tag/5.2.0)
  - @GameCharmer Remove Multi Primary Support
  - @GameCharmer Update Docs
