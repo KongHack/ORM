@@ -42,7 +42,7 @@ class Builder
         $this->common   = $common;
         $this->_db      = $common->getDatabase();
         $this->_audit   = $common->getDatabase($this->config['connection'] ?? '');
-        $this->database = $this->config['database'];
+        $this->database = $this->config['database'] ?? false;
     }
 
     /**
@@ -53,6 +53,10 @@ class Builder
      */
     public function run(string $schema = null)
     {
+        if (!$this->database) {
+            return;
+        }
+
         $master = $this->config['prefix'].'_GCAuditMaster';
         if ($this->database != null) {
             $master = $this->database.'.'.$master;
