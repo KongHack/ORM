@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [5.2.2](https://github.com/KongHack/ORM/releases/tag/5.2.2)
+ - @GameCharmer Handle no auditing system in audit builder
+
+
+
 ## [5.2.1](https://github.com/KongHack/ORM/releases/tag/5.2.1)
  - @GameCharmer disable primary alter statement in audit system
 
