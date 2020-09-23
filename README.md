@@ -37,5 +37,3 @@ The GCWorld ORM builds extensible classes used for selecting and updating object
 
 
 ### Additional Information
-
-* [GCWorld Public Gitlab](https://gitlab.konghack.com/groups/GCWorld)
