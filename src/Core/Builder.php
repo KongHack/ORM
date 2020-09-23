@@ -226,7 +226,9 @@ class Builder
             ]);
             $query->closeCursor();
 
-            $this->_audit->setTableComment($audit, self::BUILDER_VERSION);
+            if ($version != self::BUILDER_VERSION) {
+                $this->_audit->setTableComment($audit, self::BUILDER_VERSION);
+            }
         }
     }
 
