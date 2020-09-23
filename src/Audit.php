@@ -2,7 +2,6 @@
 namespace GCWorld\ORM;
 
 use GCWorld\Database\Database;
-use GCWorld\ORM\Globals;
 use Ramsey\Uuid\Uuid;
 
 /**
@@ -34,10 +33,10 @@ class Audit
         /** @var array $audit */
         $audit = $common->getConfig('audit');
         if (is_array($audit)) {
-            $this->enable     = $audit['enable'];
-            $this->database   = $audit['database'];
-            $this->connection = $audit['connection'];
-            $this->prefix     = $audit['prefix'];
+            $this->enable     = $audit['enable'] ?? false;
+            $this->database   = $audit['database'] ?? $this->database;
+            $this->connection = $audit['connection'] ?? $this->connection;
+            $this->prefix     = $audit['prefix'] ?? $this->prefix;
         }
     }
 
