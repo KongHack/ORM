@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [5.3.0](https://github.com/KongHack/ORM/releases/tag/5.3.0)
+ - @GameCharmer Direct Single Interface
+
+
+
 ## [5.2.5](https://github.com/KongHack/ORM/releases/tag/5.2.5)
  - @GameCharmer add `_getChanged()` method to DirectSingle
 

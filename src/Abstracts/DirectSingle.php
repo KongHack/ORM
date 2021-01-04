@@ -5,6 +5,7 @@ use Exception;
 use GCWorld\ORM\Audit;
 use GCWorld\ORM\CommonLoader;
 use GCWorld\ORM\Config;
+use GCWorld\ORM\Interfaces\DirectSingleInterface;
 use GCWorld\ORM\ORMException;
 use GCWorld\ORM\ORMLogger;
 
@@ -12,7 +13,7 @@ use GCWorld\ORM\ORMLogger;
  * Class DirectSingle
  * @package GCWorld\ORM\Abstracts
  */
-abstract class DirectSingle
+abstract class DirectSingle implements DirectSingleInterface
 {
     /**
      * @var \GCWorld\Common\Common
@@ -297,7 +298,7 @@ abstract class DirectSingle
     /**
      * @return bool
      */
-    public function save()
+    public function save(): bool
     {
         $table_name   = constant($this->myName.'::CLASS_TABLE');
         $primary_name = constant($this->myName.'::CLASS_PRIMARY');
@@ -429,7 +430,7 @@ abstract class DirectSingle
      * Purges the current item from Redis
      * @return void
      */
-    public function purgeCache()
+    public function purgeCache(): void
     {
         if ($this->_canCache && $this->_cache) {
             $primary_name = constant($this->myName.'::CLASS_PRIMARY');
@@ -462,7 +463,7 @@ abstract class DirectSingle
      * Gets the field keys from the dbInfo array.
      * @return array
      */
-    public function getFieldKeys()
+    public function getFieldKeys(): array
     {
         return array_keys(static::$dbInfo);
     }
@@ -470,7 +471,7 @@ abstract class DirectSingle
     /**
      * @return bool
      */
-    public function _hasChanged()
+    public function _hasChanged(): bool
     {
         return (count($this->_changed) > 0);
     }
@@ -478,7 +479,7 @@ abstract class DirectSingle
     /**
      * @return array
      */
-    public function _getChanged()
+    public function _getChanged(): array
     {
         return $this->_changed;
     }
