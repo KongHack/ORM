@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [5.3.1](https://github.com/KongHack/ORM/releases/tag/5.3.1)
+ - @GameCharmer Get Last Changed method for post-save processing
+
+
+
 ## [5.3.0](https://github.com/KongHack/ORM/releases/tag/5.3.0)
  - @GameCharmer Direct Single Interface
 
