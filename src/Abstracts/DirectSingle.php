@@ -60,6 +60,11 @@ abstract class DirectSingle implements DirectSingleInterface
     protected $_changed = [];
 
     /**
+     * @var array
+     */
+    protected $_lastChanged = [];
+
+    /**
      * Set this to false in your class when you don't want to log changes
      * @var bool
      */
@@ -421,7 +426,8 @@ abstract class DirectSingle implements DirectSingleInterface
         $this->purgeCache();
 
         // Now that we have saved everything, there are no remaining changes
-        $this->_changed = [];
+        $this->_lastChanged = $this->_changed;
+        $this->_changed     = [];
 
         return true;
     }
@@ -482,5 +488,13 @@ abstract class DirectSingle implements DirectSingleInterface
     public function _getChanged(): array
     {
         return $this->_changed;
+    }
+
+    /**
+     * @return array
+     */
+    public function _getLastChanged(): array
+    {
+        return $this->_lastChanged;
     }
 }

@@ -32,4 +32,9 @@ interface DirectSingleInterface
      * @return array
      */
     public function _getChanged(): array;
+
+    /**
+     * @return array
+     */
+    public function _getLastChanged(): array;
 }
