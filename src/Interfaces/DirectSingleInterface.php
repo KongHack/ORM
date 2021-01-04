@@ -7,11 +7,6 @@ namespace GCWorld\ORM\Interfaces;
 interface DirectSingleInterface
 {
     /**
-     * @return bool
-     */
-    public function save(): bool;
-
-    /**
      * Purges the current item from Redis
      * @return void
      */
