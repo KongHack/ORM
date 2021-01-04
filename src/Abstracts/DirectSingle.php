@@ -474,4 +474,12 @@ abstract class DirectSingle
     {
         return (count($this->_changed) > 0);
     }
+
+    /**
+     * @return array
+     */
+    public function _getChanged()
+    {
+        return $this->_changed;
+    }
 }

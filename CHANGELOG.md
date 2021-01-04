@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [5.2.5](https://github.com/KongHack/ORM/releases/tag/5.2.5)
+ - @GameCharmer add `_getChanged()` method to DirectSingle
+
+
+
 ## [5.2.4](https://github.com/KongHack/ORM/releases/tag/5.2.4)
  - @GameCharmer Optimize setting table comment
 
