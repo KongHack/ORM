@@ -3,11 +3,12 @@ namespace GCWorld\ORM\Exceptions;
 
 use Exception;
 use GCWorld\ORM\Interfaces\FieldException;
+use GCWorld\ORM\Interfaces\ModelSaveExceptionsInterface;
 
 /**
  * Class ModelSaveExceptions.
  */
-class ModelSaveExceptions extends Exception
+class ModelSaveExceptions extends Exception implements ModelSaveExceptionsInterface
 {
     /**
      * @var Exception[]
@@ -42,7 +43,7 @@ class ModelSaveExceptions extends Exception
     /**
      * @return array
      */
-    public function getFieldMessages()
+    public function getFieldMessages(): array
     {
         if (!$this->isThrowable()) {
             return [];
@@ -65,7 +66,7 @@ class ModelSaveExceptions extends Exception
     /**
      * @return bool
      */
-    public function isThrowable()
+    public function isThrowable(): bool
     {
         return \count($this->exceptArray) > 0;
     }

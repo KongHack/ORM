@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [5.3.4](https://github.com/KongHack/ORM/releases/tag/5.3.4)
+ - @GameCharmer proper interface to eliminate double-catches
+
+
+
 ## [5.3.3](https://github.com/KongHack/ORM/releases/tag/5.3.3)
  - @GameCharmer Update Composer Dependencies
 
