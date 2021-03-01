@@ -35,15 +35,15 @@ class Config
             }
         }
 
-        if (empty($config)) {
+        if (empty($config) || !is_array($config)) {
             if (!file_exists($file)) {
                 throw new Exception('YML Config File Not Found');
             }
             $config = Yaml::parseFile($file);
-            file_put_contents($cache, '<?php'.PHP_EOL.PHP_EOL.'return '.var_export($config, true).';'.PHP_EOL);
+            file_put_contents($cache, '<?php'.PHP_EOL.PHP_EOL.'return '.var_export($config, true).';'.PHP_EOL.PHP_EOL);
         }
 
-        if (array_key_exists('config_path', $config)) {
+        if (isset($config['config_path'])) {
             $file  = __DIR__.DIRECTORY_SEPARATOR.$config['config_path'];
             $cache = str_replace('.yml', '.php', $file);
             if (file_exists($cache) && filemtime($file) < filemtime($cache)) {
