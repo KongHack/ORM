@@ -5,6 +5,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [5.4.0](https://github.com/KongHack/ORM/releases/tag/5.4.0)
+ - @GameCharmer Update UUID Library
+
+
 ## [5.3.5](https://github.com/KongHack/ORM/releases/tag/5.3.5)
  - @GameCharmer Switch from array_key_exists to isset check
 
