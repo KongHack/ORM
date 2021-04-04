@@ -2,6 +2,7 @@
 namespace GCWorld\ORM;
 
 use GCWorld\Database\Database;
+use GCWorld\ORM\Core\CreateAuditTable;
 use Ramsey\Uuid\Uuid;
 
 /**
@@ -147,15 +148,33 @@ class Audit
                       (primary_id, member_id, log_request_uri, log_before, log_after)
                       VALUES
                       (:pid, :mid, :uri, :logB, :logA)';
-            $query = $db->prepare($sql);
-            $query->execute([
-                ':pid'  => $primaryId,
-                ':mid'  => $memberId,
-                ':uri'  => $request,
-                ':logB' => json_encode($B),
-                ':logA' => json_encode($A)
-            ]);
-            $query->closeCursor();
+            try {
+                $query = $db->prepare($sql);
+                $query->execute([
+                    ':pid'  => $primaryId,
+                    ':mid'  => $memberId,
+                    ':uri'  => $request,
+                    ':logB' => json_encode($B),
+                    ':logA' => json_encode($A)
+                ]);
+                $query->closeCursor();
+            } catch (\PDOException $e) {
+                if (stristr($e->getMessage(), 'Base table or view not found') === false) {
+                    throw $e;
+                }
+
+                $cCreate = new CreateAuditTable($this->common->getDatabase(), $db);
+                $cCreate->buildTable($table);
+                $query = $db->prepare($sql);
+                $query->execute([
+                    ':pid'  => $primaryId,
+                    ':mid'  => $memberId,
+                    ':uri'  => $request,
+                    ':logB' => json_encode($B),
+                    ':logA' => json_encode($A)
+                ]);
+                $query->closeCursor();
+            }
 
             return $db->lastInsertId();
         }

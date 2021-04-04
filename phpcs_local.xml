@@ -10,13 +10,9 @@
     <arg value="s"/>
     <arg name="tab-width" value="4"/>
 
-    <rule ref="vendor/gcworld/code_sniffer_contrib/CodeSnifferContrib/">
-        <exclude name="CodeSnifferContrib.Arrays"/>
-        <exclude name="Squiz.Commenting.FunctionCommentThrowTag.WrongNumber"/>
-    </rule>
     <rule ref="Generic.Files.LineLength">
         <properties>
-            <property name="lineLimit" value="120"/>
+            <property name="lineLimit" value="140"/>
             <property name="absoluteLineLimit" value="140"/>
         </properties>
     </rule>

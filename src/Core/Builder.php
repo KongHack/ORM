@@ -64,7 +64,7 @@ class Builder
 
         if (!$this->_audit->tableExists($master)) {
             // This will create the audit master
-            $file    = $this->getDataModelDirectory().'master.sql';
+            $file    = self::getDataModelDirectory().'master.sql';
             $content = file_get_contents($file);
             $content = str_replace('__REPLACE__', $master, $content);
             $this->_audit->exec($content);
@@ -136,7 +136,7 @@ class Builder
                     $existing[$schema][$auditBase]['audit_version'] = $this->_audit->getTableComment($audit);
                     $existing[$schema][$auditBase]['audit_pk_set']  = 0;
                 } else {
-                    $source = file_get_contents($this->getDataModelDirectory().'source.sql');
+                    $source = file_get_contents(self::getDataModelDirectory().'source.sql');
                     $sql    = str_replace('__REPLACE__', $audit, $source);
                     $this->_audit->exec($sql);
                     $this->_audit->setTableComment($audit, '0');
@@ -147,7 +147,7 @@ class Builder
 
             $version = $existing[$schema][$auditBase]['audit_version'];
             if ($version < self::BUILDER_VERSION) {
-                $versionFiles = glob($this->getDataModelDirectory().'revisions'.DIRECTORY_SEPARATOR.'*.sql');
+                $versionFiles = glob(self::getDataModelDirectory().'revisions'.DIRECTORY_SEPARATOR.'*.sql');
                 sort($versionFiles);
                 foreach ($versionFiles as $file) {
                     $tmp        = explode(DIRECTORY_SEPARATOR, $file);
@@ -235,7 +235,7 @@ class Builder
     /**
      * @return string
      */
-    private function getDataModelDirectory()
+    public static function getDataModelDirectory()
     {
         $base  = rtrim(__DIR__, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR;
         $base .= 'datamodel'.DIRECTORY_SEPARATOR.'audit'.DIRECTORY_SEPARATOR;
