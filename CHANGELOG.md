@@ -5,6 +5,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [5.4.1](https://github.com/KongHack/ORM/releases/tag/5.4.1)
+ - DANGER: Untested audit changes
+
+
 ## [5.4.0](https://github.com/KongHack/ORM/releases/tag/5.4.0)
  - @GameCharmer Update UUID Library
 
