@@ -27,6 +27,7 @@ class Core
     protected $use_defaults           = true;
     protected $defaults_override_null = true;
     protected $type_hinting           = false;
+    protected $audit                  = true;
 
     /**
      * @param string $namespace
@@ -41,6 +42,10 @@ class Core
         $cConfig      = new Config();
         $config       = $cConfig->getConfig();
         $this->config = $config;
+
+        if (isset($config['general']['audit']) && !$config['general']['audit']) {
+            $this->audit = false;
+        }
 
         if (isset($config['options']['get_set_funcs'])) {
             if (!$config['options']['get_set_funcs']) {
@@ -204,7 +209,7 @@ class Core
         $cMethodConstructor = $cClass->addMethod('__construct');
 
         // Let's add some variable defaults to make life easier on us
-        if ($config['audit_ignore']) {
+        if ($config['audit_ignore'] || !$this->audit) {
             $cProperty = $cClass->addProperty('_audit', false);
             $cProperty->setVisibility('protected');
             $cProperty->addComment('Disabled via ORM Config');

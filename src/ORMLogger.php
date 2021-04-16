@@ -1,7 +1,6 @@
 <?php
 namespace GCWorld\ORM;
 
-
 use Monolog\Handler\NullHandler;
 use Monolog\Logger;
 
@@ -29,7 +28,7 @@ class ORMLogger
      */
     public static function getLogger(): Logger
     {
-        if(self::$logger === null) {
+        if (self::$logger === null) {
             $cLogger = new Logger('orm_logger_empty');
             $cLogger->pushHandler(new NullHandler());
 
@@ -38,5 +37,4 @@ class ORMLogger
 
         return self::$logger;
     }
-
 }

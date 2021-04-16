@@ -1,7 +1,8 @@
-version: 4
+version: 5
 general:
     common: \Your\Fully\Qualified\Class\Name\Here
     user: \Your\Fully\Qualified\Class\Name\Here
+    audit: true
 options:
     get_set_funcs: true
     var_visibility: public

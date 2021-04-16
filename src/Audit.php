@@ -11,8 +11,10 @@ use Ramsey\Uuid\Uuid;
  */
 class Audit
 {
-    private static $overrideMemberId = null;
+    protected static $overrideMemberId = null;
+    protected static $config = null;
 
+    protected $canAudit   = true;
     protected $common     = null;
     protected $database   = null;
     protected $connection = 'default';
@@ -30,14 +32,26 @@ class Audit
      */
     public function __construct(\GCWorld\Interfaces\Common $common)
     {
-        $this->common = $common;
-        /** @var array $audit */
-        $audit = $common->getConfig('audit');
-        if (is_array($audit)) {
-            $this->enable     = $audit['enable'] ?? false;
-            $this->database   = $audit['database'] ?? $this->database;
-            $this->connection = $audit['connection'] ?? $this->connection;
-            $this->prefix     = $audit['prefix'] ?? $this->prefix;
+        if (self::$config === null) {
+            $cConfig      = new Config();
+            $config       = $cConfig->getConfig();
+            self::$config = $config;
+        }
+
+        if (isset(self::$config['general']['audit']) && !self::$config['general']['audit']) {
+            $this->canAudit = false;
+        }
+
+        if ($this->canAudit) {
+            $this->common = $common;
+            /** @var array $audit */
+            $audit = $common->getConfig('audit');
+            if (is_array($audit)) {
+                $this->enable = $audit['enable'] ?? false;
+                $this->database = $audit['database'] ?? $this->database;
+                $this->connection = $audit['connection'] ?? $this->connection;
+                $this->prefix = $audit['prefix'] ?? $this->prefix;
+            }
         }
     }
 
@@ -69,6 +83,10 @@ class Audit
      */
     public function storeLog(string $table, $primaryId, array $before, array $after, $memberId = null)
     {
+        if (!$this->canAudit) {
+            return 0;
+        }
+
         if ($memberId === null) {
             $memberId = $this->determineMemberId();
         }

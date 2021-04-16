@@ -5,8 +5,13 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [5.4.2](https://github.com/KongHack/ORM/releases/tag/5.4.2)
+ - @GameCharmer DANGER: Version Update: Overall Audit Switch
+
+
+
 ## [5.4.1](https://github.com/KongHack/ORM/releases/tag/5.4.1)
- - DANGER: Untested audit changes
+ - @GameCharmer DANGER: Untested audit changes
 
 
 ## [5.4.0](https://github.com/KongHack/ORM/releases/tag/5.4.0)
