@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [5.4.3](https://github.com/KongHack/ORM/releases/tag/5.4.3)
+ - @GameCharmer Integrate audit switch into builder
+
+
+
 ## [5.4.2](https://github.com/KongHack/ORM/releases/tag/5.4.2)
  - @GameCharmer DANGER: Version Update: Overall Audit Switch
 
