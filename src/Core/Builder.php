@@ -27,7 +27,12 @@ class Builder
     /**
      * @var array
      */
-    protected $config = [];
+    protected $coreConfig = [];
+
+    /**
+     * @var array
+     */
+    protected $auditConfig = [];
 
     protected $database = null;
 
@@ -38,11 +43,15 @@ class Builder
      */
     public function __construct(Common $common)
     {
-        $this->config   = $common->getConfig('audit');
-        $this->common   = $common;
-        $this->_db      = $common->getDatabase();
-        $this->_audit   = $common->getDatabase($this->config['connection'] ?? '');
-        $this->database = $this->config['database'] ?? false;
+        $cConfig          = new Config();
+        $this->coreConfig = $cConfig->getConfig();
+        if ($this->coreConfig['general']['audit']) {
+            $this->auditConfig = $common->getConfig('audit');
+            $this->common      = $common;
+            $this->_db         = $common->getDatabase();
+            $this->_audit      = $common->getDatabase($this->auditConfig['connection'] ?? '');
+            $this->database    = $this->auditConfig['database'] ?? false;
+        }
     }
 
     /**
@@ -53,11 +62,14 @@ class Builder
      */
     public function run(string $schema = null)
     {
+        if (!$this->coreConfig['general']['audit']) {
+            return;
+        }
         if (!$this->database) {
             return;
         }
 
-        $master = $this->config['prefix'].'_GCAuditMaster';
+        $master = $this->auditConfig['prefix'].'_GCAuditMaster';
         if ($this->database != null) {
             $master = $this->database.'.'.$master;
         }
@@ -109,13 +121,13 @@ class Builder
             ':type'   => 'BASE TABLE',
         ]);
         $tables = $query->fetchAll(\PDO::FETCH_NUM);
-        $preLen = \strlen($this->config['prefix']);
+        $preLen = \strlen($this->auditConfig['prefix']);
 
         foreach ($tables as $tRow) {
             $table = $tRow[0];
 
             // Prevent recursion
-            if (substr($table, 0, $preLen) == $this->config['prefix']) {
+            if (substr($table, 0, $preLen) == $this->auditConfig['prefix']) {
                 continue;
             }
 
@@ -126,7 +138,7 @@ class Builder
                 }
             }
 
-            $audit = $auditBase = $this->config['prefix'].$table;
+            $audit = $auditBase = $this->auditConfig['prefix'].$table;
             if ($this->database != null) {
                 $audit = $this->database.'.'.$audit;
             }
