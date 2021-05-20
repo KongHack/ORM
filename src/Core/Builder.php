@@ -45,7 +45,7 @@ class Builder
     {
         $cConfig          = new Config();
         $this->coreConfig = $cConfig->getConfig();
-        if ($this->coreConfig['general']['audit']) {
+        if (!isset($this->coreConfig['general']['audit']) || $this->coreConfig['general']['audit']) {
             $this->auditConfig = $common->getConfig('audit');
             $this->common      = $common;
             $this->_db         = $common->getDatabase();
