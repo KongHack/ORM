@@ -15,7 +15,7 @@
     "gcworld/globals":"^3.1.0",
     "gcworld/interfaces": ">=3.1.1",
     "gcworld/database": "^2.3.4",
-    "composer/composer": "^2.0",
+    "composer/composer": ">=2.0",
     "composer/installers": "^1.10",
     "symfony/yaml": "^4.0",
     "ramsey/uuid": ">=4.0",
@@ -25,9 +25,9 @@
   "require-dev": {
     "gcworld/code_sniffer_contrib": "^2.0.1",
     "phpstan/phpstan": "^0.12",
-    "phpmd/phpmd": "^2.6",
+    "phpmd/phpmd": ">=2.6",
     "phpstan/phpstan-deprecation-rules": "^0.12",
-    "friendsofphp/php-cs-fixer": "^2.15.1"
+    "friendsofphp/php-cs-fixer": ">=2.15.1"
   },
   "autoload": {
     "psr-4": {"GCWorld\\ORM\\": "src/"}
