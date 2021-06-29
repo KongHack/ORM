@@ -44,6 +44,12 @@ abstract class DirectSingle implements DirectSingleInterface
     protected $_canCache = true;
 
     /**
+     * @var int
+     * TTL for cache items.  -1 = disabled
+     */
+    protected $_cacheTTL = 60;
+
+    /**
      * @var bool
      * Set this to false in your class when you don't want to auto re-cache after a purge
      */
@@ -149,8 +155,17 @@ abstract class DirectSingle implements DirectSingleInterface
                 } catch (Exception $e) {
                     $data = null;
                 }
+                if (is_array($data)
+                    && $this->_cacheTTL > 0
+                    && (!isset($data['ORM_TIME']) || $data['ORM_TIME'] < time())
+                ) {
+                    $cLogger->info('ORM: DS: '.$table_name.': Cache1: Data is Expired');
+                    $data = null;
+                }
+
                 if ($data !== null && is_array($data) && !empty($data)) {
                     $cLogger->info('ORM: DS: '.$table_name.': Cache1: Data is Good');
+                    unset($data['ORM_TIME']); // This is our field
 
                     $fields = array_keys(static::$dbInfo);
                     if (count($fields) == count($data)) {
@@ -453,6 +468,11 @@ abstract class DirectSingle implements DirectSingleInterface
      */
     protected function setCacheData()
     {
+        // Caching Disabled
+        if (!$this->_canCache || $this->_cacheTTL < 0) {
+            return;
+        }
+
         $table_name = constant($this->myName.'::CLASS_TABLE');
         $primary    = constant($this->myName.'::CLASS_PRIMARY');
         $fields     = array_keys(static::$dbInfo);
@@ -460,6 +480,10 @@ abstract class DirectSingle implements DirectSingleInterface
         foreach ($fields as $field) {
             $data[$field] = $this->$field;
         }
+        if ($this->_cacheTTL > 0) {
+            $data['ORM_TIME'] = time() + $this->_cacheTTL;
+        }
+
         ORMLogger::getLogger()->info('ORM: DS: SCD: '.$table_name.': Setting Cache Data', $data);
 
         $this->_cache->hSet($this->myName, 'key_'.$this->$primary, serialize($data));

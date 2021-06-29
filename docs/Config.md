@@ -40,6 +40,7 @@ The config will NOT update itself to add missing values upon update. Below is th
      - audit_ignore (bool) - Completely ignore this table from auditing
      - constructor: (protected/public) - Adjust constructor visibility
      - save_hook: (string) - Path to hook method post-save
+     - cache_time: (int) - cache time in seconds.  0 = unlimited, -1 = disabled
      - fields:
        - name_of_field:
          - visibility (protected/public) - Adjust setter visibility

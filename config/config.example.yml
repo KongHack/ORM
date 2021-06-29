@@ -15,6 +15,7 @@ tables:
     EXAMPLE_TABLE:
         audit_ignore: false
         constructor: protected
+        cache_ttl: 60
         fields:
             example_field_1:
                 visibility: protected

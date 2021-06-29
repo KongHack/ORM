@@ -88,6 +88,7 @@ class Core
         $config['constructor']  = $config['constructor'] ?? 'public';
         $config['audit_ignore'] = $config['audit_ignore'] ?? false;
         $config['fields']       = $config['fields'] ?? [];
+        $config['cache_ttl']    = $config['cache_ttl'] ?? 0;
 
         $save_hook      = isset($config['save_hook']);
         $save_hook_call = $config['save_hook'] ?? '';
@@ -179,6 +180,16 @@ class Core
             $cClass->addImplement('JsonSerializable');
         }
         $cClass->addConstant('AUTO_INCREMENT', $auto_increment)->setPublic();
+
+        $cProperty = $cClass->addProperty('_cacheTTL', (int) $config['cache_ttl']);
+        $cProperty->setVisibility('protected');
+        $cProperty->addComment('@var int');
+
+        if ($config['cache_ttl'] < 0) {
+            $cProperty = $cClass->addProperty('_canCache', false);
+            $cProperty->setVisibility('protected');
+            $cProperty->addComment('@var bool');
+        }
 
         foreach ($fields as $i => $row) {
             $type = (stristr($row['Type'], 'int') ? 'int   ' : 'string');
