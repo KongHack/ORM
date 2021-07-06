@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [5.4.7](https://github.com/KongHack/ORM/releases/tag/5.4.7)
+ - @GameCharmer Cache after Purge toggle in config
+
+
+
 ## [5.4.6](https://github.com/KongHack/ORM/releases/tag/5.4.6)
  - @GameCharmer Cache TTL (TESTING)
 

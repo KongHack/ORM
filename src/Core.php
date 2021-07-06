@@ -1,4 +1,5 @@
 <?php
+
 namespace GCWorld\ORM;
 
 use GCWorld\Interfaces\Common;
@@ -96,6 +97,11 @@ class Core
             $save_hook = false;
         }
 
+        $cache_after_purge = $config['cache_after_purge'] ?? null;
+        if ($cache_after_purge === null) {
+            $cache_after_purge = $this->config['options']['cache_after_purge'] ?? false;
+        }
+
         $uuid_fields    = false;
         $auto_increment = false;
         $primaries      = [];
@@ -190,6 +196,11 @@ class Core
             $cProperty->setVisibility('protected');
             $cProperty->addComment('@var bool');
         }
+
+        $cProperty = $cClass->addProperty('_canCacheAfterPurge', $cache_after_purge);
+        $cProperty->setVisibility('protected');
+        $cProperty->addComment('@var bool');
+
 
         foreach ($fields as $i => $row) {
             $type = (stristr($row['Type'], 'int') ? 'int   ' : 'string');

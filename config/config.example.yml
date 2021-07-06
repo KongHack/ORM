@@ -11,11 +11,13 @@ options:
     use_defaults: true
     defaults_override_null: true
     type_hinting: false
+    cache_after_purge: false
 tables:
     EXAMPLE_TABLE:
         audit_ignore: false
         constructor: protected
         cache_ttl: 60
+        cache_after_purge: false
         fields:
             example_field_1:
                 visibility: protected
