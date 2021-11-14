@@ -1,4 +1,5 @@
 <?php
+
 namespace GCWorld\ORM\Exceptions;
 
 use Exception;
@@ -68,7 +69,18 @@ class ModelSaveExceptions extends Exception implements ModelSaveExceptionsInterf
      */
     public function isThrowable(): bool
     {
-        return \count($this->exceptArray) > 0;
+        return !empty($this->exceptArray);
+    }
+
+    /**
+     * @throws ModelSaveExceptions
+     * @return void
+     */
+    public function doThrow(): void
+    {
+        if ($this->isThrowable()) {
+            throw $this;
+        }
     }
 
     /**

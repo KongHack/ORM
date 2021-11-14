@@ -1,4 +1,5 @@
 <?php
+
 namespace GCWorld\ORM\Abstracts;
 
 use Exception;
@@ -135,8 +136,9 @@ abstract class DirectSingle implements DirectSingleInterface
             throw new ORMException('Primary ID is not scalar');
         }
 
-        if ($this->_canCache
-            && $this->_cache
+        $cachable = $this->_canCache && !empty($this->_cache) && $this->_cacheTTL !== 0;
+
+        if ($cachable
             && !empty($primary_id)
             && $primary_id !== null
             && $primary_id !== 0
@@ -209,7 +211,8 @@ abstract class DirectSingle implements DirectSingleInterface
             if (defined($this->myName.'::SQL')) {
                 $sql = constant($this->myName.'::SQL');
             } else {
-                $sql = 'SELECT * FROM '.$table_name.' WHERE '.$primary_name.' = :id';
+                $tmp = ($cachable ? 'SQL_NO_CACHE' : '');
+                $sql = "SELECT {$tmp} * FROM {$table_name} WHERE {$primary_name} = :id";
             }
             $cLogger->info('ORM: DS: SELECT: '.$table_name.': Start', [
                 'sql' => $sql,
@@ -253,7 +256,7 @@ abstract class DirectSingle implements DirectSingleInterface
                 }
             }
         }
-        if ($this->_canCache) {
+        if ($cachable) {
             $cLogger->info('ORM: DS: SELECT: '.$table_name.': Can Cache');
             if ($primary_id > 0) {
                 $this->setCacheData();
