@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [5.5.1](https://github.com/KongHack/ORM/releases/tag/5.5.1)
+ - @GameCharmer doThrow method
+
+
+
 ## [5.5.0](https://github.com/KongHack/ORM/releases/tag/5.5.0)
  - @GameCharmer Bump required PHP version from 7.3 to 8.0
  - @GameCharmer Add `SQL_NO_CACHE` when using a Redis cache to single select queries
