@@ -20,7 +20,7 @@
     "symfony/yaml": "^4.0",
     "ramsey/uuid": ">=4.0",
     "monolog/monolog": "^1.1 || ^2.0",
-    "nette/php-generator": "^3.3"
+    "nette/php-generator": "^3.6"
   },
   "require-dev": {
     "gcworld/code_sniffer_contrib": "^2.0.1",
