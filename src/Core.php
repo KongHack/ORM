@@ -143,8 +143,15 @@ class Core
                 }
             }
 
-            $config['fields'][$row['Field']]['uuid_field'] = strpos($row['Field'], '_uuid') !== false
-                                                             && $row['Type'] == 'binary(16)';
+            // In the event this isn't set, or if it's false, double check
+            if (!isset($config['fields'][$row['Field']]['uuid_field'])
+                || !$config['fields'][$row['Field']]['uuid_field']
+            ) {
+                $config['fields'][$row['Field']]['uuid_field'] = (
+                    strpos($row['Field'], '_uuid') !== false
+                    && strtolower($row['Type']) == 'binary(16)'
+                );
+            }
 
             if (!$uuid_fields
                && isset($config['fields'][$row['Field']]['uuid_field'])

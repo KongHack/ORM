@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [5.5.3](https://github.com/KongHack/ORM/releases/tag/5.5.3)
+ - @GameCharmer Adjust UUID Detection
+
+
+
 ## [5.5.2](https://github.com/KongHack/ORM/releases/tag/5.5.2)
  - @GameCharmer Update Nette PHP-Generator version
 
