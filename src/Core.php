@@ -116,12 +116,12 @@ class Core
         $default = Config::getDefaultFieldConfig();
         foreach ($fields as $i => $row) {
             // Do not include virtual fields in the system
-            if (strpos($row['Extra'], 'VIRTUAL') !== false) {
+            if (stripos($row['Extra'], 'VIRTUAL') !== false) {
                 unset($fields[$i]);
                 continue;
             }
 
-            if (strstr($row['Key'], 'PRI')) {
+            if (stristr($row['Key'], 'PRI')) {
                 $primaries[] = $row['Field'];
             }
             if (strlen($row['Field']) > $max_var_name) {
@@ -130,7 +130,7 @@ class Core
             if (strlen($row['Type']) > $max_var_type) {
                 $max_var_type = strlen($row['Type']);
             }
-            if (strstr($row['Extra'], 'auto_increment')) {
+            if (stristr($row['Extra'], 'auto_increment')) {
                 $auto_increment = true;
             }
             if (!isset($config['fields'][$row['Field']])) {
@@ -148,7 +148,7 @@ class Core
                 || !$config['fields'][$row['Field']]['uuid_field']
             ) {
                 $config['fields'][$row['Field']]['uuid_field'] = (
-                    strpos($row['Field'], '_uuid') !== false
+                    stripos($row['Field'], '_uuid') !== false
                     && strtolower($row['Type']) == 'binary(16)'
                 );
             }
