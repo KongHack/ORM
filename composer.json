@@ -19,7 +19,7 @@
     "composer/installers": "^1.10",
     "symfony/yaml": "^4.0",
     "ramsey/uuid": ">=4.0",
-    "monolog/monolog": "^1.1 || ^2.0",
+    "monolog/monolog": "^2.3",
     "nette/php-generator": "^3.6"
   },
   "require-dev": {
@@ -41,5 +41,10 @@
       "bash contrib/setup.sh"
     ]
   },
-  "license":"GPL-3.0"
+  "license":"GPL-3.0",
+  "config": {
+    "allow-plugins": {
+      "composer/installers": true
+    }
+  }
 }

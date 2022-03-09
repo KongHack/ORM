@@ -3,6 +3,7 @@
 namespace GCWorld\ORM;
 
 use GCWorld\Interfaces\Common;
+use Monolog\Logger;
 use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\PhpNamespace;
 use Nette\PhpGenerator\PsrPrinter;
@@ -16,19 +17,20 @@ use Exception;
  */
 class Core
 {
-    protected $master_namespace = '\\';
     /** @var Common|\GCWorld\Common\Common */
-    protected $master_common   = null;
-    protected $master_location = null;
-    protected $config          = [];
+    protected mixed   $master_common   = null;
+    protected string  $master_namespace = '\\';
+    protected ?string $master_location = null;
+    protected array   $config          = [];
+    protected Logger  $logger;
 
-    protected $get_set_funcs          = true;
-    protected $var_visibility         = 'public';
-    protected $json_serialize         = true;
-    protected $use_defaults           = true;
-    protected $defaults_override_null = true;
-    protected $type_hinting           = false;
-    protected $audit                  = true;
+    protected string  $var_visibility         = 'public';
+    protected bool    $get_set_funcs          = true;
+    protected bool    $json_serialize         = true;
+    protected bool    $use_defaults           = true;
+    protected bool    $defaults_override_null = true;
+    protected bool    $type_hinting           = false;
+    protected bool    $audit                  = true;
 
     /**
      * @param string $namespace
@@ -70,6 +72,25 @@ class Core
         if (isset($config['options']['type_hinting']) && $config['options']['type_hinting']) {
             $this->type_hinting = true;
         }
+
+        $this->logger = new Logger('orm_core');
+    }
+
+    /**
+     * @param Logger $logger
+     * @return void
+     */
+    public function setLogger(Logger $logger)
+    {
+        $this->logger = $logger;
+    }
+
+    /**
+     * @return Logger|null
+     */
+    public function getLogger()
+    {
+        return $this->logger;
     }
 
     /**
@@ -79,12 +100,17 @@ class Core
      */
     public function generate(string $table_name)
     {
+        $this->logger->debug('Processing Table: '.$table_name);
+
         $sql   = 'SHOW FULL COLUMNS FROM '.$table_name;
         $query = $this->master_common->getDatabase()->prepare($sql);
         $query->execute();
         $fields = $query->fetchAll(PDO::FETCH_ASSOC);
         unset($query);
         $config = $this->config['tables'][$table_name] ?? [];
+
+        $this->logger->debug('Found Fields', $fields);
+        $this->logger->debug('Found Config', $config);
 
         $config['constructor']  = $config['constructor'] ?? 'public';
         $config['audit_ignore'] = $config['audit_ignore'] ?? false;
@@ -115,6 +141,8 @@ class Core
 
         $default = Config::getDefaultFieldConfig();
         foreach ($fields as $i => $row) {
+            $this->logger->debug('Processing Field', $row);
+
             // Do not include virtual fields in the system
             if (stripos($row['Extra'], 'VIRTUAL') !== false) {
                 unset($fields[$i]);
