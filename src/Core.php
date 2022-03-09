@@ -112,15 +112,6 @@ class Core
         $this->logger->debug('Found Fields', $fields);
         $this->logger->debug('Found Config', $config);
 
-        // In some versions of MariaDB, the keys will return in Proper case instead of UPPERCASE
-        foreach ($fields as $i => $row) {
-            $new = [];
-            foreach ($row as $k => $v) {
-                $new[strtoupper($k)] = $v;
-            }
-            $fields[$i] = $new;
-        }
-
         $config['constructor']  = $config['constructor'] ?? 'public';
         $config['audit_ignore'] = $config['audit_ignore'] ?? false;
         $config['fields']       = $config['fields'] ?? [];
@@ -154,6 +145,7 @@ class Core
 
             // Do not include virtual fields in the system
             if (stripos($row['Extra'], 'VIRTUAL') !== false) {
+                $this->logger->debug('Unsetting Virtual: '.$row['Field']);
                 unset($fields[$i]);
                 continue;
             }
