@@ -1,25 +1,24 @@
 <?php
-namespace GCWorld\ORM;
+
+namespace GCWorld\ORM\Audit;
 
 use GCWorld\Database\Database;
-use GCWorld\ORM\Core\CreateAuditTable;
+use GCWorld\ORM\Config;
+use GCWorld\ORM\Globals;
 use Ramsey\Uuid\Uuid;
 
 /**
- * Class Audit
- * @package GCWorld\ORM
+ * Class MongoDBAudit
  */
-class Audit
+class MongoDBAudit
 {
     protected static $overrideMemberId = null;
     protected static $config = null;
 
     protected $canAudit   = true;
     protected $common     = null;
-    protected $database   = null;
-    protected $connection = 'default';
-    protected $prefix     = '_Audit_';
     protected $enable     = true;
+    protected $database   = null;
 
     protected $table     = null;
     protected $primaryId = null;
@@ -28,9 +27,9 @@ class Audit
     protected $after     = [];
 
     /**
-     * @param \GCWorld\Interfaces\Common $common
+     * @param CommonMongo $common
      */
-    public function __construct(\GCWorld\Interfaces\Common $common)
+    public function __construct(CommonMongo $common)
     {
         if (self::$config === null) {
             $cConfig      = new Config();
@@ -47,10 +46,9 @@ class Audit
             /** @var array $audit */
             $audit = $common->getConfig('audit');
             if (is_array($audit)) {
-                $this->enable = $audit['enable'] ?? false;
+                $this->enable   = $audit['enable'] ?? false;
                 $this->database = $audit['database'] ?? $this->database;
-                $this->connection = $audit['connection'] ?? $this->connection;
-                $this->prefix = $audit['prefix'] ?? $this->prefix;
+                $this->prefix   = $audit['prefix'] ?? $this->prefix;
             }
         }
     }

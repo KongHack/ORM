@@ -3,7 +3,7 @@
 namespace GCWorld\ORM\Abstracts;
 
 use Exception;
-use GCWorld\ORM\Audit;
+use GCWorld\ORM\Audit\Audit;
 use GCWorld\ORM\CommonLoader;
 use GCWorld\ORM\Config;
 use GCWorld\ORM\Interfaces\DirectSingleInterface;
