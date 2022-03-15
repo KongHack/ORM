@@ -3,6 +3,7 @@
 namespace GCWorld\ORM\Abstracts;
 
 use Exception;
+use GCWorld\Common\Interfaces\CommonInterface;
 use GCWorld\Database\Interfaces\DatabaseInterface;
 use GCWorld\ORM\Audit;
 use GCWorld\ORM\CommonLoader;
@@ -18,7 +19,7 @@ use GCWorld\ORM\ORMLogger;
 abstract class DirectSingle implements DirectSingleInterface
 {
     /**
-     * @var \GCWorld\Common\Common
+     * @var \GCWorld\Common\Common|CommonInterface
      */
     protected $_common = null;
     /**
@@ -29,9 +30,9 @@ abstract class DirectSingle implements DirectSingleInterface
     protected $_dbName = null;
 
     /**
-     * @var DatabaseInterface|\PDO
+     * @var \GCWorld\Database\Database|DatabaseInterface
      */
-    protected $_db = null;
+    protected ?DatabaseInterface $_db = null;
 
     /**
      * Set this in the event your class needs a non-standard Cache.

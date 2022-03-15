@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [5.6.3](https://github.com/KongHack/ORM/releases/tag/5.6.3)
+ - @GameCharmer Tweak DirectSingle to hopefully pacify PHPStan
+
+
+
 ## [5.6.2](https://github.com/KongHack/ORM/releases/tag/5.6.2)
  - @GameCharmer Implement new Common Interface
 
