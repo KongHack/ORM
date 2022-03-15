@@ -2,7 +2,7 @@
 
 namespace GCWorld\ORM;
 
-use GCWorld\Common\Interfaces\CommonInterface;
+use GCWorld\Interfaces\CommonInterface;
 use Monolog\Logger;
 use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\PhpNamespace;
