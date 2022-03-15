@@ -2,7 +2,7 @@
 
 namespace GCWorld\ORM;
 
-use GCWorld\Interfaces\Common;
+use GCWorld\Common\Interfaces\CommonInterface;
 use Monolog\Logger;
 use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\PhpNamespace;
@@ -17,7 +17,7 @@ use Exception;
  */
 class Core
 {
-    /** @var Common|\GCWorld\Common\Common */
+    /** @var CommonInterface|\GCWorld\Common\Common */
     protected mixed   $master_common   = null;
     protected string  $master_namespace = '\\';
     protected ?string $master_location = null;
@@ -34,9 +34,9 @@ class Core
 
     /**
      * @param string $namespace
-     * @param Common $common
+     * @param CommonInterface $common
      */
-    public function __construct(string $namespace, Common $common)
+    public function __construct(string $namespace, CommonInterface $common)
     {
         $this->master_namespace = $namespace;
         $this->master_common    = $common;

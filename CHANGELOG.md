@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [5.6.2](https://github.com/KongHack/ORM/releases/tag/5.6.2)
+ - @GameCharmer Implement new Common Interface
+
+
+
 ## [5.6.1](https://github.com/KongHack/ORM/releases/tag/5.6.1)
  - @GameCharmer Update Database
 

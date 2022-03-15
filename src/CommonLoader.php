@@ -1,10 +1,12 @@
 <?php
+
 namespace GCWorld\ORM;
 
-use GCWorld\Interfaces\Common;
+use GCWorld\Common\Interfaces\CommonInterface;
 
 /**
  * Class CommonLoader
+ *
  * @package GCWorld\ORM
  */
 class CommonLoader
@@ -13,16 +15,16 @@ class CommonLoader
 
     /**
      * Sets the common object
-     * @param \GCWorld\Interfaces\Common $common
+     * @param CommonInterface $common
      * @return void
      */
-    public static function setCommonObject(Common $common)
+    public static function setCommonObject(CommonInterface $common)
     {
         self::$common = $common;
     }
 
     /**
-     * @return \GCWorld\Common\Common
+     * @return \GCWorld\Common\Common|CommonInterface
      */
     public static function getCommon()
     {
