@@ -2,17 +2,17 @@
 
 namespace GCWorld\ORM\Core;
 
-use GCWorld\Database\Interfaces\DatabaseInterface;
+use GCWorld\Interfaces\Database\DatabaseInterface;
 use GCWorld\ORM\CommonLoader;
 
 class CreateAuditTable
 {
     /**
-     * @var DatabaseInterface|\GCWorld\Database\Database|\PDO
+     * @var DatabaseInterface|\GCWorld\Database\Database
      */
     protected $_source      = null;
     /**
-     * @var DatabaseInterface|\GCWorld\Database\Database|\PDO
+     * @var DatabaseInterface|\GCWorld\Database\Database
      */
     protected $_destination = null;
     /**

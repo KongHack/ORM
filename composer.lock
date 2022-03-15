@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "33953fb6f0a404311d0aa66c19b216ec",
+    "content-hash": "2844c57ad9b89c4408fa24ad62ea66b9",
     "packages": [
         {
             "name": "brick/math",
@@ -761,28 +761,29 @@
         },
         {
             "name": "gcworld/common",
-            "version": "2.6.3",
+            "version": "2.6.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/KongHack/Common.git",
-                "reference": "fb832a93aa3c6f36cebe3a9545f5960722e9dc39"
+                "reference": "e5a3e195f0070966ffe1cbd249963375b8448f06"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/KongHack/Common/zipball/fb832a93aa3c6f36cebe3a9545f5960722e9dc39",
-                "reference": "fb832a93aa3c6f36cebe3a9545f5960722e9dc39",
+                "url": "https://api.github.com/repos/KongHack/Common/zipball/e5a3e195f0070966ffe1cbd249963375b8448f06",
+                "reference": "e5a3e195f0070966ffe1cbd249963375b8448f06",
                 "shasum": ""
             },
             "require": {
-                "gcworld/database": ">=2.5.1",
+                "gcworld/database": "^2.5",
                 "gcworld/errorhandlers": "^1.2.0",
+                "gcworld/interfaces": ">=4.1.1",
                 "php": ">=8.0",
                 "symfony/yaml": "^4.0"
             },
             "require-dev": {
                 "gcworld/code_sniffer_contrib": "^1.0",
                 "phpmd/phpmd": "^2.8.1",
-                "phpstan/phpstan": "^1.0"
+                "phpstan/phpstan": "^1.4"
             },
             "type": "library",
             "autoload": {
@@ -803,29 +804,29 @@
             "description": "GCWorld Industries Common",
             "support": {
                 "issues": "https://github.com/KongHack/Common/issues",
-                "source": "https://github.com/KongHack/Common/tree/2.6.3"
+                "source": "https://github.com/KongHack/Common/tree/2.6.5"
             },
-            "time": "2022-03-15T17:49:52+00:00"
+            "time": "2022-03-15T20:02:47+00:00"
         },
         {
             "name": "gcworld/database",
-            "version": "2.5.2",
+            "version": "2.5.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/KongHack/Database.git",
-                "reference": "d2fd2cadabdfb609b4ebc0952c27a093c32cf687"
+                "reference": "fdf6d00615c7301003b24b26eac554ff3c36f63b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/KongHack/Database/zipball/d2fd2cadabdfb609b4ebc0952c27a093c32cf687",
-                "reference": "d2fd2cadabdfb609b4ebc0952c27a093c32cf687",
+                "url": "https://api.github.com/repos/KongHack/Database/zipball/fdf6d00615c7301003b24b26eac554ff3c36f63b",
+                "reference": "fdf6d00615c7301003b24b26eac554ff3c36f63b",
                 "shasum": ""
             },
             "require": {
                 "composer/composer": "^2.0",
                 "composer/installers": "^1.10",
                 "ext-pdo": "*",
-                "gcworld/interfaces": ">=3.3.2",
+                "gcworld/interfaces": ">=4.1.0",
                 "php": ">=8.0"
             },
             "require-dev": {
@@ -852,9 +853,9 @@
             "description": "GCWorld Industries Database",
             "support": {
                 "issues": "https://github.com/KongHack/Database/issues",
-                "source": "https://github.com/KongHack/Database/tree/2.5.2"
+                "source": "https://github.com/KongHack/Database/tree/2.5.5"
             },
-            "time": "2022-03-15T18:10:23+00:00"
+            "time": "2022-03-15T19:42:28+00:00"
         },
         {
             "name": "gcworld/errorhandlers",
@@ -942,16 +943,16 @@
         },
         {
             "name": "gcworld/interfaces",
-            "version": "4.0.0",
+            "version": "4.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/KongHack/Interfaces.git",
-                "reference": "478a31a564fd9186ec573770f3fc1cb241d9deb6"
+                "reference": "31c93aa9656989d4a971c6548eb48eba3ef3686d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/KongHack/Interfaces/zipball/478a31a564fd9186ec573770f3fc1cb241d9deb6",
-                "reference": "478a31a564fd9186ec573770f3fc1cb241d9deb6",
+                "url": "https://api.github.com/repos/KongHack/Interfaces/zipball/31c93aa9656989d4a971c6548eb48eba3ef3686d",
+                "reference": "31c93aa9656989d4a971c6548eb48eba3ef3686d",
                 "shasum": ""
             },
             "require": {
@@ -981,9 +982,9 @@
             "description": "GCWorld Industries Interfaces",
             "support": {
                 "issues": "https://github.com/KongHack/Interfaces/issues",
-                "source": "https://github.com/KongHack/Interfaces/tree/4.0.0"
+                "source": "https://github.com/KongHack/Interfaces/tree/4.1.1"
             },
-            "time": "2022-02-17T13:13:20+00:00"
+            "time": "2022-03-15T19:58:52+00:00"
         },
         {
             "name": "justinrainbow/json-schema",

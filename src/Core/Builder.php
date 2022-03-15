@@ -2,8 +2,8 @@
 
 namespace GCWorld\ORM\Core;
 
-use GCWorld\Common\Interfaces\CommonInterface;
-use GCWorld\Database\Interfaces\DatabaseInterface;
+use GCWorld\Interfaces\CommonInterface;
+use GCWorld\Interfaces\Database\DatabaseInterface;
 use GCWorld\ORM\Config;
 
 /**
@@ -16,12 +16,12 @@ class Builder
     protected $common = null;
 
     /**
-     * @var DatabaseInterface|\GCWorld\Database\Database|\PDO
+     * @var DatabaseInterface|\GCWorld\Database\Database
      */
     protected $_db = null;
 
     /**
-     * @var DatabaseInterface|\GCWorld\Database\Database|\PDO
+     * @var DatabaseInterface|\GCWorld\Database\Database
      */
     protected $_audit = null;
 

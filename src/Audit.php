@@ -2,7 +2,7 @@
 
 namespace GCWorld\ORM;
 
-use GCWorld\Common\Interfaces\CommonInterface;
+use GCWorld\Interfaces\CommonInterface;
 use GCWorld\Database\Database;
 use GCWorld\ORM\Core\CreateAuditTable;
 use Ramsey\Uuid\Uuid;

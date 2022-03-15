@@ -2,7 +2,7 @@
 
 namespace GCWorld\ORM;
 
-use GCWorld\Common\Interfaces\CommonInterface;
+use GCWorld\Interfaces\CommonInterface;
 
 /**
  * Class CommonLoader
@@ -11,6 +11,7 @@ use GCWorld\Common\Interfaces\CommonInterface;
  */
 class CommonLoader
 {
+    /** @var \GCWorld\Common\Common|CommonInterface|null */
     protected static $common = null;
 
     /**
@@ -32,7 +33,7 @@ class CommonLoader
             $cConfig = new Config();
             $config  = $cConfig->getConfig();
 
-            /** @var \GCWorld\Common\Common $class */
+            /** @var \GCWorld\Common\Common|CommonInterface $class */
             $class        = $config['general']['common'];
             $obj          = $class::getInstance();
             self::$common = $obj;

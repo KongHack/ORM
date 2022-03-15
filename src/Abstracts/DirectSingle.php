@@ -3,8 +3,8 @@
 namespace GCWorld\ORM\Abstracts;
 
 use Exception;
-use GCWorld\Common\Interfaces\CommonInterface;
-use GCWorld\Database\Interfaces\DatabaseInterface;
+use GCWorld\Interfaces\CommonInterface;
+use GCWorld\Interfaces\Database\DatabaseInterface;
 use GCWorld\ORM\Audit;
 use GCWorld\ORM\CommonLoader;
 use GCWorld\ORM\Config;
