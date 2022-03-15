@@ -1,5 +1,3 @@
 parameters:
 	ignoreErrors:
 		- '#stdClass#'
-		- '#Function d not found.#'
-		- '#GCWorld\\Interfaces\\Database::prepare.#'

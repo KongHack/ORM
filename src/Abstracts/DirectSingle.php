@@ -3,6 +3,7 @@
 namespace GCWorld\ORM\Abstracts;
 
 use Exception;
+use GCWorld\Database\Interfaces\DatabaseInterface;
 use GCWorld\ORM\Audit;
 use GCWorld\ORM\CommonLoader;
 use GCWorld\ORM\Config;
@@ -28,7 +29,7 @@ abstract class DirectSingle implements DirectSingleInterface
     protected $_dbName = null;
 
     /**
-     * @var \GCWorld\Database\Database
+     * @var DatabaseInterface|\PDO
      */
     protected $_db = null;
 
@@ -232,7 +233,6 @@ abstract class DirectSingle implements DirectSingleInterface
                     if (isset($config['options']['enable_backtrace']) && $config['options']['enable_backtrace']) {
                         debug_print_backtrace();
                         if (function_exists('d')) {
-                            // @phpstan-ignore-next-line
                             d(func_get_args());
                         }
                     } else {

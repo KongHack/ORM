@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1a8a1e95f15cabdb3e498bdf5cd8bb8d",
+    "content-hash": "33953fb6f0a404311d0aa66c19b216ec",
     "packages": [
         {
             "name": "brick/math",
@@ -809,16 +809,16 @@
         },
         {
             "name": "gcworld/database",
-            "version": "2.5.1",
+            "version": "2.5.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/KongHack/Database.git",
-                "reference": "b73cddc16e96b96ddd992c0230fdbb5eadbfcf5a"
+                "reference": "d2fd2cadabdfb609b4ebc0952c27a093c32cf687"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/KongHack/Database/zipball/b73cddc16e96b96ddd992c0230fdbb5eadbfcf5a",
-                "reference": "b73cddc16e96b96ddd992c0230fdbb5eadbfcf5a",
+                "url": "https://api.github.com/repos/KongHack/Database/zipball/d2fd2cadabdfb609b4ebc0952c27a093c32cf687",
+                "reference": "d2fd2cadabdfb609b4ebc0952c27a093c32cf687",
                 "shasum": ""
             },
             "require": {
@@ -831,7 +831,7 @@
             "require-dev": {
                 "gcworld/code_sniffer_contrib": "^1.0",
                 "phpmd/phpmd": "^2.6",
-                "phpstan/phpstan": "^0.12"
+                "phpstan/phpstan": "^1.4"
             },
             "type": "library",
             "autoload": {
@@ -852,9 +852,9 @@
             "description": "GCWorld Industries Database",
             "support": {
                 "issues": "https://github.com/KongHack/Database/issues",
-                "source": "https://github.com/KongHack/Database/tree/2.5.1"
+                "source": "https://github.com/KongHack/Database/tree/2.5.2"
             },
-            "time": "2022-03-15T15:59:14+00:00"
+            "time": "2022-03-15T18:10:23+00:00"
         },
         {
             "name": "gcworld/errorhandlers",
@@ -3515,16 +3515,16 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "0.12.99",
+            "version": "1.4.10",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "b4d40f1d759942f523be267a1bab6884f46ca3f7"
+                "reference": "898c479c39caa727bedf4311dd294a8f4e250e72"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/b4d40f1d759942f523be267a1bab6884f46ca3f7",
-                "reference": "b4d40f1d759942f523be267a1bab6884f46ca3f7",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/898c479c39caa727bedf4311dd294a8f4e250e72",
+                "reference": "898c479c39caa727bedf4311dd294a8f4e250e72",
                 "shasum": ""
             },
             "require": {
@@ -3538,11 +3538,6 @@
                 "phpstan.phar"
             ],
             "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "0.12-dev"
-                }
-            },
             "autoload": {
                 "files": [
                     "bootstrap.php"
@@ -3555,7 +3550,7 @@
             "description": "PHPStan - PHP Static Analysis Tool",
             "support": {
                 "issues": "https://github.com/phpstan/phpstan/issues",
-                "source": "https://github.com/phpstan/phpstan/tree/0.12.99"
+                "source": "https://github.com/phpstan/phpstan/tree/1.4.10"
             },
             "funding": [
                 {
@@ -3575,58 +3570,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-09-12T20:09:55+00:00"
-        },
-        {
-            "name": "phpstan/phpstan-deprecation-rules",
-            "version": "0.12.6",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/phpstan/phpstan-deprecation-rules.git",
-                "reference": "46dbd43c2db973d2876d6653e53f5c2cc3a01fbb"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan-deprecation-rules/zipball/46dbd43c2db973d2876d6653e53f5c2cc3a01fbb",
-                "reference": "46dbd43c2db973d2876d6653e53f5c2cc3a01fbb",
-                "shasum": ""
-            },
-            "require": {
-                "php": "^7.1 || ^8.0",
-                "phpstan/phpstan": "^0.12.60"
-            },
-            "require-dev": {
-                "phing/phing": "^2.16.3",
-                "php-parallel-lint/php-parallel-lint": "^1.2",
-                "phpstan/phpstan-phpunit": "^0.12",
-                "phpunit/phpunit": "^7.5.20"
-            },
-            "type": "phpstan-extension",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "0.12-dev"
-                },
-                "phpstan": {
-                    "includes": [
-                        "rules.neon"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "PHPStan\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "description": "PHPStan rules for detecting usage of deprecated classes, methods, properties, constants and traits.",
-            "support": {
-                "issues": "https://github.com/phpstan/phpstan-deprecation-rules/issues",
-                "source": "https://github.com/phpstan/phpstan-deprecation-rules/tree/0.12.6"
-            },
-            "time": "2020-12-13T10:20:54+00:00"
+            "time": "2022-03-14T10:25:45+00:00"
         },
         {
             "name": "psr/cache",
