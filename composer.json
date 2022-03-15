@@ -14,7 +14,7 @@
     "gcworld/common":"^2.5",
     "gcworld/globals":"^3.1.0",
     "gcworld/interfaces": ">=3.1.1",
-    "gcworld/database": "^2.3.4",
+    "gcworld/database": ">=2.3.4",
     "composer/composer": ">=2.0",
     "composer/installers": "^1.10",
     "symfony/yaml": "^4.0",
