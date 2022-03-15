@@ -1,17 +1,18 @@
 <?php
+
 namespace GCWorld\ORM\Core;
 
-use GCWorld\Interfaces\Database;
+use GCWorld\Database\Interfaces\DatabaseInterface;
 use GCWorld\ORM\CommonLoader;
 
 class CreateAuditTable
 {
     /**
-     * @var Database|\GCWorld\Database\Database|\PDO
+     * @var DatabaseInterface|\GCWorld\Database\Database|\PDO
      */
     protected $_source      = null;
     /**
-     * @var Database|\GCWorld\Database\Database|\PDO
+     * @var DatabaseInterface|\GCWorld\Database\Database|\PDO
      */
     protected $_destination = null;
     /**
@@ -22,10 +23,10 @@ class CreateAuditTable
     /**
      * CreateAuditTable constructor.
      *
-     * @param Database $_source
-     * @param Database $_destination
+     * @param DatabaseInterface $_source
+     * @param DatabaseInterface $_destination
      */
-    public function __construct(Database $_source, Database $_destination)
+    public function __construct(DatabaseInterface $_source, DatabaseInterface $_destination)
     {
         $this->_source      = $_source;
         $this->_destination = $_destination;
