@@ -1,6 +1,8 @@
 <?php
+
 namespace GCWorld\ORM;
 
+use GCWorld\Common\Interfaces\CommonInterface;
 use GCWorld\Database\Database;
 use GCWorld\ORM\Core\CreateAuditTable;
 use Ramsey\Uuid\Uuid;
@@ -28,9 +30,9 @@ class Audit
     protected $after     = [];
 
     /**
-     * @param \GCWorld\Interfaces\Common $common
+     * @param CommonInterface $common
      */
-    public function __construct(\GCWorld\Interfaces\Common $common)
+    public function __construct(CommonInterface $common)
     {
         if (self::$config === null) {
             $cConfig      = new Config();

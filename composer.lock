@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "54f36c0404658ba8103f1aa6675c22af",
+    "content-hash": "1a8a1e95f15cabdb3e498bdf5cd8bb8d",
     "packages": [
         {
             "name": "brick/math",
@@ -761,29 +761,28 @@
         },
         {
             "name": "gcworld/common",
-            "version": "2.6.0",
+            "version": "2.6.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/KongHack/Common.git",
-                "reference": "85bfe9756d076023288c2e33aaa267e3bce8fd35"
+                "reference": "fb832a93aa3c6f36cebe3a9545f5960722e9dc39"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/KongHack/Common/zipball/85bfe9756d076023288c2e33aaa267e3bce8fd35",
-                "reference": "85bfe9756d076023288c2e33aaa267e3bce8fd35",
+                "url": "https://api.github.com/repos/KongHack/Common/zipball/fb832a93aa3c6f36cebe3a9545f5960722e9dc39",
+                "reference": "fb832a93aa3c6f36cebe3a9545f5960722e9dc39",
                 "shasum": ""
             },
             "require": {
-                "gcworld/database": "^2.3.17",
+                "gcworld/database": ">=2.5.1",
                 "gcworld/errorhandlers": "^1.2.0",
-                "gcworld/interfaces": ">=3.1.1",
-                "php": ">=7.2.5",
+                "php": ">=8.0",
                 "symfony/yaml": "^4.0"
             },
             "require-dev": {
                 "gcworld/code_sniffer_contrib": "^1.0",
                 "phpmd/phpmd": "^2.8.1",
-                "phpstan/phpstan": "^0.12.7"
+                "phpstan/phpstan": "^1.0"
             },
             "type": "library",
             "autoload": {
@@ -804,9 +803,9 @@
             "description": "GCWorld Industries Common",
             "support": {
                 "issues": "https://github.com/KongHack/Common/issues",
-                "source": "https://github.com/KongHack/Common/tree/2.6.0"
+                "source": "https://github.com/KongHack/Common/tree/2.6.3"
             },
-            "time": "2021-04-04T16:42:21+00:00"
+            "time": "2022-03-15T17:49:52+00:00"
         },
         {
             "name": "gcworld/database",

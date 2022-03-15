@@ -1,8 +1,9 @@
 <?php
+
 namespace GCWorld\ORM\Core;
 
-use GCWorld\Database\Database;
-use GCWorld\Interfaces\Common;
+use GCWorld\Common\Interfaces\CommonInterface;
+use GCWorld\Database\Interfaces\DatabaseInterface;
 use GCWorld\ORM\Config;
 
 /**
@@ -10,17 +11,17 @@ use GCWorld\ORM\Config;
  */
 class Builder
 {
-    const BUILDER_VERSION = 3;
+    public const BUILDER_VERSION = 3;
 
     protected $common = null;
 
     /**
-     * @var Database|\GCWorld\Interfaces\Database|\PDO
+     * @var DatabaseInterface|\GCWorld\Database\Database|\PDO
      */
     protected $_db = null;
 
     /**
-     * @var Database|\GCWorld\Interfaces\Database|\PDO
+     * @var DatabaseInterface|\GCWorld\Database\Database|\PDO
      */
     protected $_audit = null;
 
@@ -39,9 +40,9 @@ class Builder
     /**
      * Builder constructor.
      *
-     * @param Common $common
+     * @param CommonInterface $common
      */
-    public function __construct(Common $common)
+    public function __construct(CommonInterface $common)
     {
         $cConfig          = new Config();
         $this->coreConfig = $cConfig->getConfig();
