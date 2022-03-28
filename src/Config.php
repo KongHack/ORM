@@ -75,10 +75,11 @@ class Config
             throw new Exception('Missing User Variable In General');
         }
 
-        if (!isset($config['audit_handler']) || !is_string($config['audit_handler'])) {
-            $config['audit_handler'] = Audit::class;
+        if (!array_key_exists('audit_handler', $config['general'])
+            || empty($config['general']['audit_handler'])
+        ) {
+            $config['general']['audit_handler'] = Audit::class;
         }
-
 
         $this->config = $config;
     }
