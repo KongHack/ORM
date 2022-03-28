@@ -4,6 +4,7 @@ namespace GCWorld\ORM;
 
 use GCWorld\Interfaces\CommonInterface;
 use GCWorld\Database\Database;
+use GCWorld\ORM\Core\AuditUtilities;
 use GCWorld\ORM\Core\CreateAuditTable;
 use Ramsey\Uuid\Uuid;
 
@@ -17,7 +18,7 @@ class Audit
     protected static $config = null;
 
     protected $canAudit   = true;
-    protected $common     = null;
+    protected $cCommon     = null;
     protected $database   = null;
     protected $connection = 'default';
     protected $prefix     = '_Audit_';
@@ -30,9 +31,9 @@ class Audit
     protected $after     = [];
 
     /**
-     * @param CommonInterface $common
+     * @param CommonInterface $cCommon
      */
-    public function __construct(CommonInterface $common)
+    public function __construct(CommonInterface $cCommon)
     {
         if (self::$config === null) {
             $cConfig      = new Config();
@@ -45,14 +46,14 @@ class Audit
         }
 
         if ($this->canAudit) {
-            $this->common = $common;
+            $this->cCommon = $cCommon;
             /** @var array $audit */
-            $audit = $common->getConfig('audit');
+            $audit = $cCommon->getConfig('audit');
             if (is_array($audit)) {
-                $this->enable = $audit['enable'] ?? false;
-                $this->database = $audit['database'] ?? $this->database;
+                $this->enable     = $audit['enable'] ?? false;
+                $this->database   = $audit['database'] ?? $this->database;
                 $this->connection = $audit['connection'] ?? $this->connection;
-                $this->prefix = $audit['prefix'] ?? $this->prefix;
+                $this->prefix     = $audit['prefix'] ?? $this->prefix;
             }
         }
     }
@@ -133,32 +134,12 @@ class Audit
             $storeTable = $this->database.'.'.$storeTable;
         }
         /** @var Database $db */
-        $db = $this->common->getDatabase($this->connection);
+        $db = $this->cCommon->getDatabase($this->connection);
 
         //Determine only things changed.
-        $A = [];
-        $B = [];
-
-        // KISS
-        foreach ($before as $k => $v) {
-            if ($after[$k] !== $v) {
-                $B[$k] = $v;
-                $A[$k] = $after[$k];
-
-                // Overrides
-
-                if (strpos($k, '_uuid') !== false && strlen($v) == 16) {
-                    $B[$k] = Uuid::fromBytes($v)->toString();
-                } elseif (self::isBinary($v)) {
-                    $B[$k] = base64_encode($v);
-                }
-                if (strpos($k, '_uuid') !== false && strlen($after[$k]) == 16) {
-                    $A[$k] = Uuid::fromBytes($after[$k])->toString();
-                } elseif (self::isBinary($after[$k])) {
-                    $A[$k] = base64_encode($after[$k]);
-                }
-            }
-        }
+        $cData = AuditUtilities::cleanData($after, $before);
+        $A = $cData->getAfter();
+        $B = $cData->getBefore();
 
         if (count($A) > 0) {
             $cGlobals = new Globals();
@@ -183,7 +164,7 @@ class Audit
                     throw $e;
                 }
 
-                $cCreate = new CreateAuditTable($this->common->getDatabase(), $db);
+                $cCreate = new CreateAuditTable($this->cCommon->getDatabase(), $db);
                 $cCreate->buildTable($table);
                 $query = $db->prepare($sql);
                 $query->execute([
@@ -206,7 +187,7 @@ class Audit
      * More Info: http://stackoverflow.com/questions/1318608/php-get-parent-script-name
      * @return mixed
      */
-    private function getTopScript()
+    protected function getTopScript()
     {
         $backtrace = debug_backtrace(defined("DEBUG_BACKTRACE_IGNORE_ARGS") ? DEBUG_BACKTRACE_IGNORE_ARGS : false);
         $top_frame = array_pop($backtrace);
@@ -263,10 +244,10 @@ class Audit
             return intval(self::$overrideMemberId);
         }
 
-        if (!method_exists($this->common, 'getUser')) {
+        if (!method_exists($this->cCommon, 'getUser')) {
             return 0;
         }
-        $user = $this->common->getUser();
+        $user = $this->cCommon->getUser();
         if (!is_object($user)) {
             return 0;
         }
@@ -298,20 +279,5 @@ class Audit
         }
 
         return 0;
-    }
-
-    /**
-     * @param mixed $str
-     * @return bool
-     */
-    public function isBinary($str)
-    {
-        if (!is_scalar($str)) {
-            return true;
-        }
-        if (mb_detect_encoding($str)) {
-            return false;
-        }
-        return preg_match('~[^\x20-\x7E\t\r\n]~', $str) > 0;
     }
 }

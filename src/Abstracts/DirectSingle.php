@@ -5,9 +5,9 @@ namespace GCWorld\ORM\Abstracts;
 use Exception;
 use GCWorld\Interfaces\CommonInterface;
 use GCWorld\Interfaces\Database\DatabaseInterface;
-use GCWorld\ORM\Audit;
 use GCWorld\ORM\CommonLoader;
 use GCWorld\ORM\Config;
+use GCWorld\ORM\Interfaces\AuditInterface;
 use GCWorld\ORM\Interfaces\DirectSingleInterface;
 use GCWorld\ORM\ORMException;
 use GCWorld\ORM\ORMLogger;
@@ -79,9 +79,15 @@ abstract class DirectSingle implements DirectSingleInterface
      */
     protected $_audit = true;
 
+
+    /**
+     * @var ?string
+     */
+    protected ?string $_auditDefinition = null;
+
     /**
      * The last audit object will be set to this upon audit completion
-     * @var Audit|null
+     * @var AuditInterface|null
      */
     protected $_lastAuditObject = null;
 
@@ -424,10 +430,11 @@ abstract class DirectSingle implements DirectSingleInterface
             unset($query);
 
             // The is_array check solves issues with canInsert style objects
-            if (is_array($before) && is_array($after)) {
-                $audit = new Audit($this->_common);
-                $audit->storeLog($table_name, $this->$primary_name, $before, $after);
-                $this->_lastAuditObject = $audit;
+            if (is_array($before) && is_array($after) && !empty($this->_auditDefinition)) {
+                /** @var AuditInterface $cAudit */
+                $cAudit = new $this->_auditDefinition($this->_common);
+                $cAudit->storeLog($table_name, $this->$primary_name, $before, $after);
+                $this->_lastAuditObject = $cAudit;
             }
         }
 

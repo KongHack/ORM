@@ -3,6 +3,7 @@ general:
     common: \Your\Fully\Qualified\Class\Name\Here
     user: \Your\Fully\Qualified\Class\Name\Here
     audit: true
+    audit_handler:
 options:
     get_set_funcs: true
     var_visibility: public
@@ -15,6 +16,7 @@ options:
 tables:
     EXAMPLE_TABLE:
         audit_ignore: false
+        audit_handler:
         constructor: protected
         cache_ttl: 60
         cache_after_purge: false

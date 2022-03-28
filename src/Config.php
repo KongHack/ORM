@@ -1,4 +1,5 @@
 <?php
+
 namespace GCWorld\ORM;
 
 use Exception;
@@ -10,7 +11,7 @@ use Symfony\Component\Yaml\Yaml;
  */
 class Config
 {
-    const VERSION = 4;
+    public const VERSION = 5;
 
     /**
      * @var array
@@ -73,6 +74,11 @@ class Config
         if (!array_key_exists('user', $config['general'])) {
             throw new Exception('Missing User Variable In General');
         }
+
+        if (!isset($config['audit_handler']) || !is_string($config['audit_handler'])) {
+            $config['audit_handler'] = Audit::class;
+        }
+
 
         $this->config = $config;
     }
