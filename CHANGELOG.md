@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [5.7.0](https://github.com/KongHack/ORM/releases/tag/5.7.0)
+ - @GameCharmer Audit alternative class system
+
+
+
 ## [5.6.5](https://github.com/KongHack/ORM/releases/tag/5.6.5)
  - @GameCharmer Fix Interfaces
 

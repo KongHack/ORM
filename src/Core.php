@@ -116,7 +116,7 @@ class Core
         $config['audit_ignore']  = $config['audit_ignore'] ?? false;
         $config['fields']        = $config['fields'] ?? [];
         $config['cache_ttl']     = $config['cache_ttl'] ?? 0;
-        $config['audit_handler'] = $config['audit_handler'] ?? $this->config['audit_handler'] ?? '';
+        $config['audit_handler'] = ($config['audit_handler'] ?? ($this->config['audit_handler'] ?? null));
 
         $save_hook      = isset($config['save_hook']);
         $save_hook_call = $config['save_hook'] ?? '';
