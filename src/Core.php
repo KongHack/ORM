@@ -238,7 +238,7 @@ class Core
         $cProperty->setVisibility('protected');
         $cProperty->addComment('@var bool');
 
-        $cProperty = $cClass->addProperty('_auditDefinition', $config['audit_handler']);
+        $cProperty = $cClass->addProperty('_auditHandler', $config['audit_handler']);
         $cProperty->setVisibility('protected');
         $cProperty->setNullable(true);
         $cProperty->setType('string');

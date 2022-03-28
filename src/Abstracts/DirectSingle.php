@@ -83,7 +83,7 @@ abstract class DirectSingle implements DirectSingleInterface
     /**
      * @var ?string
      */
-    protected ?string $_auditDefinition = null;
+    protected ?string $_auditHandler = null;
 
     /**
      * The last audit object will be set to this upon audit completion
@@ -430,9 +430,9 @@ abstract class DirectSingle implements DirectSingleInterface
             unset($query);
 
             // The is_array check solves issues with canInsert style objects
-            if (is_array($before) && is_array($after) && !empty($this->_auditDefinition)) {
+            if (is_array($before) && is_array($after) && !empty($this->_auditHandler)) {
                 /** @var AuditInterface $cAudit */
-                $cAudit = new $this->_auditDefinition($this->_common);
+                $cAudit = new $this->_auditHandler($this->_common);
                 $cAudit->storeLog($table_name, $this->$primary_name, $before, $after);
                 $this->_lastAuditObject = $cAudit;
             }
