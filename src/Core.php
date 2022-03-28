@@ -112,10 +112,11 @@ class Core
         $this->logger->debug('Found Fields', $fields);
         $this->logger->debug('Found Config', $config);
 
-        $config['constructor']  = $config['constructor'] ?? 'public';
-        $config['audit_ignore'] = $config['audit_ignore'] ?? false;
-        $config['fields']       = $config['fields'] ?? [];
-        $config['cache_ttl']    = $config['cache_ttl'] ?? 0;
+        $config['constructor']   = $config['constructor'] ?? 'public';
+        $config['audit_ignore']  = $config['audit_ignore'] ?? false;
+        $config['fields']        = $config['fields'] ?? [];
+        $config['cache_ttl']     = $config['cache_ttl'] ?? 0;
+        $config['audit_handler'] = $config['audit_handler'] ?? $this->config['audit_handler'] ?? '';
 
         $save_hook      = isset($config['save_hook']);
         $save_hook_call = $config['save_hook'] ?? '';
@@ -236,6 +237,10 @@ class Core
         $cProperty = $cClass->addProperty('_canCacheAfterPurge', $cache_after_purge);
         $cProperty->setVisibility('protected');
         $cProperty->addComment('@var bool');
+
+        $cProperty = $cClass->addProperty('_auditDefinition', $config['audit_handler']);
+        $cProperty->setVisibility('protected');
+
 
 
         foreach ($fields as $i => $row) {
