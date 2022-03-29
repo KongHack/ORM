@@ -2,6 +2,7 @@
 
 namespace GCWorld\ORM\Core;
 
+use GCWorld\ORM\Config;
 use GCWorld\ORM\Helpers\CleanAuditData;
 use Ramsey\Uuid\Uuid;
 
@@ -11,12 +12,34 @@ use Ramsey\Uuid\Uuid;
 class AuditUtilities
 {
     /**
-     * @param array $after
-     * @param array $before
+     * @param string $table
+     * @param array  $after
+     * @param array  $before
      * @return CleanAuditData
      */
-    public static function cleanData(array $after, array $before)
+    public static function cleanData(string $table, array $after, array $before)
     {
+        $cConfig = new Config();
+        $config  = $cConfig->getConfig()['tables'] ?? [];
+        if (array_key_exists($table, $config)) {
+            $tableConfig = $config[$table];
+            // Check to see if we are auditing this table at all
+            if (isset($tableConfig['audit_ignore']) && $tableConfig['audit_ignore']) {
+                return new CleanAuditData();
+            }
+
+            if (array_key_exists('fields', $tableConfig)) {
+                $fields = $tableConfig['fields'];
+                foreach ($fields as $field => $fieldConfig) {
+                    if (isset($fieldConfig['audit_ignore']) && $fieldConfig['audit_ignore']) {
+                        unset($before[$field]);
+                        unset($after[$field]);
+                    }
+                }
+            }
+        }
+
+
         $A = [];
         $B = [];
         foreach ($before as $k => $v) {

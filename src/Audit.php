@@ -94,26 +94,6 @@ class Audit
             $memberId = $this->determineMemberId();
         }
 
-        $cConfig = new Config();
-        $config  = $cConfig->getConfig()['tables'] ?? [];
-        if (array_key_exists($table, $config)) {
-            $tableConfig = $config[$table];
-            // Check to see if we are auditing this table at all
-            if (isset($tableConfig['audit_ignore']) && $tableConfig['audit_ignore']) {
-                return 0;
-            }
-
-            if (array_key_exists('fields', $tableConfig)) {
-                $fields = $tableConfig['fields'];
-                foreach ($fields as $field => $fieldConfig) {
-                    if (isset($fieldConfig['audit_ignore']) && $fieldConfig['audit_ignore']) {
-                        unset($before[$field]);
-                        unset($after[$field]);
-                    }
-                }
-            }
-        }
-
         $this->table     = $table;
         $this->primaryId = $primaryId;
         $this->memberId  = $memberId;
@@ -137,50 +117,50 @@ class Audit
         $db = $this->cCommon->getDatabase($this->connection);
 
         //Determine only things changed.
-        $cData = AuditUtilities::cleanData($after, $before);
+        $cData = AuditUtilities::cleanData($table, $after, $before);
         $A = $cData->getAfter();
         $B = $cData->getBefore();
 
-        if (count($A) > 0) {
-            $cGlobals = new Globals();
-            $request  = $cGlobals->string()->SERVER('REQUEST_URI') ?? $this->getTopScript();
-
-            $sql   = 'INSERT INTO '.$storeTable.'
-                      (primary_id, member_id, log_request_uri, log_before, log_after)
-                      VALUES
-                      (:pid, :mid, :uri, :logB, :logA)';
-            try {
-                $query = $db->prepare($sql);
-                $query->execute([
-                    ':pid'  => $primaryId,
-                    ':mid'  => $memberId,
-                    ':uri'  => $request,
-                    ':logB' => json_encode($B),
-                    ':logA' => json_encode($A)
-                ]);
-                $query->closeCursor();
-            } catch (\PDOException $e) {
-                if (stristr($e->getMessage(), 'Base table or view not found') === false) {
-                    throw $e;
-                }
-
-                $cCreate = new CreateAuditTable($this->cCommon->getDatabase(), $db);
-                $cCreate->buildTable($table);
-                $query = $db->prepare($sql);
-                $query->execute([
-                    ':pid'  => $primaryId,
-                    ':mid'  => $memberId,
-                    ':uri'  => $request,
-                    ':logB' => json_encode($B),
-                    ':logA' => json_encode($A)
-                ]);
-                $query->closeCursor();
-            }
-
-            return $db->lastInsertId();
+        if (empty($A) || empty($B)) {
+            return 0;
         }
 
-        return 0;
+        $cGlobals = new Globals();
+        $request  = $cGlobals->string()->SERVER('REQUEST_URI') ?? $this->getTopScript();
+
+        $sql = 'INSERT INTO '.$storeTable.'
+                (primary_id, member_id, log_request_uri, log_before, log_after)
+                VALUES
+                (:pid, :mid, :uri, :logB, :logA)';
+        try {
+            $query = $db->prepare($sql);
+            $query->execute([
+                ':pid'  => $primaryId,
+                ':mid'  => $memberId,
+                ':uri'  => $request,
+                ':logB' => json_encode($B),
+                ':logA' => json_encode($A)
+            ]);
+            $query->closeCursor();
+        } catch (\PDOException $e) {
+            if (stristr($e->getMessage(), 'Base table or view not found') === false) {
+                throw $e;
+            }
+
+            $cCreate = new CreateAuditTable($this->cCommon->getDatabase(), $db);
+            $cCreate->buildTable($table);
+            $query = $db->prepare($sql);
+            $query->execute([
+                ':pid'  => $primaryId,
+                ':mid'  => $memberId,
+                ':uri'  => $request,
+                ':logB' => json_encode($B),
+                ':logA' => json_encode($A)
+            ]);
+            $query->closeCursor();
+        }
+
+        return $db->lastInsertId();
     }
 
     /**

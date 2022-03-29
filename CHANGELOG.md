@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [5.7.2](https://github.com/KongHack/ORM/releases/tag/5.7.2)
+ - @GameCharmer Move Audit Ignore logic to clean data utility
+
+
+
 ## [5.7.1](https://github.com/KongHack/ORM/releases/tag/5.7.1)
  - @GameCharmer Patch Config Path
 
