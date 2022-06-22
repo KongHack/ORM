@@ -25,17 +25,10 @@ class Builder
      */
     protected $_audit = null;
 
-    /**
-     * @var array
-     */
-    protected $coreConfig = [];
-
-    /**
-     * @var array
-     */
-    protected $auditConfig = [];
-
-    protected $database = null;
+    protected array   $coreConfig  = [];
+    protected array   $auditConfig = [];
+    protected bool    $doAudit     = false;
+    protected ?string $auditDB     = null;
 
     /**
      * Builder constructor.
@@ -46,12 +39,20 @@ class Builder
     {
         $cConfig          = new Config();
         $this->coreConfig = $cConfig->getConfig();
+        $this->common     = $common;
+        $this->_db        = $common->getDatabase();
+
         if (!isset($this->coreConfig['general']['audit']) || $this->coreConfig['general']['audit']) {
             $this->auditConfig = $common->getConfig('audit');
-            $this->common      = $common;
-            $this->_db         = $common->getDatabase();
-            $this->_audit      = $common->getDatabase($this->auditConfig['connection'] ?? '');
-            $this->database    = $this->auditConfig['database'] ?? false;
+            if (isset($this->auditConfig['enable']) && $this->auditConfig['enable']) {
+                try {
+                    $this->_audit  = $common->getDatabase($this->auditConfig['connection'] ?? '');
+                    $this->auditDB = $this->auditConfig['database'] ?? null;
+                    $this->doAudit = true;
+                } catch (\Exception) {
+                    // Nothing
+                }
+            }
         }
     }
 
@@ -63,16 +64,21 @@ class Builder
      */
     public function run(string $schema = null)
     {
+        if (!$this->doAudit) {
+            return;
+        }
+
         if (!$this->coreConfig['general']['audit']) {
             return;
         }
-        if (!$this->database) {
+
+        if (!$this->auditDB) {
             return;
         }
 
         $master = $this->auditConfig['prefix'].'_GCAuditMaster';
-        if ($this->database != null) {
-            $master = $this->database.'.'.$master;
+        if ($this->auditDB != null) {
+            $master = $this->auditDB.'.'.$master;
         }
 
         if (!$this->_audit->tableExists($master)) {
@@ -112,7 +118,7 @@ class Builder
         }
 
         if ($schema == null) {
-            $schema = $this->database ?? $this->_audit->getWorkingDatabaseName();
+            $schema = $this->auditDB ?? $this->_audit->getWorkingDatabaseName();
         }
 
         $sql   = 'SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = :schema AND TABLE_TYPE = :type';
@@ -140,8 +146,8 @@ class Builder
             }
 
             $audit = $auditBase = $this->auditConfig['prefix'].$table;
-            if ($this->database != null) {
-                $audit = $this->database.'.'.$audit;
+            if ($this->auditDB != null) {
+                $audit = $this->auditDB.'.'.$audit;
             }
 
             if (!isset($existing[$schema][$auditBase])) {
@@ -233,7 +239,7 @@ class Builder
                         audit_datetime_updated = NOW()";
             $query = $this->_audit->prepare($sql);
             $query->execute([
-                ':audit_schema'  => $this->database ?? $schema,
+                ':audit_schema'  => $this->auditDB ?? $schema,
                 ':audit_table'   => $auditBase,
                 ':audit_version' => self::BUILDER_VERSION,
             ]);
