@@ -59,7 +59,7 @@ abstract class DirectSingle implements DirectSingleInterface
     protected $_canCacheAfterPurge = true;
 
     /**
-     * @var \Redis|bool
+     * @var \Redis|null
      */
     protected $_cache = null;
 
