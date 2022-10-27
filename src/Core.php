@@ -241,9 +241,9 @@ class Core
 
         $cProperty = $cClass->addProperty('_auditHandler', $config['audit_handler']);
         $cProperty->setVisibility('protected');
-        $cProperty->setNullable(true);
-        $cProperty->setType('string');
+        $cProperty->setType('?string');
         $cProperty->addComment('Class Name for audit handler'.PHP_EOL.'@var ?string');
+        $cProperty->setNullable(true);
 
         foreach ($fields as $i => $row) {
             $type = (stristr($row['Type'], 'int') ? 'int   ' : 'string');
