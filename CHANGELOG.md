@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [6.0.3](https://github.com/KongHack/ORM/releases/tag/6.0.3)
+- @GameCharmer patch issue with properties
+
+
+
 ## [6.0.2](https://github.com/KongHack/ORM/releases/tag/6.0.2)
 - @GameCharmer fix issue with null params array
 
