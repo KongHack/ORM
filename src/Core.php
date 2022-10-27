@@ -594,17 +594,15 @@ NOW;
                 if (isset($item['Null']) && strtoupper($item['Null']) == 'YES') {
                     $cMethod->addComment('@param ?mixed '.$item['Column_name']);
                     $cMethod->addParameter($item['Column_name'], null);
-                    $vars[]   = $item['Column_name'];
-                    $varStr[] = '$'.$item['Column_name'].' = null';
-
-                    continue;
+                } else {
+                    $cMethod->addComment('@param mixed '.$item['Column_name']);
+                    $cMethod->addParameter($item['Column_name']);
                 }
 
-                $cMethod->addComment('@param mixed '.$item['Column_name']);
-                $cMethod->addParameter($item['Column_name']);
                 $vars[]   = $item['Column_name'];
                 $varStr[] = '$'.$item['Column_name'];
             }
+
             $str   = implode(', ', $varStr);
             $body  = '$id = self::find'.$name.'('.$str.');'.PHP_EOL;
             $body .= 'if(!empty($id)) {'.PHP_EOL;
@@ -619,7 +617,6 @@ NOW;
             $body .= 'return $cObj;'.PHP_EOL;
             $cMethod->setBody($body);
 
-
             // Factory ID Method ======================================================================================
             $cMethod = $cClass->addMethod('factory'.$name);
             $cMethod->setPublic();
@@ -633,7 +630,6 @@ NOW;
             $body .= '}'.PHP_EOL.PHP_EOL;
             $body .= 'return new static($'.$primary.');'.PHP_EOL;
             $cMethod->setBody($body);
-
 
             // Find Primary Function ==================================================================================
             $cMethod = $cClass->addMethod('find'.$name);
