@@ -215,7 +215,7 @@ class Core
         $cNamespace->addUse('GCWorld\\ORM\\Interfaces\\GeneratedInterface', 'dbi');
         $cClass->addConstant('CLASS_PRIMARY', $primaries[0])->setPublic();
 
-        $cClass->addExtend('dbc');
+        $cClass->setExtends('dbc');
         $cClass->addImplement('dbi');
         $cClass->addImplement('dbd');
         if ($this->json_serialize) {
@@ -590,6 +590,14 @@ NOW;
             $cMethod->setStatic(true);
             $cMethod->addComment('@return static');
             foreach ($unique as $item) {
+                if (isset($item['Null']) && strtoupper($item['Null']) == 'YES') {
+                    $cMethod->addComment('@param ?mixed '.$item['Column_name']);
+                    $cMethod->addParameter($item['Column_name'], null);
+                    $vars[] = $item['Column_name'].' = null';
+
+                    continue;
+                }
+
                 $cMethod->addComment('@param mixed '.$item['Column_name']);
                 $cMethod->addParameter($item['Column_name']);
                 $vars[] = $item['Column_name'];
