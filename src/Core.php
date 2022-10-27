@@ -581,8 +581,9 @@ NOW;
         }
 
         foreach ($uniques as $key => $unique) {
-            $name = str_replace(' ', '', ucwords(str_replace('_', ' ', $key)));
-            $vars = [];
+            $name   = str_replace(' ', '', ucwords(str_replace('_', ' ', $key)));
+            $vars   = [];
+            $varStr = [];
 
             // Factory All Method =====================================================================================
             $cMethod = $cClass->addMethod('factory'.$name.'All');
@@ -593,16 +594,18 @@ NOW;
                 if (isset($item['Null']) && strtoupper($item['Null']) == 'YES') {
                     $cMethod->addComment('@param ?mixed '.$item['Column_name']);
                     $cMethod->addParameter($item['Column_name'], null);
-                    $vars[] = $item['Column_name'].' = null';
+                    $vars[]   = $item['Column_name'];
+                    $varStr[] = '$'.$item['Column_name'].' = null';
 
                     continue;
                 }
 
                 $cMethod->addComment('@param mixed '.$item['Column_name']);
                 $cMethod->addParameter($item['Column_name']);
-                $vars[] = $item['Column_name'];
+                $vars[]   = $item['Column_name'];
+                $varStr[] = '$'.$item['Column_name'];
             }
-            $str   = '$'.implode(', $', $vars);
+            $str   = implode(', ', $varStr);
             $body  = '$id = self::find'.$name.'('.$str.');'.PHP_EOL;
             $body .= 'if(!empty($id)) {'.PHP_EOL;
             $body .= '    return new static($id);'.PHP_EOL;
