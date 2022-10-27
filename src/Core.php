@@ -7,6 +7,7 @@ use Monolog\Logger;
 use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\PhpNamespace;
 use Nette\PhpGenerator\PsrPrinter;
+use Nette\PhpGenerator\TraitType;
 use ReflectionClass;
 use PDO;
 use Exception;
@@ -435,8 +436,7 @@ NOW;
         }
 
         $cTraitNamespace = new PhpNamespace('GCWorld\\ORM\\Generated\\Traits');
-        $cTraitClass     = new ClassType($table_name, $cTraitNamespace);
-        $cTraitClass->setTrait();
+        $cTraitClass     = new TraitType($table_name, $cTraitNamespace);
 
         foreach ($fields as $i => $row) {
             if (in_array($row['Field'], $primaries)) {
