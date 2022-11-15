@@ -376,6 +376,7 @@ NOW;
         if ($this->json_serialize) {
             $cMethod = $cClass->addMethod('jsonSerialize');
             $cMethod->addComment('@return array');
+            $cMethod->setReturnType('mixed');
 
             $body = 'return ['.PHP_EOL;
 

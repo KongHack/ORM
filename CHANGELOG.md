@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [6.1.0](https://github.com/KongHack/ORM/releases/tag/6.1.0)
+- @GameCharmer Support for 8.1 jsonSerialize
+
+
+
 ## [6.0.4](https://github.com/KongHack/ORM/releases/tag/6.0.4)
 - @GameCharmer patch issue with find unique
 
