@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [6.1.2](https://github.com/KongHack/ORM/releases/tag/6.1.2)
+- @GameCharmer patch audit utilities again
+
+
+
 ## [6.1.1](https://github.com/KongHack/ORM/releases/tag/6.1.1)
 - @GameCharmer patch audit utilities base64 encode on null
 
