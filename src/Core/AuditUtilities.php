@@ -39,7 +39,6 @@ class AuditUtilities
             }
         }
 
-
         $A = [];
         $B = [];
         foreach ($before as $k => $v) {
@@ -51,11 +50,15 @@ class AuditUtilities
 
                 if (strpos($k, '_uuid') !== false && strlen($v) == 16) {
                     $B[$k] = Uuid::fromBytes($v)->toString();
+                } elseif (empty($v)) {
+                    $B[$k] = '';
                 } elseif (self::isBinary($v)) {
                     $B[$k] = base64_encode($v);
                 }
                 if (strpos($k, '_uuid') !== false && strlen($after[$k]) == 16) {
                     $A[$k] = Uuid::fromBytes($after[$k])->toString();
+                } elseif (empty($after[$k])) {
+                    $A[$k] = '';
                 } elseif (self::isBinary($after[$k])) {
                     $A[$k] = base64_encode($after[$k]);
                 }
