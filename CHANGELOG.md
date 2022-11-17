@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [6.1.3](https://github.com/KongHack/ORM/releases/tag/6.1.3)
+- @GameCharmer Remove UUID auto-convert, handle null/blank UUID
+
+
+
 ## [6.1.2](https://github.com/KongHack/ORM/releases/tag/6.1.2)
 - @GameCharmer patch audit utilities again
 

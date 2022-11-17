@@ -361,10 +361,12 @@ class Core
 
                 if ($fieldConfig['uuid_field']) {
                     $body = <<<'NOW'
-if(strlen($value)==36) {
-    $value = Uuid::fromString($value)->getBytes();
-} elseif ($value !== null && $value !== '' && strlen($value)!== 16) {
-    throw new \GCWorld\ORM\Exceptions\UuidException('UUID must be a binary 16');
+if ($value !== null && $value !== '' && strlen($value)!== 16) {
+    try {
+        Uuid::fromBytes($value);
+    } catch (\Exception) {
+        throw new \GCWorld\ORM\Exceptions\UuidException('Invalid UUID Set');
+    }
 }
 NOW;
                 }
