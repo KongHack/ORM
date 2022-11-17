@@ -8,6 +8,7 @@ use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\PhpNamespace;
 use Nette\PhpGenerator\PsrPrinter;
 use Nette\PhpGenerator\TraitType;
+use Ramsey\Uuid\Uuid;
 use ReflectionClass;
 use PDO;
 use Exception;
@@ -361,7 +362,10 @@ class Core
 
                 if ($fieldConfig['uuid_field']) {
                     $body = <<<'NOW'
-if ($value !== null && $value !== '' && strlen($value)!== 16) {
+if(!empty($value)) {
+    if(\strlen($value) === 36) {
+        $value = Uuid::fromString($value)->getBytes();
+    }
     try {
         Uuid::fromBytes($value);
     } catch (\Exception) {
