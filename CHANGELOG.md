@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [6.1.5](https://github.com/KongHack/ORM/releases/tag/6.1.5)
+- @GameCharmer Update Composer Dependencies
+
+
+
 ## [6.1.4](https://github.com/KongHack/ORM/releases/tag/6.1.4)
 - @GameCharmer Add back auto-convert.  Did not realize how heavily that was used
 
