@@ -11,6 +11,9 @@ The config will NOT update itself to add missing values upon update. Below is th
  - user: \Your\Fully\Qualified\Class\Name\Here
    - Must be the fully qualified class name of your User class
 
+### [table_dir]
+ - If this value is set, the ORM will look for a directory of Table_Name.yml files relative to your config file location.  
+   Files will be loaded in from this location, then the table_dir value will be removed from the resulting config array.
 
 ### [options]
  - get_set_funcs: true
