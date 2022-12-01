@@ -185,20 +185,19 @@ class Core
             }
 
             if (!$uuid_fields
-               && isset($config['fields'][$row['Field']]['uuid_field'])
-               && $config['fields'][$row['Field']]['uuid_field']
+                && isset($config['fields'][$row['Field']]['uuid_field'])
+                && $config['fields'][$row['Field']]['uuid_field']
             ) {
                 $uuid_fields = true;
             }
 
-            // Run a backed enum check once here.
-            if (isset($config[$row['Field']]['type_hint'])
-                && !empty($config[$row['Field']]['type_hint'])
-                && str_contains($config[$row['Field']]['type_hint'], '\\')
-                && enum_exists($config[$row['Field']]['type_hint'])
+            if (isset($config['fields'][$row['Field']]['type_hint'])
+                && !empty($config['fields'][$row['Field']]['type_hint'])
+                && str_contains($config['fields'][$row['Field']]['type_hint'], '\\')
+                && enum_exists($config['fields'][$row['Field']]['type_hint'])
             ) {
-                $cReflection                          = new ReflectionClass($config[$row['Field']]['type_hint']);
-                $config[$row['Field']]['backed_enum'] = $cReflection->implementsInterface(\BackedEnum::class);
+                $cReflection = new ReflectionClass($config['fields'][$row['Field']]['type_hint']);
+                $config['fields'][$row['Field']]['backed_enum'] = $cReflection->implementsInterface(\BackedEnum::class);
             }
         }
 
@@ -329,8 +328,8 @@ class Core
                 $cMethod->addComment('@return '.$return_type);
 
                 if (isset($fieldConfig['backed_enum']) && $fieldConfig['backed_enum']) {
-                    $body  = '$val = $this->>get(\''.$row['Field'].'\');'.PHP_EOL;
-                    $body .= 'return '.$fieldConfig.'::from($val);';
+                    $body  = '$val = $this->get(\''.$row['Field'].'\');'.PHP_EOL;
+                    $body .= 'return '.$return_type.'::from($val);';
 
                     $cMethod->setBody($body);
                 } else {
