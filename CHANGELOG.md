@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [6.2.0](https://github.com/KongHack/ORM/releases/tag/6.2.0)
+- @GameCharmer Table definitions can now be defined as individual files per table via `table_dir` option.
+
+
+
 ## [6.1.5](https://github.com/KongHack/ORM/releases/tag/6.1.5)
 - @GameCharmer Update Composer Dependencies
 
