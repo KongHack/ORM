@@ -374,7 +374,14 @@ if(!empty($value)) {
 }
 NOW;
                 }
-                $body .= PHP_EOL.'return $this->set(\''.$row['Field'].'\', $value);';
+                $body .= PHP_EOL;
+                if (str_contains($return_type, '\\')) {
+                    $body .= 'if ($value instanceof \BackedEnum) {'.PHP_EOL;
+                    $body .= '    return $this->set(\''.$row['Field'].'\', $value->value);'.PHP_EOL;
+                    $body .= '}'.PHP_EOL;
+                }
+
+                $body .= 'return $this->set(\''.$row['Field'].'\', $value);';
                 $cSetter->setBody($body);
             }
         }

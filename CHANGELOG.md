@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [6.2.2](https://github.com/KongHack/ORM/releases/tag/6.2.2)
+- @GameCharmer Support backed enums
+
+
+
 ## [6.2.1](https://github.com/KongHack/ORM/releases/tag/6.2.1)
 - @GameCharmer Patch config array issue
 
