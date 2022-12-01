@@ -103,10 +103,10 @@ class Config
 
             $tableFiles = glob($tableDir.'*.yml');
             foreach ($tableFiles as $tableFile) {
-                $tmp                = explode(DIRECTORY_SEPARATOR, $tableFile);
-                $fileName           = array_pop($tmp);
-                $tableName          = substr($fileName, 0, -4);
-                $config[$tableName] = Yaml::parseFile($tableFile);
+                $tmp                          = explode(DIRECTORY_SEPARATOR, $tableFile);
+                $fileName                     = array_pop($tmp);
+                $tableName                    = substr($fileName, 0, -4);
+                $config['tables'][$tableName] = Yaml::parseFile($tableFile);
             }
 
             unset($config['table_dir']);

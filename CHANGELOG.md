@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [6.2.1](https://github.com/KongHack/ORM/releases/tag/6.2.1)
+- @GameCharmer Patch config array issue
+
+
+
 ## [6.2.0](https://github.com/KongHack/ORM/releases/tag/6.2.0)
 - @GameCharmer Table definitions can now be defined as individual files per table via `table_dir` option.
 
