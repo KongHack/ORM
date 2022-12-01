@@ -8,7 +8,6 @@ use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\PhpNamespace;
 use Nette\PhpGenerator\PsrPrinter;
 use Nette\PhpGenerator\TraitType;
-use Ramsey\Uuid\Uuid;
 use ReflectionClass;
 use PDO;
 use Exception;
@@ -196,12 +195,10 @@ class Core
             if (isset($config[$row['Field']]['type_hint'])
                 && !empty($config[$row['Field']]['type_hint'])
                 && str_contains($config[$row['Field']]['type_hint'], '\\')
+                && enum_exists($config[$row['Field']]['type_hint'])
             ) {
-                $enum = $config[$row['Field']]['type_hint'];
-                if (enum_exists($enum, false)) {
-                    $cReflection                          = new ReflectionClass($enum);
-                    $config[$row['Field']]['backed_enum'] = $cReflection->implementsInterface(\BackedEnum::class);
-                }
+                $cReflection                          = new ReflectionClass($config[$row['Field']]['type_hint']);
+                $config[$row['Field']]['backed_enum'] = $cReflection->implementsInterface(\BackedEnum::class);
             }
         }
 
