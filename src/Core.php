@@ -197,8 +197,11 @@ class Core
                 && !empty($config[$row['Field']]['type_hint'])
                 && str_contains($config[$row['Field']]['type_hint'], '\\')
             ) {
-                $tmp                                  = $config[$row['Field']]['type_hint'];
-                $config[$row['Field']]['backed_enum'] = ($tmp instanceof \BackedEnum);
+                $enum = $config[$row['Field']]['type_hint'];
+                if (enum_exists($enum, false)) {
+                    $cReflection                          = new ReflectionClass($enum);
+                    $config[$row['Field']]['backed_enum'] = $cReflection->implementsInterface(\BackedEnum::class);
+                }
             }
         }
 
