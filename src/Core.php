@@ -191,6 +191,15 @@ class Core
             ) {
                 $uuid_fields = true;
             }
+
+            // Run a backed enum check once here.
+            if (isset($config[$row['Field']]['type_hint'])
+                && !empty($config[$row['Field']]['type_hint'])
+                && str_contains($config[$row['Field']]['type_hint'], '\\')
+            ) {
+                $tmp                                  = $config[$row['Field']]['type_hint'];
+                $config[$row['Field']]['backed_enum'] = ($tmp instanceof \BackedEnum);
+            }
         }
 
         if (count($primaries) !== 1) {
@@ -296,8 +305,6 @@ class Core
         $cMethodConstructor->setVisibility($config['constructor']);
         $cMethodConstructor->setBody('parent::__construct($primary_id, $defaults);');
 
-
-
         if ($this->get_set_funcs) {
             foreach ($fields as $i => $row) {
                 $fieldConfig = $config['fields'][$row['Field']];
@@ -317,10 +324,18 @@ class Core
                     $return_type = '?'.$return_type;
                 }
 
-                $cClass->addMethod('get'.$name)
-                    ->setPublic()
-                    ->addComment('@return '.$return_type)
-                    ->setBody('return $this->get(\''.$row['Field'].'\');');
+                $cMethod = $cClass->addMethod('get'.$name);
+                $cMethod->setPublic();
+                $cMethod->addComment('@return '.$return_type);
+
+                if (isset($fieldConfig['backed_enum']) && $fieldConfig['backed_enum']) {
+                    $body  = '$val = $this->>get(\''.$row['Field'].'\');'.PHP_EOL;
+                    $body .= 'return '.$fieldConfig.'::from($val);';
+
+                    $cMethod->setBody($body);
+                } else {
+                    $cMethod->setBody('return $this->get(\''.$row['Field'].'\');');
+                }
 
                 if ($fieldConfig['uuid_field']) {
                     $body  = '$value = $this->get(\''.$row['Field'].'\');'.PHP_EOL;
@@ -375,13 +390,12 @@ if(!empty($value)) {
 NOW;
                 }
                 $body .= PHP_EOL;
-                if (str_contains($return_type, '\\')) {
-                    $body .= 'if ($value instanceof \BackedEnum) {'.PHP_EOL;
-                    $body .= '    return $this->set(\''.$row['Field'].'\', $value->value);'.PHP_EOL;
-                    $body .= '}'.PHP_EOL;
+                if (isset($fieldConfig['backed_enum']) && $fieldConfig['backed_enum']) {
+                    $body .= 'return $this->set(\''.$row['Field'].'\', $value->value);'.PHP_EOL;
+                } else {
+                    $body .= 'return $this->set(\''.$row['Field'].'\', $value);';
                 }
 
-                $body .= 'return $this->set(\''.$row['Field'].'\', $value);';
                 $cSetter->setBody($body);
             }
         }
