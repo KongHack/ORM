@@ -28,6 +28,7 @@ class Config
         $file  = rtrim(dirname(__FILE__), DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR;
         $file .= 'config'.DIRECTORY_SEPARATOR.'config.yml';
 
+        $usingCache = false;
         $writeCache = true;
         $config     = [];
         $cache      = str_replace('.yml', '.php', $file);
@@ -35,12 +36,13 @@ class Config
             if (filemtime($file) < filemtime($cache)) {
                 $writeCache = false;
                 $config     = require $cache;
+                $usingCache = true;
             }
         }
 
         if (empty($config) || !is_array($config)) {
             if (!file_exists($file)) {
-                throw new Exception('YML Config File Not Found');
+                throw new Exception('ORM Config File Not Found');
             }
             $config = Yaml::parseFile($file);
         }
@@ -53,9 +55,20 @@ class Config
             ) {
                 $writeCache = false;
                 $config     = require $cache;
+                $usingCache = true;
             } else {
                 $config = Yaml::parseFile($file);
             }
+        }
+
+        // Trust model where the end user is deleting the cache file automatically
+        if ($usingCache
+            && isset($config['general'])
+            && isset($config['general']['trust_cache'])
+            && $config['general']['trust_cache']
+        ) {
+            $this->config = $config;
+            return;
         }
 
         if (!isset($config['version'])) {
@@ -72,14 +85,16 @@ class Config
             file_put_contents($file, $new);
         }
 
-        if (!array_key_exists('common', $config['general'])) {
+        if (!isset($config['general'])) {
+            throw new Exception('Missing entire General section');
+        }
+        if (!isset($config['general']['common'])) {
             throw new Exception('Missing Common Variable In General');
         }
-        if (!array_key_exists('user', $config['general'])) {
+        if (!isset($config['general']['user'])) {
             throw new Exception('Missing User Variable In General');
         }
-
-        if (!array_key_exists('audit_handler', $config['general'])
+        if (!isset($config['general']['audit_handler'])
             || empty($config['general']['audit_handler'])
         ) {
             $config['general']['audit_handler'] = Audit::class;

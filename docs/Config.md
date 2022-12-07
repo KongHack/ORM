@@ -11,9 +11,23 @@ The config will NOT update itself to add missing values upon update. Below is th
  - user: \Your\Fully\Qualified\Class\Name\Here
    - Must be the fully qualified class name of your User class
 
+ - audit: boolean
+   - Enable / Disable all auditing features
+
+ - audit_handler: \Your\Fully\Qualified\Class\Name\Here
+   - (OPTIONAL).  Leave blank to use the default audit handler.  Class provided must implement `AuditInterface`
+
+ - trust_cache: boolean
+   - If true, the ORM config system will stop processing immediately after loading the config cache php file.
+     This should speed up config load times, as all additional config checks, table.yml loads, sorts, etc. will not execute
+
+
+
 ### [table_dir]
  - If this value is set, the ORM will look for a directory of Table_Name.yml files relative to your config file location.  
    Files will be loaded in from this location, then the table_dir value will be removed from the resulting config array.
+
+
 
 ### [options]
  - get_set_funcs: true
@@ -38,16 +52,19 @@ The config will NOT update itself to add missing values upon update. Below is th
    - true/false - Will enable type hinting in get/set functions, ALL THE TIME
    
    
+
 ### [tables]
    - TABLE_NAME
      - audit_ignore (bool) - Completely ignore this table from auditing
+     - audit_handler (string) - Custom audit handler per table
      - constructor: (protected/public) - Adjust constructor visibility
+     - cache_ttl (int) - (-1) to disable caching, 0 to allow permanent caching, any other positive integer will define a timeout on cached data
      - save_hook: (string) - Path to hook method post-save
      - cache_time: (int) - cache time in seconds.  0 = unlimited, -1 = disabled
      - fields:
        - name_of_field:
          - visibility (protected/public) - Adjust setter visibility
-         - type_hint (string) define a type_hint
+         - type_hint (string) define a type_hint. This can be a full class name, enum, etc
          - audit_ignore (boolean) ignore just this field from the audit system
          - uuid_field (boolean) define fields as uuid fields that don't contain `_uuid` in the field name
          - getter_ignore (boolean) do not generate a getter if true
