@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [6.2.5](https://github.com/KongHack/ORM/releases/tag/6.2.5)
+- @GameCharmer Update Common, Update Yaml
+
+
+
 ## [6.2.4](https://github.com/KongHack/ORM/releases/tag/6.2.4)
 - @GameCharmer Trust Cache option
 - @GameCharmer Updates to example config and documentation
