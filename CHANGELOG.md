@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [6.2.6](https://github.com/KongHack/ORM/releases/tag/6.2.6)
+- @GameCharmer Update Core to not include ? in return type in code
+
+
+
 ## [6.2.5](https://github.com/KongHack/ORM/releases/tag/6.2.5)
 - @GameCharmer Update Common, Update Yaml
 

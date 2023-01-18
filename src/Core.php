@@ -319,13 +319,10 @@ class Core
                 } elseif ($this->type_hinting) {
                     $return_type = $this->defaultReturn($row['Type']);
                 }
-                if ($row['Null'] == 'YES') {
-                    $return_type = '?'.$return_type;
-                }
 
                 $cMethod = $cClass->addMethod('get'.$name);
                 $cMethod->setPublic();
-                $cMethod->addComment('@return '.$return_type);
+                $cMethod->addComment('@return '.($row['Null'] == 'YES' ? '?' : '').$return_type);
 
                 if (isset($fieldConfig['backed_enum']) && $fieldConfig['backed_enum']) {
                     $body  = '$val = $this->get(\''.$row['Field'].'\');'.PHP_EOL;
