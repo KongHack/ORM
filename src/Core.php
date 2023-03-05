@@ -521,12 +521,11 @@ NOW;
 
         file_put_contents($path.$filename, $contents);
 
-        if (isset($config['table_desc_dir']) && !empty($config['table_desc_dir'])) {
-            $this->logger->info('Table Desc Dir set');
+        if (isset($this->config['table_desc_dir']) && !empty($this->config['table_desc_dir'])) {
             $tmp = explode(DIRECTORY_SEPARATOR, $this->cConfig->getConfigFilePath());
             array_pop($tmp);
             $startPath = implode(DIRECTORY_SEPARATOR, $tmp).DIRECTORY_SEPARATOR;
-            $descDir   = $startPath.$config['table_desc_dir'];
+            $descDir   = $startPath.$this->config['table_desc_dir'];
             if (!is_dir($descDir)) {
                 $this->logger->alert('Table Desc Dir is defined but cannot be found: '.$descDir);
             } else {
@@ -983,8 +982,6 @@ NOW;
      */
     protected function doDescription(string $descDir, string $table_name, array $dbInfo)
     {
-        $this->logger->info('Starting doDescription');
-
         //Create a trait version
         $existing = [];
         $changed  = false;
