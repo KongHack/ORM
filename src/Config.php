@@ -13,10 +13,8 @@ class Config
 {
     public const VERSION = 5;
 
-    /**
-     * @var array
-     */
-    protected $config = [];
+    protected string $config_file;
+    protected array  $config = [];
 
     /**
      * Config constructor.
@@ -60,6 +58,8 @@ class Config
                 $config = Yaml::parseFile($file);
             }
         }
+
+        $this->config_file = $file;
 
         // Trust model where the end user is deleting the cache file automatically
         if ($usingCache
@@ -266,6 +266,14 @@ class Config
                 }
             }
         }
+    }
+
+    /**
+     * @return string
+     */
+    public function getConfigFilePath(): string
+    {
+        return $this->config_file;
     }
 
     /**

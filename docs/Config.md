@@ -29,6 +29,13 @@ The config will NOT update itself to add missing values upon update. Below is th
 
 
 
+### [table_desc_dir]
+ - If this value is set, the ORM will look for a directory of Table_Name.yml files relative to your config file location.  
+   Files will be automatically created based on the found data model, then compiled into descriptor traits  
+   that can be used in your models to provide auxillary functions for external usage
+
+
+
 ### [options]
  - get_set_funcs: true
    - true/false - Will automatically generate default get/set functions.  Should be used if your var_visibility is not public

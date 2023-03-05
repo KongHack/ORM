@@ -11,6 +11,7 @@ use Nette\PhpGenerator\TraitType;
 use ReflectionClass;
 use PDO;
 use Exception;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * Class Core
@@ -18,6 +19,8 @@ use Exception;
  */
 class Core
 {
+    protected Config $cConfig;
+
     /** @var CommonInterface|\GCWorld\Common\Common */
     protected mixed   $master_common   = null;
     protected string  $master_namespace = '\\';
@@ -43,9 +46,10 @@ class Core
         $this->master_common    = $common;
         $this->master_location  = __DIR__;
 
-        $cConfig      = new Config();
-        $config       = $cConfig->getConfig();
-        $this->config = $config;
+        $cConfig       = new Config();
+        $this->cConfig = $cConfig;
+        $config        = $cConfig->getConfig();
+        $this->config  = $config;
 
         if (isset($config['general']['audit']) && !$config['general']['audit']) {
             $this->audit = false;
@@ -271,11 +275,11 @@ class Core
             $cProperty->addComment('@db-info '.$row['Type']);
         }
 
-        $arr = [];
+        $dbInfo = [];
         foreach ($fields as $i => $row) {
-            $arr[$row['Field']] = $row['Type'].($row['Comment'] != '' ? ' - '.$row['Comment'] : '');
+            $dbInfo[$row['Field']] = $row['Type'].($row['Comment'] != '' ? ' - '.$row['Comment'] : '');
         }
-        $cProperty = $cClass->addProperty('dbInfo', $arr);
+        $cProperty = $cClass->addProperty('dbInfo', $dbInfo);
         $cProperty->setStatic(true);
         $cProperty->addComment('Contains an array of all fields and the database notation for field type');
         $cProperty->addComment('@var array');
@@ -421,7 +425,6 @@ NOW;
             $cMethod->setBody($body);
         }
 
-
         if ($save_hook) {
             $cMethod = $cClass->addMethod('saveHook');
             $cMethod->addComment('@param array $before');
@@ -517,6 +520,20 @@ NOW;
         $contents .= $cPrinter->printClass($cTraitClass);
 
         file_put_contents($path.$filename, $contents);
+
+
+        if (isset($config['table_desc_dir']) && !empty($config['table_desc_dir'])) {
+            $tmp = explode(DIRECTORY_SEPARATOR, $this->cConfig->getConfigFilePath());
+            array_pop($tmp);
+            $startPath = implode(DIRECTORY_SEPARATOR, $tmp).DIRECTORY_SEPARATOR;
+            $descDir   = $startPath.$config['table_desc_dir'];
+            if (!is_dir($descDir)) {
+                $this->logger->alert('Table Desc Dir is defined but cannot be found: '.$descDir);
+            } else {
+                // $dbInfo
+                $this->doDescription($descDir, $table_name, $dbInfo);
+            }
+        }
 
         return true;
     }
@@ -805,7 +822,7 @@ NOW;
      * @param array $row
      * @return float|int|mixed
      */
-    private function formatDefault(array $row)
+    protected function formatDefault(array $row)
     {
         $default = $row['Default'];
         if ($default === null) {
@@ -831,7 +848,7 @@ NOW;
      * @param mixed $type
      * @return mixed
      */
-    private function defaultData($type)
+    protected function defaultData($type)
     {
         $type = strtoupper($type);
         $pos  = strpos($type, '(');
@@ -903,7 +920,7 @@ NOW;
      * @param string $type
      * @return string
      */
-    private function defaultReturn(string $type)
+    protected function defaultReturn(string $type)
     {
         $type = strtoupper($type);
         $pos  = strpos($type, '(');
@@ -957,5 +974,117 @@ NOW;
 
         // Ignoring geometry, because fuck that.
         return 'mixed';
+    }
+
+    /**
+     * @param string $descDir
+     * @param string $table_name
+     * @param array  $dbInfo
+     * @return void
+     */
+    protected function doDescription(string $descDir, string $table_name, array $dbInfo)
+    {
+        //Create a trait version
+        $existing = [];
+        $changed  = false;
+        $descFile = $descDir.$table_name.'.yml';
+        $path     = $this->master_location.DIRECTORY_SEPARATOR.'Generated/Descriptions/';
+        $filename = $table_name.'.php';
+        if (!is_dir($path)) {
+            mkdir($path, 0755, true);
+        }
+        if (file_exists($descFile)) {
+            $existing = Yaml::parseFile($descFile);
+            if (!is_array($existing)) {
+                $existing = [];
+            }
+        }
+
+        foreach ($dbInfo as $field => $techDesc) {
+            if (!isset($existing[$field])) {
+                $changed          = true;
+                $existing[$field] = [
+                    'title' => $field,
+                    'desc'  => '',
+                    'help'  => '',
+                    'tech'  => $techDesc,
+                ];
+                continue;
+            }
+            if (!isset($existing[$field]['title'])) {
+                $changed                   = true;
+                $existing[$field]['title'] = $field;
+            }
+            if (!isset($existing[$field]['desc'])) {
+                $changed                  = true;
+                $existing[$field]['desc'] = $field;
+            }
+            if (!isset($existing[$field]['help'])) {
+                $changed                  = true;
+                $existing[$field]['help'] = $field;
+            }
+            if (!isset($existing[$field]['tech'])) {
+                $changed                  = true;
+                $existing[$field]['tech'] = $techDesc;
+            }
+        }
+
+        if ($changed) {
+            file_put_contents($descFile, Yaml::dump($existing, 4));
+        }
+
+        $cTraitNamespace = new PhpNamespace('GCWorld\\ORM\\Generated\\Descriptions');
+        $cTraitClass     = new TraitType($table_name, $cTraitNamespace);
+
+        $cProperty = $cTraitClass->addProperty('ORMDESC');
+        $cProperty->addComment('@var array');
+        $cProperty->setVisibility('protected');
+        $cProperty->setValue($existing);
+
+        $body = <<< 'NOW'
+if(!isset(self::$ORMDESC[$fieldName])) {
+    return 'UNDEFINED: '.$fieldName;
+}
+
+return self::$ORMDESC[$fieldName]['title'];
+NOW;
+
+        $cFunc = $cTraitClass->addMethod('getFieldName');
+        $cFunc->addParameter('fieldName')->setType('string');
+        $cFunc->setVisibility('public');
+        $cFunc->setBody($body);
+
+        $body = <<< 'NOW'
+if(!isset(self::$ORMDESC[$fieldName])) {
+    return 'UNDEFINED: '.$fieldName;
+}
+
+return self::$ORMDESC[$fieldName]['desc'];
+NOW;
+
+        $cFunc = $cTraitClass->addMethod('getFieldDesc');
+        $cFunc->addParameter('fieldName')->setType('string');
+        $cFunc->setVisibility('public');
+        $cFunc->setBody($body);
+
+        $body = <<< 'NOW'
+if(!isset(self::$ORMDESC[$fieldName])) {
+    return 'UNDEFINED: '.$fieldName;
+}
+
+return self::$ORMDESC[$fieldName]['help'];
+NOW;
+
+        $cFunc = $cTraitClass->addMethod('getFieldHelp');
+        $cFunc->addParameter('fieldName')->setType('string');
+        $cFunc->setVisibility('public');
+        $cFunc->setBody($body);
+
+        $cPrinter  = new PsrPrinter();
+        $contents  = '<?php'.PHP_EOL;
+        $contents .= $cPrinter->printNamespace($cTraitNamespace);
+        $contents .= $cPrinter->printClass($cTraitClass);
+
+        file_put_contents($path.$filename, $contents);
     }
 }
