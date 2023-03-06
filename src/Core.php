@@ -1034,7 +1034,7 @@ NOW;
             file_put_contents($descFile, Yaml::dump($existing, 4));
         }
 
-        $cNamespace->addUse('GCWorld\\ORM\\Interfaces\\ORMDescriptionInterface', 'odi');
+        $cNamespace->addUse('GCWorld\\Interfaces\\ORMDescriptionInterface', 'odi');
         $cNamespace->addUse('GCWorld\\ORM\\Traits\\ORMFieldsTrait', 'odit');
         $cClass->addImplement('odi');
         $cClass->addTrait('odit');
