@@ -10,7 +10,7 @@ trait ORMFieldsTrait
     /**
      * @return string
      */
-    public static function getFieldName(string $fieldName)
+    public static function getFieldName(string $fieldName): string
     {
         if (!isset(self::$ORM_FIELDS[$fieldName])) {
             return 'UNDEFINED: '.$fieldName;
@@ -22,7 +22,7 @@ trait ORMFieldsTrait
     /**
      * @return string
      */
-    public static function getFieldDesc(string $fieldName)
+    public static function getFieldDesc(string $fieldName): string
     {
         if (!isset(self::$ORM_FIELDS[$fieldName])) {
             return 'UNDEFINED: '.$fieldName;
@@ -34,7 +34,7 @@ trait ORMFieldsTrait
     /**
      * @return string
      */
-    public static function getFieldHelp(string $fieldName)
+    public static function getFieldHelp(string $fieldName): string
     {
         if (!isset(self::$ORM_FIELDS[$fieldName])) {
             return 'UNDEFINED: '.$fieldName;
