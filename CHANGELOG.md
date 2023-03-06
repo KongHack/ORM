@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [6.3.1](https://github.com/KongHack/ORM/releases/tag/6.3.1)
+- @GameCharmer Update composer installers dependency
+
+
+
 ## [6.3.0](https://github.com/KongHack/ORM/releases/tag/6.3.0)
 - @GameCharmer New Description System
 
