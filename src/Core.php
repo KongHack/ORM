@@ -1049,6 +1049,7 @@ NOW;
 
         $cFunc = $cTraitClass->addMethod('getFieldName');
         $cFunc->addParameter('fieldName')->setType('string');
+        $cFunc->addComment('@return string');
         $cFunc->setVisibility('public');
         $cFunc->setBody($body);
 
@@ -1062,6 +1063,7 @@ NOW;
 
         $cFunc = $cTraitClass->addMethod('getFieldDesc');
         $cFunc->addParameter('fieldName')->setType('string');
+        $cFunc->addComment('@return string');
         $cFunc->setVisibility('public');
         $cFunc->setBody($body);
 
@@ -1075,6 +1077,7 @@ NOW;
 
         $cFunc = $cTraitClass->addMethod('getFieldHelp');
         $cFunc->addParameter('fieldName')->setType('string');
+        $cFunc->addComment('@return string');
         $cFunc->setVisibility('public');
         $cFunc->setBody($body);
 
