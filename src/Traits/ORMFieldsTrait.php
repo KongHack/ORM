@@ -7,8 +7,6 @@ namespace GCWorld\ORM\Traits;
  */
 trait ORMFieldsTrait
 {
-    public static array $ORM_FIELDS = [];
-
     /**
      * @return string
      */
