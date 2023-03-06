@@ -1034,9 +1034,10 @@ NOW;
         $cClass->addTrait('odit');
 
         $cProperty = $cClass->addProperty('ORM_FIELDS');
-        $cProperty->setStatic(true);
-        $cProperty->addComment('@var array');
         $cProperty->setVisibility('public');
+        $cProperty->setStatic(true);
+        $cProperty->setType('array');
+        $cProperty->addComment('@var array');
         $cProperty->setValue($existing);
     }
 }
