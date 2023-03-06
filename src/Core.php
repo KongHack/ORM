@@ -446,6 +446,18 @@ NOW;
         $this->doFactory($cClass, $cNamespace);
         $this->doBaseExceptions($cClass, $cNamespace, $config['fields']);
 
+        if (isset($this->config['table_desc_dir']) && !empty($this->config['table_desc_dir'])) {
+            $tmp = explode(DIRECTORY_SEPARATOR, $this->cConfig->getConfigFilePath());
+            array_pop($tmp);
+            $startPath = implode(DIRECTORY_SEPARATOR, $tmp).DIRECTORY_SEPARATOR;
+            $descDir   = $startPath.$this->config['table_desc_dir'];
+            if (!is_dir($descDir)) {
+                $this->logger->alert('Table Desc Dir is defined but cannot be found: '.$descDir);
+            } else {
+                $this->doDescription($cClass, $cNamespace, $descDir, $table_name, $dbInfo);
+            }
+        }
+
 
         $cPrinter  = new PsrPrinter();
         $contents  = '<?php'.PHP_EOL;
@@ -520,18 +532,6 @@ NOW;
         $contents .= $cPrinter->printClass($cTraitClass);
 
         file_put_contents($path.$filename, $contents);
-
-        if (isset($this->config['table_desc_dir']) && !empty($this->config['table_desc_dir'])) {
-            $tmp = explode(DIRECTORY_SEPARATOR, $this->cConfig->getConfigFilePath());
-            array_pop($tmp);
-            $startPath = implode(DIRECTORY_SEPARATOR, $tmp).DIRECTORY_SEPARATOR;
-            $descDir   = $startPath.$this->config['table_desc_dir'];
-            if (!is_dir($descDir)) {
-                $this->logger->alert('Table Desc Dir is defined but cannot be found: '.$descDir);
-            } else {
-                $this->doDescription($descDir, $table_name, $dbInfo);
-            }
-        }
 
         return true;
     }
@@ -975,22 +975,19 @@ NOW;
     }
 
     /**
-     * @param string $descDir
-     * @param string $table_name
-     * @param array  $dbInfo
+     * @param ClassType    $cClass
+     * @param PhpNamespace $cNamespace
+     * @param string       $descDir
+     * @param string       $table_name
+     * @param array        $dbInfo
      * @return void
      */
-    protected function doDescription(string $descDir, string $table_name, array $dbInfo)
+    protected function doDescription(ClassType $cClass, PhpNamespace $cNamespace, string $descDir, string $table_name, array $dbInfo)
     {
         //Create a trait version
         $existing = [];
         $changed  = false;
         $descFile = $descDir.$table_name.'.yml';
-        $path     = $this->master_location.DIRECTORY_SEPARATOR.'Generated/Descriptions/';
-        $filename = $table_name.'.php';
-        if (!is_dir($path)) {
-            mkdir($path, 0755, true);
-        }
         if (file_exists($descFile)) {
             $existing = Yaml::parseFile($descFile);
             if (!is_array($existing)) {
@@ -1031,61 +1028,15 @@ NOW;
             file_put_contents($descFile, Yaml::dump($existing, 4));
         }
 
-        $cTraitNamespace = new PhpNamespace('GCWorld\\ORM\\Generated\\Descriptions');
-        $cTraitClass     = new TraitType($table_name, $cTraitNamespace);
+        $cNamespace->addUse('GCWorld\\ORM\\Interfaces\\ORMDescriptionInterface', 'odi');
+        $cNamespace->addUse('GCWorld\\ORM\\Traits\\ORMFieldsTrait', 'odit');
+        $cClass->addImplement('odi');
+        $cClass->addTrait('odit');
 
-        $cProperty = $cTraitClass->addProperty('ORMDESC');
+        $cProperty = $cClass->addProperty('ORM_FIELDS');
+        $cProperty->setStatic(true);
         $cProperty->addComment('@var array');
         $cProperty->setVisibility('protected');
         $cProperty->setValue($existing);
-
-        $body = <<< 'NOW'
-if(!isset(self::$ORMDESC[$fieldName])) {
-    return 'UNDEFINED: '.$fieldName;
-}
-
-return self::$ORMDESC[$fieldName]['title'];
-NOW;
-
-        $cFunc = $cTraitClass->addMethod('getFieldName');
-        $cFunc->addParameter('fieldName')->setType('string');
-        $cFunc->addComment('@return string');
-        $cFunc->setVisibility('public');
-        $cFunc->setBody($body);
-
-        $body = <<< 'NOW'
-if(!isset(self::$ORMDESC[$fieldName])) {
-    return 'UNDEFINED: '.$fieldName;
-}
-
-return self::$ORMDESC[$fieldName]['desc'];
-NOW;
-
-        $cFunc = $cTraitClass->addMethod('getFieldDesc');
-        $cFunc->addParameter('fieldName')->setType('string');
-        $cFunc->addComment('@return string');
-        $cFunc->setVisibility('public');
-        $cFunc->setBody($body);
-
-        $body = <<< 'NOW'
-if(!isset(self::$ORMDESC[$fieldName])) {
-    return 'UNDEFINED: '.$fieldName;
-}
-
-return self::$ORMDESC[$fieldName]['help'];
-NOW;
-
-        $cFunc = $cTraitClass->addMethod('getFieldHelp');
-        $cFunc->addParameter('fieldName')->setType('string');
-        $cFunc->addComment('@return string');
-        $cFunc->setVisibility('public');
-        $cFunc->setBody($body);
-
-        $cPrinter  = new PsrPrinter();
-        $contents  = '<?php'.PHP_EOL;
-        $contents .= $cPrinter->printNamespace($cTraitNamespace);
-        $contents .= $cPrinter->printClass($cTraitClass);
-
-        file_put_contents($path.$filename, $contents);
     }
 }
