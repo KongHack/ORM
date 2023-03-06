@@ -449,8 +449,8 @@ NOW;
         if (isset($this->config['descriptions'])
             && isset($this->config['descriptions']['enabled'])
             && $this->config['descriptions']['enabled']
-            && isset($this->config['desc_dir'])
-            && !empty($this->config['desc_dir'])
+            && isset($this->config['descriptions']['desc_dir'])
+            && !empty($this->config['descriptions']['desc_dir'])
         ) {
             $tmp = explode(DIRECTORY_SEPARATOR, $this->cConfig->getConfigFilePath());
             array_pop($tmp);
