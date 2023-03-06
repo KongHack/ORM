@@ -1036,7 +1036,7 @@ NOW;
         $cProperty = $cClass->addProperty('ORM_FIELDS');
         $cProperty->setStatic(true);
         $cProperty->addComment('@var array');
-        $cProperty->setVisibility('protected');
+        $cProperty->setVisibility('public');
         $cProperty->setValue($existing);
     }
 }
