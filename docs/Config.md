@@ -28,12 +28,14 @@ The config will NOT update itself to add missing values upon update. Below is th
    Files will be loaded in from this location, then the table_dir value will be removed from the resulting config array.
 
 
+### [descriptions]
+ - enable: boolean
+   - Enable / Disable description generation system
 
-### [table_desc_dir]
- - If this value is set, the ORM will look for a directory of Table_Name.yml files relative to your config file location.  
-   Files will be automatically created based on the found data model, then compiled into descriptor traits  
-   that can be used in your models to provide auxillary functions for external usage
+ - desc_dir: If this value is set, the ORM will look for a directory of Table_Name.yml files relative to your config file location.  
+   Files will be automatically created based on the found data model, then compiled into your models to provide auxiliary functions for external usage
 
+ - desc_trait: If defined and not empty, will include your descriptor trait instead of the default `GCWorld\ORM\Traits\ORMFieldsTrait` trait
 
 
 ### [options]

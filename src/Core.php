@@ -446,13 +446,18 @@ NOW;
         $this->doFactory($cClass, $cNamespace);
         $this->doBaseExceptions($cClass, $cNamespace, $config['fields']);
 
-        if (isset($this->config['table_desc_dir']) && !empty($this->config['table_desc_dir'])) {
+        if (isset($this->config['descriptions'])
+            && isset($this->config['descriptions']['enabled'])
+            && $this->config['descriptions']['enabled']
+            && isset($this->config['desc_dir'])
+            && !empty($this->config['desc_dir'])
+        ) {
             $tmp = explode(DIRECTORY_SEPARATOR, $this->cConfig->getConfigFilePath());
             array_pop($tmp);
             $startPath = implode(DIRECTORY_SEPARATOR, $tmp).DIRECTORY_SEPARATOR;
-            $descDir   = $startPath.$this->config['table_desc_dir'];
+            $descDir   = $startPath.$this->config['descriptions']['desc_dir'];
             if (!is_dir($descDir)) {
-                $this->logger->alert('Table Desc Dir is defined but cannot be found: '.$descDir);
+                $this->logger->alert('Descriptions: Desc Dir is defined but cannot be found: '.$descDir);
             } else {
                 $this->doDescription($cClass, $cNamespace, $descDir, $table_name, $dbInfo);
             }
@@ -1039,8 +1044,16 @@ NOW;
             file_put_contents($descFile, Yaml::dump($existing, 4));
         }
 
+        $odiTrait = 'GCWorld\\ORM\\Traits\\ORMFieldsTrait';
+        if (isset($this->config['descriptions']['desc_trait'])
+            && !empty($this->config['descriptions']['desc_trait'])
+            && trait_exists($this->config['descriptions']['desc_trait'])
+        ) {
+            $odiTrait = $this->config['descriptions']['desc_trait'];
+        }
+
         $cNamespace->addUse('GCWorld\\Interfaces\\ORMDescriptionInterface', 'odi');
-        $cNamespace->addUse('GCWorld\\ORM\\Traits\\ORMFieldsTrait', 'odit');
+        $cNamespace->addUse($odiTrait, 'odit');
         $cClass->addImplement('odi');
         $cClass->addTrait('odit');
 

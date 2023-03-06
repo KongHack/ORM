@@ -99,6 +99,14 @@ class Config
         ) {
             $config['general']['audit_handler'] = Audit::class;
         }
+        if (!isset($config['descriptions'])) {
+            $writeCache             = true;
+            $config['descriptions'] = [
+                'enabled'    => false,
+                'desc_dir'   => null,
+                'desc_trait' => null,
+            ];
+        }
 
         if (isset($config['table_dir'])
             && !empty($config['table_dir'])
