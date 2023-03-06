@@ -14,7 +14,7 @@ trait ORMFieldsTrait
     public static function getFieldTitle(string $fieldName): ?string
     {
         if (!isset(self::$ORM_FIELDS[$fieldName])) {
-            return 'UNDEFINED: '.$fieldName;
+            return null;
         }
 
         return self::$ORM_FIELDS[$fieldName]['title'];
@@ -27,7 +27,7 @@ trait ORMFieldsTrait
     public static function getFieldDesc(string $fieldName): ?string
     {
         if (!isset(self::$ORM_FIELDS[$fieldName])) {
-            return 'UNDEFINED: '.$fieldName;
+            return null;
         }
 
         return self::$ORM_FIELDS[$fieldName]['desc'];
@@ -40,9 +40,22 @@ trait ORMFieldsTrait
     public static function getFieldHelp(string $fieldName): ?string
     {
         if (!isset(self::$ORM_FIELDS[$fieldName])) {
-            return 'UNDEFINED: '.$fieldName;
+            return null;
         }
 
         return self::$ORM_FIELDS[$fieldName]['help'];
+    }
+
+    /**
+     * @param string $fieldName
+     * @return int
+     */
+    public static function getFieldMaxLength(string $fieldName): int
+    {
+        if (!isset(self::$ORM_FIELDS[$fieldName])) {
+            return 0;
+        }
+
+        return (int) self::$ORM_FIELDS[$fieldName]['maxlen'];
     }
 }

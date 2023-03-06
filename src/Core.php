@@ -1005,10 +1005,11 @@ NOW;
             if (!isset($existing[$field])) {
                 $changed          = true;
                 $existing[$field] = [
-                    'title' => $field,
-                    'desc'  => '',
-                    'help'  => '',
-                    'tech'  => $techDesc,
+                    'title'  => $field,
+                    'desc'   => '',
+                    'help'   => '',
+                    'tech'   => $techDesc,
+                    'maxlen' => $this->determineMaxLen($techDesc),
                 ];
                 continue;
             }
@@ -1018,15 +1019,19 @@ NOW;
             }
             if (!isset($existing[$field]['desc'])) {
                 $changed                  = true;
-                $existing[$field]['desc'] = $field;
+                $existing[$field]['desc'] = '';
             }
             if (!isset($existing[$field]['help'])) {
                 $changed                  = true;
-                $existing[$field]['help'] = $field;
+                $existing[$field]['help'] = '';
             }
             if (!isset($existing[$field]['tech'])) {
                 $changed                  = true;
                 $existing[$field]['tech'] = $techDesc;
+            }
+            if (!isset($existing[$field]['maxlen'])) {
+                $changed                    = true;
+                $existing[$field]['maxlen'] = $this->determineMaxLen($techDesc);
             }
         }
 
@@ -1045,5 +1050,25 @@ NOW;
         $cProperty->setType('array');
         $cProperty->addComment('@var array');
         $cProperty->setValue($existing);
+    }
+
+    /**
+     * @param $techDesc
+     * @return int
+     */
+    protected function determineMaxLen($techDesc): int
+    {
+        $start = strpos($techDesc, '(');
+        if ($start === false) {
+            return 0;
+        }
+        $end = strpos($techDesc, ')', $start + 1);
+        if ($end === false) {
+            return 0;
+        }
+
+        $length = $end - $start;
+        $result = substr($techDesc, $start + 1, $length - 1);
+        return intval($result);
     }
 }
