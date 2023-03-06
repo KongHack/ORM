@@ -11,7 +11,7 @@ trait ORMFieldsTrait
      * @param string $fieldName
      * @return string|null
      */
-    public static function getFieldTitle(string $fieldName): ?string
+    public static function getORMFieldTitle(string $fieldName): ?string
     {
         if (!isset(self::$ORM_FIELDS[$fieldName])) {
             return null;
@@ -24,7 +24,7 @@ trait ORMFieldsTrait
      * @param string $fieldName
      * @return string|null
      */
-    public static function getFieldDesc(string $fieldName): ?string
+    public static function getORMFieldDesc(string $fieldName): ?string
     {
         if (!isset(self::$ORM_FIELDS[$fieldName])) {
             return null;
@@ -37,7 +37,7 @@ trait ORMFieldsTrait
      * @param string $fieldName
      * @return string|null
      */
-    public static function getFieldHelp(string $fieldName): ?string
+    public static function getORMFieldHelp(string $fieldName): ?string
     {
         if (!isset(self::$ORM_FIELDS[$fieldName])) {
             return null;
@@ -50,7 +50,7 @@ trait ORMFieldsTrait
      * @param string $fieldName
      * @return int
      */
-    public static function getFieldMaxLength(string $fieldName): int
+    public static function getORMFieldMaxLength(string $fieldName): int
     {
         if (!isset(self::$ORM_FIELDS[$fieldName])) {
             return 0;
