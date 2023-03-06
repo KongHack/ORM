@@ -980,10 +980,16 @@ NOW;
      * @param string       $descDir
      * @param string       $table_name
      * @param array        $dbInfo
+     *
      * @return void
      */
-    protected function doDescription(ClassType $cClass, PhpNamespace $cNamespace, string $descDir, string $table_name, array $dbInfo)
-    {
+    protected function doDescription(
+        ClassType $cClass,
+        PhpNamespace $cNamespace,
+        string $descDir,
+        string $table_name,
+        array $dbInfo
+    ) {
         //Create a trait version
         $existing = [];
         $changed  = false;

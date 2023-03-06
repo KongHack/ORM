@@ -8,9 +8,10 @@ namespace GCWorld\ORM\Traits;
 trait ORMFieldsTrait
 {
     /**
-     * @return string
+     * @param string $fieldName
+     * @return string|null
      */
-    public static function getFieldName(string $fieldName): string
+    public static function getFieldTitle(string $fieldName): ?string
     {
         if (!isset(self::$ORM_FIELDS[$fieldName])) {
             return 'UNDEFINED: '.$fieldName;
@@ -20,9 +21,10 @@ trait ORMFieldsTrait
     }
 
     /**
-     * @return string
+     * @param string $fieldName
+     * @return string|null
      */
-    public static function getFieldDesc(string $fieldName): string
+    public static function getFieldDesc(string $fieldName): ?string
     {
         if (!isset(self::$ORM_FIELDS[$fieldName])) {
             return 'UNDEFINED: '.$fieldName;
@@ -32,9 +34,10 @@ trait ORMFieldsTrait
     }
 
     /**
-     * @return string
+     * @param string $fieldName
+     * @return string|null
      */
-    public static function getFieldHelp(string $fieldName): string
+    public static function getFieldHelp(string $fieldName): ?string
     {
         if (!isset(self::$ORM_FIELDS[$fieldName])) {
             return 'UNDEFINED: '.$fieldName;

@@ -8,17 +8,20 @@ namespace GCWorld\ORM\Interfaces;
 interface ORMDescriptionInterface
 {
     /**
-     * @return string
+     * @param string $fieldName
+     * @return string|null
      */
-    public static function getFieldName(string $fieldName): string;
+    public static function getFieldTitle(string $fieldName): ?string;
 
     /**
-     * @return string
+     * @param string $fieldName
+     * @return string|null
      */
-    public static function getFieldDesc(string $fieldName): string;
+    public static function getFieldDesc(string $fieldName): ?string;
 
     /**
-     * @return string
+     * @param string $fieldName
+     * @return string|null
      */
-    public static function getFieldHelp(string $fieldName): string;
+    public static function getFieldHelp(string $fieldName): ?string;
 }
