@@ -42,7 +42,7 @@ class AuditUtilities
         $A = [];
         $B = [];
         foreach ($before as $k => $v) {
-            if ($after[$k] !== $v) {
+            if (isset($after[$k]) && $after[$k] !== $v) {
                 $B[$k] = $v;
                 $A[$k] = $after[$k];
 
