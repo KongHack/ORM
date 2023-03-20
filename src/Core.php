@@ -443,7 +443,7 @@ NOW;
         }
 
         // Not for traits
-        $this->doFactory($cClass, $cNamespace);
+        $this->doFactory($cClass, $cNamespace, $config['fields']);
         $this->doBaseExceptions($cClass, $cNamespace, $config['fields']);
 
         if (isset($this->config['descriptions'])
@@ -606,10 +606,11 @@ NOW;
     /**
      * @param ClassType    $cClass
      * @param PhpNamespace $cNamespace
+     * @param array        $fields
      *
      * @return void
      */
-    protected function doFactory(ClassType $cClass, PhpNamespace $cNamespace)
+    protected function doFactory(ClassType $cClass, PhpNamespace $cNamespace, array $fields)
     {
         $keys    = $this->getKeys($cClass->getName());
         $uniques = $keys['uniques'];
@@ -635,11 +636,19 @@ NOW;
             $cMethod->setStatic(true);
             $cMethod->addComment('@return static');
             foreach ($unique as $item) {
+                $fieldConfig = $fields[$item['Field']] ?? Config::getDefaultFieldConfig();
+                $type        = 'mixed';
+                if ($fieldConfig['type_hint'] != '') {
+                    $type = $fieldConfig['type_hint'];
+                } elseif ($this->type_hinting) {
+                    $type = $this->defaultReturn($item['Type']);
+                }
+
                 if (isset($item['Null']) && strtoupper($item['Null']) == 'YES') {
-                    $cMethod->addComment('@param ?mixed '.$item['Column_name']);
+                    $cMethod->addComment('@param ?'.$type.' '.$item['Column_name']);
                     $cMethod->addParameter($item['Column_name'], null);
                 } else {
-                    $cMethod->addComment('@param mixed '.$item['Column_name']);
+                    $cMethod->addComment('@param '.$type.' '.$item['Column_name']);
                     $cMethod->addParameter($item['Column_name']);
                 }
 
@@ -680,16 +689,30 @@ NOW;
             $cMethod->setPublic();
             $cMethod->setStatic(true);
             $cMethod->addComment('@return mixed');
-            foreach ($vars as $var) {
-                $cMethod->addComment('@param mixed $'.$var);
-                $cMethod->addParameter($var);
+            foreach ($unique as $item) {
+                $fieldConfig = $fields[$item['Field']] ?? Config::getDefaultFieldConfig();
+                $type        = 'mixed';
+                if ($fieldConfig['type_hint'] != '') {
+                    $type = $fieldConfig['type_hint'];
+                } elseif ($this->type_hinting) {
+                    $type = $this->defaultReturn($item['Type']);
+                }
+
+                $cMethod->addComment('@param mixed $'.$item['Column_name']);
+                $cMethod->addParameter($item['Column_name'])->setType($type);
             }
 
             $params = [];
             $where  = [];
-            foreach ($vars as $var) {
-                $where[]  = $var.' = :'.$var;
-                $params[] = '\':'.$var.'\' => $'.$var.','.PHP_EOL;
+            foreach ($unique as $item) {
+                $var     = $item['Column_name'];
+                $enum    = isset($fields[$var]['backed_enum']) && isset($fields[$var]['backed_enum']);
+                $where[] = $var.' = :'.$var;
+                if ($enum) {
+                    $params[] = '\':' . $var . '\' => $' . $var . '->value,' . PHP_EOL;
+                } else {
+                    $params[] = '\':' . $var . '\' => $' . $var . ',' . PHP_EOL;
+                }
             }
             $sWhere = 'WHERE '.implode(' AND ', $where);
 
