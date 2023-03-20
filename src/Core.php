@@ -636,7 +636,7 @@ NOW;
             $cMethod->setStatic(true);
             $cMethod->addComment('@return static');
             foreach ($unique as $item) {
-                $fieldConfig = $fields[$item['Field']] ?? Config::getDefaultFieldConfig();
+                $fieldConfig = $fields[$item['Column_name']] ?? Config::getDefaultFieldConfig();
                 $type        = 'mixed';
                 if ($fieldConfig['type_hint'] != '') {
                     $type = $fieldConfig['type_hint'];
@@ -690,7 +690,7 @@ NOW;
             $cMethod->setStatic(true);
             $cMethod->addComment('@return mixed');
             foreach ($unique as $item) {
-                $fieldConfig = $fields[$item['Field']] ?? Config::getDefaultFieldConfig();
+                $fieldConfig = $fields[$item['Column_name']] ?? Config::getDefaultFieldConfig();
                 $type        = 'mixed';
                 if ($fieldConfig['type_hint'] != '') {
                     $type = $fieldConfig['type_hint'];
