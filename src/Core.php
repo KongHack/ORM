@@ -205,6 +205,8 @@ class Core
             }
         }
 
+        $this->logger->debug('Discovered Primaries', $primaries);
+
         if (count($primaries) !== 1) {
             return false;
         }
@@ -443,7 +445,9 @@ NOW;
         }
 
         // Not for traits
+        $this->logger->debug('ACTION: Calling doFactory');
         $this->doFactory($cClass, $cNamespace, $config['fields']);
+        $this->logger->debug('ACTION: Calling doBaseExceptions');
         $this->doBaseExceptions($cClass, $cNamespace, $config['fields']);
 
         if (isset($this->config['descriptions'])
@@ -616,6 +620,8 @@ NOW;
         $uniques = $keys['uniques'];
         $primary = $keys['primary'];
 
+        $this->logger->debug('Discovered Uniques', $uniques);
+
         // We don't have a primary key.  That can't be good.
         if ($primary == null) {
             return;
@@ -626,12 +632,14 @@ NOW;
         }
 
         foreach ($uniques as $key => $unique) {
+            $this->logger->debug('Processing Unique: '.$key);
             $name   = str_replace(' ', '', ucwords(str_replace('_', ' ', $key)));
             $vars   = [];
             $varStr = [];
 
             // Factory All Method =====================================================================================
             $cMethod = $cClass->addMethod('factory'.$name.'All');
+            $this->logger->debug('Creating Method: '.$cMethod->getName());
             $cMethod->setPublic();
             $cMethod->setStatic(true);
             $cMethod->addComment('@return static');
@@ -672,6 +680,7 @@ NOW;
 
             // Factory ID Method ======================================================================================
             $cMethod = $cClass->addMethod('factory'.$name);
+            $this->logger->debug('Creating Method: '.$cMethod->getName());
             $cMethod->setPublic();
             $cMethod->setStatic(true);
             $cMethod->addParameter($primary);
@@ -686,6 +695,7 @@ NOW;
 
             // Find Primary Function ==================================================================================
             $cMethod = $cClass->addMethod('find'.$name);
+            $this->logger->debug('Creating Method: '.$cMethod->getName());
             $cMethod->setPublic();
             $cMethod->setStatic(true);
             $cMethod->addComment('@return mixed');
