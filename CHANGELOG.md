@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [6.3.4](https://github.com/KongHack/ORM/releases/tag/6.3.4)
+- @Gamecharmer Add exception if config is completely empty
+
+
+
 ## [6.3.3](https://github.com/KongHack/ORM/releases/tag/6.3.3)
 - @GameCharmer Implement Enum Support for factory methods (PARTIAL)
 
