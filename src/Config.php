@@ -59,6 +59,10 @@ class Config
             }
         }
 
+        if (empty($config)) {
+            throw new \Exception('ORM Config Empty');
+        }
+
         $this->config_file = $file;
 
         // Trust model where the end user is deleting the cache file automatically
