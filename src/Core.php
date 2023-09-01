@@ -278,6 +278,7 @@ class Core
         }
 
         $dbInfo = [];
+        $enums  = [];
         foreach ($fields as $i => $row) {
             $dbInfo[$row['Field']] = $row['Type'].($row['Comment'] != '' ? ' - '.$row['Comment'] : '');
         }
@@ -334,6 +335,7 @@ class Core
                     $body  = '$val = $this->get(\''.$row['Field'].'\');'.PHP_EOL;
                     $body .= 'return '.$return_type.'::from($val);';
 
+                    $enums[$row['Field']] = $return_type;
                     $cMethod->setBody($body);
                 } else {
                     $cMethod->setBody('return $this->get(\''.$row['Field'].'\');');
@@ -442,6 +444,10 @@ NOW;
             $body .= PHP_EOL;
             $body .= $save_hook_call.'($table_name, $primary_id, $before, $after, $changed);';
             $cMethod->setBody($body);
+        }
+
+        if(!empty($enums)) {
+            $cClass->addConstant('ORM_ENUMS', $enums);
         }
 
         // Not for traits
