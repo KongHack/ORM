@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [6.3.6](https://github.com/KongHack/ORM/releases/tag/6.3.6)
+- @GameCharmer Update Composer Dependencies (Dependabot)
+
+
+
 ## [6.3.5](https://github.com/KongHack/ORM/releases/tag/6.3.5)
 - @GameCharmer Addition of `ORM_ENUMS` Constant to models that use enums for fields
 
