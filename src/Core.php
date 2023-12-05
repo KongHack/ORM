@@ -223,19 +223,23 @@ class Core
             $cNamespace->addUse('Ramsey\\Uuid\\Uuid');
         }
 
+        // NOTE: As of nette/php-generator 4.1.2, class aliases are broken.
+        // This means we need to add the class extend/implement here instead.
         if ($this->get_set_funcs) {
-            $cNamespace->addUse('GCWorld\\ORM\\Abstracts\\DirectSingle', 'dbc');
-            $cNamespace->addUse('GCWorld\\ORM\\Interfaces\\ProtectedDBInterface', 'dbd');
+            $cNamespace->addUse('GCWorld\\ORM\\Abstracts\\DirectSingle');
+            $cClass->setExtends('GCWorld\\ORM\\Abstracts\\DirectSingle');
+            $cNamespace->addUse('GCWorld\\ORM\\Interfaces\\ProtectedDBInterface');
+            $cClass->addImplement('GCWorld\\ORM\\Interfaces\\ProtectedDBInterface');
         } else {
-            $cNamespace->addUse('GCWorld\\ORM\\Abstracts\\DirectDBClass', 'dbc');
-            $cNamespace->addUse('GCWorld\\ORM\\Interfaces\\PublicDBInterface', 'dbd');
+            $cNamespace->addUse('GCWorld\\ORM\\Abstracts\\DirectDBClass');
+            $cClass->setExtends('GCWorld\\ORM\\Abstracts\\DirectDBClass');
+            $cNamespace->addUse('GCWorld\\ORM\\Interfaces\\PublicDBInterface');
+            $cClass->addImplement('GCWorld\\ORM\\Interfaces\\PublicDBInterface');
         }
-        $cNamespace->addUse('GCWorld\\ORM\\Interfaces\\GeneratedInterface', 'dbi');
+        $cNamespace->addUse('GCWorld\\ORM\\Interfaces\\GeneratedInterface');
+        $cClass->addImplement('GCWorld\\ORM\\Interfaces\\GeneratedInterface');
         $cClass->addConstant('CLASS_PRIMARY', $primaries[0])->setPublic();
 
-        $cClass->setExtends('dbc');
-        $cClass->addImplement('dbi');
-        $cClass->addImplement('dbd');
         if ($this->json_serialize) {
             $cNamespace->addUse('JsonSerializable');
             $cClass->addImplement('JsonSerializable');
@@ -1093,10 +1097,10 @@ NOW;
             $odiTrait = $this->config['descriptions']['desc_trait'];
         }
 
-        $cNamespace->addUse('GCWorld\\Interfaces\\ORMDescriptionInterface', 'odi');
-        $cNamespace->addUse($odiTrait, 'odit');
-        $cClass->addImplement('odi');
-        $cClass->addTrait('odit');
+        $cNamespace->addUse('GCWorld\\Interfaces\\ORMDescriptionInterface');
+        $cNamespace->addUse($odiTrait);
+        $cClass->addImplement('GCWorld\\Interfaces\\ORMDescriptionInterface');
+        $cClass->addTrait($odiTrait);
 
         $cProperty = $cClass->addProperty('ORM_FIELDS');
         $cProperty->setVisibility('public');
