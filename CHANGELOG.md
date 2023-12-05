@@ -4,7 +4,11 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 
-- @GameCharmer Experimental update for nette/php-generator
+
+## [6.3.7](https://github.com/KongHack/ORM/releases/tag/6.3.7)
+- @GameCharmer Update `nette/php-generator` from `4.0.5` to `4.1.2`
+  - NOTE: 4.1.2 breaks aliases, so those have been replaced with full class names.
+
 
 
 ## [6.3.6](https://github.com/KongHack/ORM/releases/tag/6.3.6)
