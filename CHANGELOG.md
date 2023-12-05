@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 
+- @GameCharmer Experimental update for nette/php-generator
+
 
 ## [6.3.6](https://github.com/KongHack/ORM/releases/tag/6.3.6)
 - @GameCharmer Update Composer Dependencies (Dependabot)

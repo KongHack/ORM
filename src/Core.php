@@ -105,7 +105,7 @@ class Core
      */
     public function generate(string $table_name)
     {
-        $this->logger->debug('Processing Table: '.$table_name);
+        $this->logger->info('Processing Table: '.$table_name);
 
         $sql   = 'SHOW FULL COLUMNS FROM '.$table_name;
         $query = $this->master_common->getDatabase()->prepare($sql);
@@ -211,9 +211,11 @@ class Core
             return false;
         }
 
+        $this->logger->debug('Generating Code');
+
         $filename   = $table_name.'.php';
         $cNamespace = new PhpNamespace('GCWorld\\ORM\\Generated');
-        $cClass     = new ClassType($table_name, $cNamespace);
+        $cClass     = $cNamespace->addClass($table_name);
         $cClass->setAbstract(true);
         $cClass->addConstant('CLASS_TABLE', $table_name)->setPublic();
         $cClass->addComment('Generated Class for Table '.$table_name);
