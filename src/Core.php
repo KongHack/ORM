@@ -479,15 +479,15 @@ NOW;
             }
         }
 
-
         $cPrinter  = new PsrPrinter();
         $contents  = '<?php'.PHP_EOL;
         $contents .= $cPrinter->printNamespace($cNamespace);
-        $contents .= $cPrinter->printClass($cClass);
 
+        $this->logger->info('DISK ACCESS: Writing File: '.$path.$filename);
         file_put_contents($path.$filename, $contents);
 
 
+        $this->logger->info('ACTION: Generating Trait');
         //Create a trait version
         $path     = $this->master_location.DIRECTORY_SEPARATOR.'Generated/Traits/';
         $filename = $table_name.'.php';
@@ -496,7 +496,7 @@ NOW;
         }
 
         $cTraitNamespace = new PhpNamespace('GCWorld\\ORM\\Generated\\Traits');
-        $cTraitClass     = new TraitType($table_name, $cTraitNamespace);
+        $cTraitClass     = $cTraitNamespace->addTrait($table_name);
 
         foreach ($fields as $i => $row) {
             if (in_array($row['Field'], $primaries)) {
@@ -550,8 +550,8 @@ NOW;
         $cPrinter  = new PsrPrinter();
         $contents  = '<?php'.PHP_EOL;
         $contents .= $cPrinter->printNamespace($cTraitNamespace);
-        $contents .= $cPrinter->printClass($cTraitClass);
 
+        $this->logger->info('DISK ACCESS: Writing File: '.$path.$filename);
         file_put_contents($path.$filename, $contents);
 
         return true;
