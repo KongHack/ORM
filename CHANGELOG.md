@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [6.4.0](https://github.com/KongHack/ORM/releases/tag/6.4.0)
+- @GameCharmer Update to PHP 8.1
+
+
+
 ## [6.3.7](https://github.com/KongHack/ORM/releases/tag/6.3.7)
 - @GameCharmer Update `nette/php-generator` from `4.0.5` to `4.1.2`
   - NOTE: 4.1.2 breaks aliases, so those have been replaced with full class names.

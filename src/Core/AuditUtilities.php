@@ -46,6 +46,15 @@ class AuditUtilities
                 $B[$k] = $v;
                 $A[$k] = $after[$k];
 
+                if($v instanceof \BackedEnum) {
+                    $v     = $v->value;
+                    $B[$k] = $v;
+                }
+                if($after[$k] instanceof \BackedEnum) {
+                    $after[$k] = $after[$k]->value;
+                    $A[$k]     = $after[$k];
+                }
+
                 // Overrides
 
                 if (empty($v)) {
