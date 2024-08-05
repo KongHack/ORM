@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [6.4.2](https://github.com/KongHack/ORM/releases/tag/6.4.2)
+- @GameCharmer Update Nette PHP Generator
+
+
+
 ## [6.4.1](https://github.com/KongHack/ORM/releases/tag/6.4.1)
 - @GameCharmer Update composer/composer
 
