@@ -40,7 +40,7 @@
       "bash contrib/setup.sh"
     ]
   },
-  "license":"GPL-3.0",
+  "license":"MIT",
   "config": {
     "allow-plugins": {
       "composer/installers": true
