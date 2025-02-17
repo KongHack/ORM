@@ -5,8 +5,13 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [6.4.5](https://github.com/KongHack/ORM/releases/tag/6.4.5)
+- @GameCharmer Update composer dependencies for 8.4
+
+
+
 ## [6.4.4](https://github.com/KongHack/ORM/releases/tag/6.4.4)
-- @Mitch Update Form Config
+- @GameCharmer Update Form Config
 
 
 
