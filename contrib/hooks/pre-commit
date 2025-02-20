@@ -80,10 +80,10 @@ then
 		fi
 
 		printf "PHP-CS-Fixer - ";
-		OUTLINE=$(vendor/bin/php-cs-fixer fix $FILE --allow-risky=yes --dry-run --using-cache=no --show-progress=none -v 2>/dev/null)
+		OUTLINE=$(PHP_CS_FIXER_IGNORE_ENV=1 vendor/bin/php-cs-fixer fix $FILE --allow-risky=yes --dry-run --using-cache=no --show-progress=none -v 2>/dev/null)
 		if [ $? != 0 ]
 		then
-			OUTLINE=$(vendor/bin/php-cs-fixer fix $FILE --allow-risky=yes --using-cache=no -v 2>/dev/null)
+			OUTLINE=$(PHP_CS_FIXER_IGNORE_ENV=1 vendor/bin/php-cs-fixer fix $FILE --allow-risky=yes --using-cache=no -v 2>/dev/null)
 			printf "${RED}[BAD]${NC}\n";
 			FILE_ISSUE=true
 			FILE_ISSUE_TEXT="$FILE_ISSUE_TEXT\n[PHP CS Fixer]\n$OUTLINE"
