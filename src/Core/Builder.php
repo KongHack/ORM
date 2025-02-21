@@ -66,7 +66,7 @@ class Builder
      *
      * @return void
      */
-    public function run(?string $schema = null)
+    public function run(?string $schema = null): void
     {
         if (!$this->doAudit) {
             return;

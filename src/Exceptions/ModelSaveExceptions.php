@@ -1,5 +1,4 @@
 <?php
-
 namespace GCWorld\ORM\Exceptions;
 
 use Exception;
@@ -23,7 +22,7 @@ class ModelSaveExceptions extends Exception implements ModelSaveExceptionsInterf
      * @param int            $code
      * @param Exception|null $previous
      */
-    public function __construct(string $message = '', int $code = 0, Exception $previous = null)
+    public function __construct(string $message = '', int $code = 0, ?Exception $previous = null)
     {
         parent::__construct($message, $code, $previous);
     }
@@ -74,6 +73,7 @@ class ModelSaveExceptions extends Exception implements ModelSaveExceptionsInterf
 
     /**
      * @throws ModelSaveExceptions
+     *
      * @return void
      */
     public function doThrow(): void

@@ -1,26 +1,27 @@
 <?php
 namespace GCWorld\ORM\Exceptions;
 
+use Exception;
 use GCWorld\ORM\Interfaces\FieldException;
 
 /**
  * Class ModelUniqueValueException.
  */
-class ModelUniqueValueException extends \Exception implements FieldException
+class ModelUniqueValueException extends Exception implements FieldException
 {
-    protected $field_name = '';
-    protected $value      = '';
+    protected string $field_name = '';
+    protected string $value      = '';
 
     /**
      * ModelUniqueValueException constructor.
      *
-     * @param string          $field_name
-     * @param string          $value
-     * @param string          $message
-     * @param int             $code
-     * @param \Exception|null $previous
+     * @param string         $field_name
+     * @param string         $value
+     * @param string         $message
+     * @param int            $code
+     * @param Exception|null $previous
      */
-    public function __construct(string $field_name, string $value, string $message = '', int $code = 0, \Exception $previous = null)
+    public function __construct(string $field_name, string $value, string $message = '', int $code = 0, ?Exception $previous = null)
     {
         $this->field_name = $field_name;
         $this->value      = $value;

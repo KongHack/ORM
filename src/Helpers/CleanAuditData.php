@@ -1,5 +1,4 @@
 <?php
-
 namespace GCWorld\ORM\Helpers;
 
 /**
@@ -12,18 +11,20 @@ class CleanAuditData
 
     /**
      * @param array $after
+     *
      * @return void
      */
-    public function setAfter(array $after)
+    public function setAfter(array $after): void
     {
         $this->after = $after;
     }
 
     /**
      * @param array $before
+     *
      * @return void
      */
-    public function setBefore(array $before)
+    public function setBefore(array $before): void
     {
         $this->before = $before;
     }
@@ -31,9 +32,10 @@ class CleanAuditData
     /**
      * @param mixed $key
      * @param mixed $value
+     *
      * @return void
      */
-    public function addAfter($key, $value)
+    public function addAfter(mixed $key, mixed $value): void
     {
         $this->after[$key] = $value;
     }
@@ -41,9 +43,10 @@ class CleanAuditData
     /**
      * @param mixed $key
      * @param mixed $value
+     *
      * @return void
      */
-    public function addBefore($key, $value)
+    public function addBefore(mixed $key, mixed $value): void
     {
         $this->before[$key] = $value;
     }
@@ -51,7 +54,7 @@ class CleanAuditData
     /**
      * @return array
      */
-    public function getAfter()
+    public function getAfter(): array
     {
         return $this->after;
     }
@@ -59,7 +62,7 @@ class CleanAuditData
     /**
      * @return array
      */
-    public function getBefore()
+    public function getBefore(): array
     {
         return $this->before;
     }

@@ -1,34 +1,35 @@
 <?php
 namespace GCWorld\ORM\Exceptions;
 
+use Exception;
 use GCWorld\ORM\Interfaces\FieldException;
 
 /**
  * Class ModelInvalidOptionException.
  */
-class ModelInvalidOptionException extends \Exception implements FieldException
+class ModelInvalidOptionException extends Exception implements FieldException
 {
-    protected $chosen     = null;
-    protected $possible   = null;
-    protected $field_name = null;
+    protected $chosen;
+    protected $possible;
+    protected $field_name;
 
     /**
      * ModelInvalidOptionException constructor.
      *
-     * @param string          $field_name
-     * @param mixed           $chosen
-     * @param array           $possible
-     * @param string          $message
-     * @param int             $code
-     * @param \Exception|null $previous
+     * @param string         $field_name
+     * @param mixed          $chosen
+     * @param array          $possible
+     * @param string         $message
+     * @param int            $code
+     * @param Exception|null $previous
      */
     public function __construct(
         string $field_name,
-        $chosen,
+        mixed $chosen,
         array $possible,
         string $message = '',
         int $code = 0,
-        \Exception $previous = null
+        ?Exception $previous = null
     ) {
         $this->field_name = $field_name;
         $this->chosen     = $chosen;
@@ -45,7 +46,7 @@ class ModelInvalidOptionException extends \Exception implements FieldException
     /**
      * @return string|null
      */
-    public function getChosen()
+    public function getChosen(): ?string
     {
         return $this->chosen;
     }
@@ -53,7 +54,7 @@ class ModelInvalidOptionException extends \Exception implements FieldException
     /**
      * @return array|null
      */
-    public function getPossible()
+    public function getPossible(): ?array
     {
         return $this->possible;
     }
