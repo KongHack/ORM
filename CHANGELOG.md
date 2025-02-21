@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [6.4.8](https://github.com/KongHack/ORM/releases/tag/6.4.8)
+- @GameCharmer More PHP 8.4 Cleanup
+
+
+
 ## [6.4.7](https://github.com/KongHack/ORM/releases/tag/6.4.7)
 - @GameCharmer Adjust Builder for PHP 8.4
 
