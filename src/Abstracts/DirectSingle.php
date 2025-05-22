@@ -23,19 +23,17 @@ abstract class DirectSingle implements DirectSingleInterface
     /**
      * Here for reference, will be created in child objects automatically.
      *
-     * @var array
+     * @var array<string, mixed>
      */
-    public static $dbInfo = [];
+    public static array $dbInfo = [];
     /**
      * @var \GCWorld\Common\Common|CommonInterface
      */
-    protected $_common;
+    protected readonly CommonInterface $_common;
     /**
      * Set this in the event your class needs a non-standard DB.
-     *
-     * @var string|null
      */
-    protected $_dbName;
+    protected ?string $_dbName = null;
 
     /**
      * @var \GCWorld\Database\Database|DatabaseInterface
@@ -44,54 +42,38 @@ abstract class DirectSingle implements DirectSingleInterface
 
     /**
      * Set this in the event your class needs a non-standard Cache.
-     *
-     * @var string|null
      */
-    protected $_cacheName;
+    protected ?string $_cacheName = null;
 
     /**
-     * @var bool
-     *           Set to false if you want to omit this object from your memory cache all together
+     * Set to false if you want to omit this object from your memory cache all together
      */
-    protected $_canCache = true;
+    protected bool $_canCache = true;
 
     /**
-     * @var int
-     *          TTL for cache items.  -1 = disabled
+     * TTL for cache items.  -1 = disabled
      */
-    protected $_cacheTTL = 60;
+    protected int $_cacheTTL = 60;
 
     /**
-     * @var bool
-     *           Set this to false in your class when you don't want to auto re-cache after a purge
+     * Set this to false in your class when you don't want to auto re-cache after a purge
      */
-    protected $_canCacheAfterPurge = true;
+    protected bool $_canCacheAfterPurge = true;
 
     /**
      * @var Redis|null
      */
-    protected $_cache;
+    protected ?Redis $_cache = null;
 
-    /**
-     * @var array
-     */
-    protected $_changed = [];
+    protected array $_changed = [];
 
-    /**
-     * @var array
-     */
-    protected $_lastChanged = [];
+    protected array $_lastChanged = [];
 
     /**
      * Set this to false in your class when you don't want to log changes.
-     *
-     * @var bool
      */
-    protected $_audit = true;
+    protected bool $_audit = true;
 
-    /**
-     * @var ?string
-     */
     protected ?string $_auditHandler = null;
 
     /**
@@ -99,27 +81,20 @@ abstract class DirectSingle implements DirectSingleInterface
      *
      * @var AuditInterface|null
      */
-    protected $_lastAuditObject;
+    protected ?AuditInterface $_lastAuditObject = null;
 
     /**
      * Setting this to true will enable insert on duplicate key update features.
      * This also includes not throwing an error on 0 id construct.
-     *
-     * @var bool
      */
-    protected $_canInsert = false;
+    protected bool $_canInsert = false;
 
     /**
      * Used for reference and to reduce constant check calls.
-     *
-     * @var string
      */
-    protected $myName;
+    protected readonly string $myName;
 
     /**
-     * @param mixed|null $primary_id
-     * @param array|null $defaults
-     *
      * @throws ORMException
      */
     protected function __construct(mixed $primary_id = null, ?array $defaults = null)
@@ -270,9 +245,6 @@ abstract class DirectSingle implements DirectSingleInterface
         }
     }
 
-    /**
-     * @return bool
-     */
     public function save(): bool
     {
         $table_name   = \constant($this->myName.'::CLASS_TABLE');
@@ -405,8 +377,6 @@ abstract class DirectSingle implements DirectSingleInterface
 
     /**
      * Purges the current item from Redis.
-     *
-     * @return void
      */
     public function purgeCache(): void
     {
@@ -422,54 +392,37 @@ abstract class DirectSingle implements DirectSingleInterface
 
     /**
      * Gets the field keys from the dbInfo array.
-     *
-     * @return array
      */
     public function getFieldKeys(): array
     {
         return \array_keys(static::$dbInfo);
     }
 
-    /**
-     * @return bool
-     */
     public function _hasChanged(): bool
     {
         return \count($this->_changed) > 0;
     }
 
-    /**
-     * @return array
-     */
     public function _getChanged(): array
     {
         return $this->_changed;
     }
 
-    /**
-     * @return array
-     */
     public function _getLastChanged(): array
     {
         return $this->_lastChanged;
     }
 
-    /**
-     * @param string $key
-     *
-     * @return mixed
-     */
-    protected function get(string $key)
+    protected function get(string $key): mixed
     {
         return $this->{$key};
     }
 
     /**
-     * @param array $fields
-     *
-     * @return array
+     * @param string[] $fields
+     * @return array<string, mixed>
      */
-    protected function getArray(array $fields)
+    protected function getArray(array $fields): array
     {
         $return = [];
         foreach ($fields as $k) {
@@ -480,12 +433,9 @@ abstract class DirectSingle implements DirectSingleInterface
     }
 
     /**
-     * @param string $key
-     * @param mixed  $val
-     *
      * @return static
      */
-    protected function set(string $key, $val)
+    protected function set(string $key, mixed $val): static
     {
         if ($this->{$key} !== $val) {
             $this->{$key} = $val;
@@ -498,11 +448,10 @@ abstract class DirectSingle implements DirectSingleInterface
     }
 
     /**
-     * @param array $data
-     *
+     * @param array<string,mixed> $data
      * @return static
      */
-    protected function setArray(array $data)
+    protected function setArray(array $data): static
     {
         foreach ($data as $k => $v) {
             $this->set($k, $v);
@@ -511,10 +460,7 @@ abstract class DirectSingle implements DirectSingleInterface
         return $this;
     }
 
-    /**
-     * @return void
-     */
-    protected function setCacheData()
+    protected function setCacheData(): void
     {
         // Caching Disabled
         if (!$this->_canCache || $this->_cacheTTL < 0) {

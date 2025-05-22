@@ -13,14 +13,10 @@ class ModelSaveExceptions extends Exception implements ModelSaveExceptionsInterf
     /**
      * @var Exception[]
      */
-    protected $exceptArray = [];
+    protected array $exceptArray = [];
 
     /**
      * ModelRequiredFieldException constructor.
-     *
-     * @param string         $message
-     * @param int            $code
-     * @param Exception|null $previous
      */
     public function __construct(string $message = '', int $code = 0, ?Exception $previous = null)
     {
@@ -29,10 +25,8 @@ class ModelSaveExceptions extends Exception implements ModelSaveExceptionsInterf
 
     /**
      * @param Exception $e
-     *
-     * @return $this
      */
-    public function addException(Exception $e)
+    public function addException(Exception $e): self
     {
         $this->exceptArray[] = $e;
         $this->message      .= PHP_EOL.$e->getMessage();
@@ -40,9 +34,6 @@ class ModelSaveExceptions extends Exception implements ModelSaveExceptionsInterf
         return $this;
     }
 
-    /**
-     * @return array
-     */
     public function getFieldMessages(): array
     {
         if (!$this->isThrowable()) {
@@ -63,9 +54,6 @@ class ModelSaveExceptions extends Exception implements ModelSaveExceptionsInterf
         return $messages;
     }
 
-    /**
-     * @return bool
-     */
     public function isThrowable(): bool
     {
         return !empty($this->exceptArray);
@@ -73,8 +61,6 @@ class ModelSaveExceptions extends Exception implements ModelSaveExceptionsInterf
 
     /**
      * @throws ModelSaveExceptions
-     *
-     * @return void
      */
     public function doThrow(): void
     {
@@ -86,7 +72,7 @@ class ModelSaveExceptions extends Exception implements ModelSaveExceptionsInterf
     /**
      * @return Exception[]
      */
-    public function getExceptions()
+    public function getExceptions(): array
     {
         return $this->exceptArray;
     }

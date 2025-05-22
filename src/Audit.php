@@ -14,77 +14,83 @@ use Ramsey\Uuid\Uuid;
  */
 class Audit
 {
-    protected static $overrideMemberId = null;
-    protected static $config = null;
+    protected static mixed $overrideMemberId = null;
+    protected static ?array $config = null;
 
-    protected $canAudit   = true;
-    protected $cCommon     = null;
-    protected $database   = null;
-    protected $connection = 'default';
-    protected $prefix     = '_Audit_';
-    protected $enable     = true;
+    protected readonly bool $canAudit;
+    protected readonly ?CommonInterface $cCommon;
+    protected readonly ?string $database;
+    protected readonly string $connection;
+    protected readonly string $prefix;
+    protected readonly bool $enable;
 
-    protected $table     = null;
-    protected $primaryId = null;
-    protected $memberId  = null;
-    protected $before    = [];
-    protected $after     = [];
+    protected ?string $table = null;
+    protected mixed $primaryId = null;
+    protected mixed $memberId = null;
+    protected array $before = [];
+    protected array $after = [];
 
-    /**
-     * @param CommonInterface $cCommon
-     */
     public function __construct(CommonInterface $cCommon)
     {
         if (self::$config === null) {
-            $cConfig      = new Config();
-            $config       = $cConfig->getConfig();
-            self::$config = $config;
+            $globalConfigObj = new Config();
+            self::$config    = $globalConfigObj->getConfig();
         }
 
+        $canAudit   = true;
         if (isset(self::$config['general']['audit']) && !self::$config['general']['audit']) {
-            $this->canAudit = false;
+            $canAudit = false;
         }
+        $this->canAudit = $canAudit;
+
+        $commonInstance = null;
+        $dbName         = null;
+        $connName       = 'default';
+        $prefixName     = '_Audit_';
+        $enableFlag     = true;
 
         if ($this->canAudit) {
-            $this->cCommon = $cCommon;
-            /** @var array $audit */
-            $audit = $cCommon->getConfig('audit');
-            if (is_array($audit)) {
-                $this->enable     = $audit['enable'] ?? false;
-                $this->database   = $audit['database'] ?? $this->database;
-                $this->connection = $audit['connection'] ?? $this->connection;
-                $this->prefix     = $audit['prefix'] ?? $this->prefix;
+            $commonInstance = $cCommon;
+            /** @var array|null $auditConfig */
+            $auditConfig = $cCommon->getConfig('audit');
+            if (is_array($auditConfig)) {
+                $enableFlag = $auditConfig['enable'] ?? false;
+                $dbName     = $auditConfig['database'] ?? null; // Use null if not set, don't fall back to previous $this->database
+                $connName   = $auditConfig['connection'] ?? 'default';
+                $prefixName = $auditConfig['prefix'] ?? '_Audit_';
+            } else {
+                // If $auditConfig is not an array, maintain default $enable = true but other specific settings might be null/default
+                // This branch ensures that if getConfig('audit') doesn't return an array, we still initialize readonly props.
+                // Based on original logic, if $audit is not an array, $this->enable would remain true (its default).
+                // $this->database would remain null. $this->connection default. $this->prefix default.
+                // So, the defaults assigned above are mostly correct.
             }
         }
+        
+        $this->cCommon    = $commonInstance;
+        $this->database   = $dbName;
+        $this->connection = $connName;
+        $this->prefix     = $prefixName;
+        $this->enable     = $enableFlag;
     }
 
-    /**
-     * @param mixed $memberId
-     * @return void
-     */
-    public static function setOverrideMemberId($memberId)
+    public static function setOverrideMemberId(mixed $memberId): void
     {
         self::$overrideMemberId = $memberId;
     }
 
-    /**
-     * @return void
-     */
-    public static function clearOverrideMemberId()
+    public static function clearOverrideMemberId(): void
     {
         self::$overrideMemberId = null;
     }
 
     /**
-     * @param string $table
-     * @param mixed  $primaryId
-     * @param array  $before
-     * @param array  $after
-     * @param mixed  $memberId
+     * @param array<string,mixed> $before
+     * @param array<string,mixed> $after
      * @return int|string
      * @throws \Exception
      */
-    public function storeLog(string $table, $primaryId, array $before, array $after, $memberId = null)
+    public function storeLog(string $table, mixed $primaryId, array $before, array $after, mixed $memberId = null): int|string
     {
         if (!$this->canAudit) {
             return 0;
@@ -165,9 +171,8 @@ class Audit
 
     /**
      * More Info: http://stackoverflow.com/questions/1318608/php-get-parent-script-name
-     * @return mixed
      */
-    protected function getTopScript()
+    protected function getTopScript(): mixed
     {
         $backtrace = debug_backtrace(defined("DEBUG_BACKTRACE_IGNORE_ARGS") ? DEBUG_BACKTRACE_IGNORE_ARGS : false);
         $top_frame = array_pop($backtrace);
@@ -175,50 +180,32 @@ class Audit
         return $top_frame['file'];
     }
 
-    /**
-     * @return null|string
-     */
-    public function getTable()
+    public function getTable(): ?string
     {
         return $this->table;
     }
 
-    /**
-     * @return null|int
-     */
-    public function getPrimaryId()
+    public function getPrimaryId(): mixed
     {
         return $this->primaryId;
     }
 
-    /**
-     * @return null|int
-     */
-    public function getMemberId()
+    public function getMemberId(): mixed
     {
         return $this->memberId;
     }
 
-    /**
-     * @return array
-     */
-    public function getBefore()
+    public function getBefore(): array
     {
         return $this->before;
     }
 
-    /**
-     * @return array
-     */
-    public function getAfter()
+    public function getAfter(): array
     {
         return $this->after;
     }
 
-    /**
-     * @return int
-     */
-    protected function determineMemberId()
+    protected function determineMemberId(): mixed
     {
         if (self::$overrideMemberId !== null) {
             return intval(self::$overrideMemberId);

@@ -19,27 +19,23 @@ use Symfony\Component\Yaml\Yaml;
  */
 class Core
 {
-    protected Config $cConfig;
+    protected readonly Config $cConfig;
 
     /** @var CommonInterface|\GCWorld\Common\Common */
-    protected mixed   $master_common   = null;
-    protected string  $master_namespace = '\\';
-    protected ?string $master_location = null;
-    protected array   $config          = [];
-    protected Logger  $logger;
+    protected readonly CommonInterface $master_common;
+    protected readonly string $master_namespace;
+    protected readonly ?string $master_location;
+    protected readonly array $config;
+    protected Logger $logger; // Not readonly due to setLogger
 
-    protected string  $var_visibility         = 'public';
-    protected bool    $get_set_funcs          = true;
-    protected bool    $json_serialize         = true;
-    protected bool    $use_defaults           = true;
-    protected bool    $defaults_override_null = true;
-    protected bool    $type_hinting           = false;
-    protected bool    $audit                  = true;
+    protected readonly string $var_visibility;
+    protected readonly bool $get_set_funcs;
+    protected readonly bool $json_serialize;
+    protected readonly bool $use_defaults;
+    protected readonly bool $defaults_override_null;
+    protected readonly bool $type_hinting;
+    protected readonly bool $audit;
 
-    /**
-     * @param string $namespace
-     * @param CommonInterface $common
-     */
     public function __construct(string $namespace, CommonInterface $common)
     {
         $this->master_namespace = $namespace;
@@ -48,62 +44,44 @@ class Core
 
         $cConfig       = new Config();
         $this->cConfig = $cConfig;
-        $config        = $cConfig->getConfig();
-        $this->config  = $config;
+        $config        = $cConfig->getConfig(); // Local var, not the property
+        $this->config  = $config; // Assign to readonly property
 
-        if (isset($config['general']['audit']) && !$config['general']['audit']) {
-            $this->audit = false;
-        }
+        // Initialize other readonly properties based on config
+        $this->audit = !(isset($config['general']['audit']) && !$config['general']['audit']);
 
-        if (isset($config['options']['get_set_funcs'])) {
-            if (!$config['options']['get_set_funcs']) {
-                $this->get_set_funcs = false;
-            }
-        }
+        $this->get_set_funcs = !(isset($config['options']['get_set_funcs']) && !$config['options']['get_set_funcs']);
+
+        $var_visibility_default = 'public';
         if (isset($config['options']['var_visibility'])
             && in_array($config['options']['var_visibility'], ['public', 'protected'])
         ) {
-            $this->var_visibility = $config['options']['var_visibility'];
+            $var_visibility_default = $config['options']['var_visibility'];
         }
-        if (isset($config['options']['json_serialize']) && !$config['options']['json_serialize']) {
-            $this->json_serialize = false;
-        }
-        if (isset($config['options']['use_defaults']) && !$config['options']['use_defaults']) {
-            $this->use_defaults = false;
-        }
-        if (isset($config['options']['defaults_override_null']) && !$config['options']['defaults_override_null']) {
-            $this->defaults_override_null = false;
-        }
-        if (isset($config['options']['type_hinting']) && $config['options']['type_hinting']) {
-            $this->type_hinting = true;
-        }
+        $this->var_visibility = $var_visibility_default;
+
+        $this->json_serialize = !(isset($config['options']['json_serialize']) && !$config['options']['json_serialize']);
+        $this->use_defaults   = !(isset($config['options']['use_defaults']) && !$config['options']['use_defaults']);
+        $this->defaults_override_null = !(isset($config['options']['defaults_override_null']) && !$config['options']['defaults_override_null']);
+        $this->type_hinting = (isset($config['options']['type_hinting']) && $config['options']['type_hinting']);
 
         $this->logger = new Logger('orm_core');
     }
 
-    /**
-     * @param Logger $logger
-     * @return void
-     */
-    public function setLogger(Logger $logger)
+    public function setLogger(Logger $logger): void
     {
         $this->logger = $logger;
     }
 
-    /**
-     * @return Logger|null
-     */
-    public function getLogger()
+    public function getLogger(): Logger
     {
         return $this->logger;
     }
 
     /**
-     * @param string $table_name
-     * @return bool
      * @throws Exception
      */
-    public function generate(string $table_name)
+    public function generate(string $table_name): bool
     {
         $this->logger->info('Processing Table: '.$table_name);
 
@@ -557,12 +535,7 @@ NOW;
         return true;
     }
 
-    /**
-     * @param string $table_name
-     *
-     * @return array
-     */
-    public function getKeys(string $table_name)
+    public function getKeys(string $table_name): array
     {
         $sql   = 'SHOW INDEX FROM '.$table_name;
         $query = $this->master_common->getDatabase()->prepare($sql);
@@ -620,13 +593,11 @@ NOW;
     }
 
     /**
-     * @param ClassType    $cClass
+     * @param ClassType $cClass
      * @param PhpNamespace $cNamespace
-     * @param array        $fields
-     *
-     * @return void
+     * @param array<string,mixed> $fields
      */
-    protected function doFactory(ClassType $cClass, PhpNamespace $cNamespace, array $fields)
+    protected function doFactory(ClassType $cClass, PhpNamespace $cNamespace, array $fields): void
     {
         $keys    = $this->getKeys($cClass->getName());
         $uniques = $keys['uniques'];
@@ -758,13 +729,11 @@ NOW;
     }
 
     /**
-     * @param ClassType    $cClass
+     * @param ClassType $cClass
      * @param PhpNamespace $cNamespace
-     * @param array        $fields
-     *
-     * @return void
+     * @param array<string,mixed> $fields
      */
-    protected function doBaseExceptions(ClassType $cClass, PhpNamespace $cNamespace, array $fields)
+    protected function doBaseExceptions(ClassType $cClass, PhpNamespace $cNamespace, array $fields): void
     {
         $columns = [];
         foreach ($fields as $id => $field) {
@@ -849,10 +818,7 @@ NOW;
         $cMethod->setBody($body);
     }
 
-    /**
-     * @return object
-     */
-    public function load()
+    public function load(): object
     {
         $args       = func_get_args();
         $class_name = '\\GCWorld\\ORM\\Generated\\'.$args[0];
@@ -867,10 +833,9 @@ NOW;
     }
 
     /**
-     * @param array $row
-     * @return float|int|mixed
+     * @param array<string,mixed> $row
      */
-    protected function formatDefault(array $row)
+    protected function formatDefault(array $row): mixed
     {
         $default = $row['Default'];
         if ($default === null) {
@@ -892,11 +857,7 @@ NOW;
         return $default;
     }
 
-    /**
-     * @param mixed $type
-     * @return mixed
-     */
-    protected function defaultData($type)
+    protected function defaultData(string $type): mixed
     {
         $type = strtoupper($type);
         $pos  = strpos($type, '(');
@@ -964,11 +925,7 @@ NOW;
         return null;
     }
 
-    /**
-     * @param string $type
-     * @return string
-     */
-    protected function defaultReturn(string $type)
+    protected function defaultReturn(string $type): string
     {
         $type = strtoupper($type);
         $pos  = strpos($type, '(');
@@ -1025,13 +982,9 @@ NOW;
     }
 
     /**
-     * @param ClassType    $cClass
+     * @param ClassType $cClass
      * @param PhpNamespace $cNamespace
-     * @param string       $descDir
-     * @param string       $table_name
-     * @param array        $dbInfo
-     *
-     * @return void
+     * @param array<string,mixed> $dbInfo
      */
     protected function doDescription(
         ClassType $cClass,
@@ -1039,7 +992,7 @@ NOW;
         string $descDir,
         string $table_name,
         array $dbInfo
-    ) {
+    ): void {
         //Create a trait version
         $existing = [];
         $changed  = false;
@@ -1110,11 +1063,7 @@ NOW;
         $cProperty->setValue($existing);
     }
 
-    /**
-     * @param $techDesc
-     * @return int
-     */
-    protected function determineMaxLen($techDesc): int
+    protected function determineMaxLen(string $techDesc): int
     {
         $start = strpos($techDesc, '(');
         if ($start === false) {

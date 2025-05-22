@@ -10,21 +10,16 @@ class CreateAuditTable
     /**
      * @var DatabaseInterface|\GCWorld\Database\Database
      */
-    protected $_source      = null;
+    protected readonly DatabaseInterface $_source;
     /**
      * @var DatabaseInterface|\GCWorld\Database\Database
      */
-    protected $_destination = null;
-    /**
-     * @var array
-     */
-    protected $config       = [];
+    protected readonly DatabaseInterface $_destination;
+
+    protected readonly array $config;
 
     /**
      * CreateAuditTable constructor.
-     *
-     * @param DatabaseInterface $_source
-     * @param DatabaseInterface $_destination
      */
     public function __construct(DatabaseInterface $_source, DatabaseInterface $_destination)
     {
@@ -33,11 +28,7 @@ class CreateAuditTable
         $this->config       = CommonLoader::getCommon()->getConfig('audit');
     }
 
-    /**
-     * @param string $table
-     * @return void
-     */
-    public function buildTable(string $table)
+    public function buildTable(string $table): void
     {
         /// $schema = $this->_source->getWorkingDatabaseName();
         $preLen = \strlen($this->config['prefix']);

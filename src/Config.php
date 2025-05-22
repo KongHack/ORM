@@ -13,8 +13,8 @@ class Config
 {
     public const VERSION = 5;
 
-    protected string $config_file;
-    protected array  $config = [];
+    protected readonly string $config_file;
+    protected readonly array  $config;
 
     /**
      * Config constructor.
@@ -151,19 +151,12 @@ class Config
         $this->config = $config;
     }
 
-    /**
-     * @return array
-     */
-    public function getConfig()
+    public function getConfig(): array
     {
         return $this->config;
     }
 
-    /**
-     * @param array $config
-     * @return void
-     */
-    protected function upgradeConfig(array &$config)
+    protected function upgradeConfig(array &$config): void
     {
         if ($config['version'] < 4) {
             $config['version'] = 4;
@@ -258,11 +251,7 @@ class Config
         }
     }
 
-    /**
-     * @param array $config
-     * @return void
-     */
-    protected function sortConfig(array &$config)
+    protected function sortConfig(array &$config): void
     {
         unset($config['sort']);
         if (isset($config['tables'])) {
@@ -280,18 +269,12 @@ class Config
         }
     }
 
-    /**
-     * @return string
-     */
     public function getConfigFilePath(): string
     {
         return $this->config_file;
     }
 
-    /**
-     * @return array
-     */
-    public static function getDefaultFieldConfig()
+    public static function getDefaultFieldConfig(): array
     {
         return [
             'visibility'    => 'public',

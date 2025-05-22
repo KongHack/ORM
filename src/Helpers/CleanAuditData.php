@@ -10,9 +10,7 @@ class CleanAuditData
     protected array $before = [];
 
     /**
-     * @param array $after
-     *
-     * @return void
+     * @param array<mixed,mixed> $after
      */
     public function setAfter(array $after): void
     {
@@ -20,39 +18,25 @@ class CleanAuditData
     }
 
     /**
-     * @param array $before
-     *
-     * @return void
+     * @param array<mixed,mixed> $before
      */
     public function setBefore(array $before): void
     {
         $this->before = $before;
     }
 
-    /**
-     * @param mixed $key
-     * @param mixed $value
-     *
-     * @return void
-     */
     public function addAfter(mixed $key, mixed $value): void
     {
         $this->after[$key] = $value;
     }
 
-    /**
-     * @param mixed $key
-     * @param mixed $value
-     *
-     * @return void
-     */
     public function addBefore(mixed $key, mixed $value): void
     {
         $this->before[$key] = $value;
     }
 
     /**
-     * @return array
+     * @return array<mixed,mixed>
      */
     public function getAfter(): array
     {
@@ -60,7 +44,7 @@ class CleanAuditData
     }
 
     /**
-     * @return array
+     * @return array<mixed,mixed>
      */
     public function getBefore(): array
     {

@@ -15,47 +15,57 @@ class Builder
 {
     public const BUILDER_VERSION = 3;
 
-    protected $common;
+    protected readonly CommonInterface $common;
 
     /**
      * @var DatabaseInterface|\GCWorld\Database\Database
      */
-    protected $_db;
+    protected readonly DatabaseInterface $_db;
 
     /**
-     * @var DatabaseInterface|\GCWorld\Database\Database
+     * @var DatabaseInterface|\GCWorld\Database\Database|null
      */
-    protected $_audit;
+    protected readonly ?DatabaseInterface $_audit;
 
-    protected array   $coreConfig  = [];
-    protected array   $auditConfig = [];
-    protected bool    $doAudit     = false;
-    protected ?string $auditDB     = null;
+    protected readonly array $coreConfig;
+    protected readonly array $auditConfig;
+    protected readonly bool $doAudit;
+    protected readonly ?string $auditDB;
 
     /**
      * Builder constructor.
-     *
-     * @param CommonInterface $common
      */
     public function __construct(CommonInterface $common)
     {
-        $cConfig          = new Config();
-        $this->coreConfig = $cConfig->getConfig();
-        $this->common     = $common;
-        $this->_db        = $common->getDatabase();
+        $cConfig        = new Config();
+        $this->coreConfig = $cConfig->getConfig(); // readonly
+        $this->common     = $common; // readonly
+        $this->_db        = $common->getDatabase(); // readonly
+
+        $auditConfigDefault = [];
+        $auditDefault       = null;
+        $auditDBDefault     = null;
+        $doAuditDefault     = false;
 
         if (!isset($this->coreConfig['general']['audit']) || $this->coreConfig['general']['audit']) {
-            $this->auditConfig = $common->getConfig('audit');
-            if (isset($this->auditConfig['enable']) && $this->auditConfig['enable']) {
+            $auditConfigDefault = $common->getConfig('audit');
+            if (isset($auditConfigDefault['enable']) && $auditConfigDefault['enable']) {
                 try {
-                    $this->_audit  = $common->getDatabase($this->auditConfig['connection'] ?? '');
-                    $this->auditDB = $this->auditConfig['database'] ?? null;
-                    $this->doAudit = true;
+                    $auditDefault   = $common->getDatabase($auditConfigDefault['connection'] ?? '');
+                    $auditDBDefault = $auditConfigDefault['database'] ?? null;
+                    $doAuditDefault = true;
                 } catch (Exception) {
-                    // Nothing
+                    // Reset to defaults if an exception occurs
+                    $auditDefault   = null;
+                    $auditDBDefault = null;
+                    $doAuditDefault = false;
                 }
             }
         }
+        $this->auditConfig = $auditConfigDefault; // readonly
+        $this->_audit      = $auditDefault;       // readonly
+        $this->auditDB     = $auditDBDefault;     // readonly
+        $this->doAudit     = $doAuditDefault;     // readonly
     }
 
     /**
@@ -256,10 +266,7 @@ class Builder
         }
     }
 
-    /**
-     * @return string
-     */
-    public static function getDataModelDirectory()
+    public static function getDataModelDirectory(): string
     {
         $base  = \rtrim(__DIR__, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR;
         $base .= 'datamodel'.DIRECTORY_SEPARATOR.'audit'.DIRECTORY_SEPARATOR;

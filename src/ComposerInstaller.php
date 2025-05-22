@@ -12,11 +12,7 @@ class ComposerInstaller
 {
     const CONFIG_FILE_NAME = 'GCWorld_ORM.yml';
 
-    /**
-     * @param \Composer\Script\Event $event
-     * @return bool
-     */
-    public static function setupConfig(Event $event)
+    public static function setupConfig(Event $event): bool
     {
         $vendorDir = $event->getComposer()->getConfig()->get('vendor-dir');
         $myDir     = dirname(__FILE__);
