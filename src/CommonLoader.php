@@ -12,22 +12,20 @@ use GCWorld\Interfaces\CommonInterface;
 class CommonLoader
 {
     /** @var \GCWorld\Common\Common|CommonInterface|null */
-    protected static $common = null;
+    protected static ?CommonInterface $common = null;
 
     /**
      * Sets the common object
-     * @param CommonInterface $common
-     * @return void
      */
-    public static function setCommonObject(CommonInterface $common)
+    public static function setCommonObject(CommonInterface $common): void
     {
         self::$common = $common;
     }
 
     /**
-     * @return \GCWorld\Common\Common|CommonInterface
+     * @return CommonInterface
      */
-    public static function getCommon()
+    public static function getCommon(): CommonInterface
     {
         if (self::$common == null) {
             $cConfig = new Config();

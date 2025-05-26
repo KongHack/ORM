@@ -11,21 +11,13 @@ use Monolog\Logger;
  */
 class ORMLogger
 {
-    protected static $logger = null;
+    protected static ?Logger $logger = null;
 
-    /**
-     * @param Logger $logger
-     *
-     * @return void
-     */
-    public static function setLogger(Logger $logger)
+    public static function setLogger(Logger $logger): void
     {
         self::$logger = $logger;
     }
 
-    /**
-     * @return Logger
-     */
     public static function getLogger(): Logger
     {
         if (self::$logger === null) {

@@ -9,30 +9,22 @@ use GCWorld\ORM\Interfaces\FieldException;
  */
 class ModelImmutableException extends Exception implements FieldException
 {
-    protected string $field_name = '';
+    protected readonly string $field_name;
 
     /**
-     * ModelRequiredFieldException constructor.
-     *
-     * @param string         $field_name
-     * @param string         $message
-     * @param int            $code
-     * @param Exception|null $previous
+     * ModelImmutableException constructor.
      */
     public function __construct(string $field_name, string $message = '', int $code = 0, ?Exception $previous = null)
     {
-        $this->field_name = $field_name;
+        $this->field_name = $field_name; // Initialize readonly property
 
-        if (empty($message)) {
-            $message = \ucwords(\implode(' ', \explode('_', $field_name))).' is an immutable field and cannot be changed';
+        $finalMessage = $message;
+        if (empty($finalMessage)) {
+            $finalMessage = \ucwords(\implode(' ', \explode('_', $this->field_name))).' is an immutable field and cannot be changed';
         }
-
-        parent::__construct($message, $code, $previous);
+        parent::__construct($finalMessage, $code, $previous);
     }
 
-    /**
-     * @return string
-     */
     public function getFieldName(): string
     {
         return $this->field_name;

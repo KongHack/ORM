@@ -11,25 +11,23 @@ use GCWorld\Interfaces\User;
 class UserLoader
 {
     /**
-     * @var User
+     * @var User|null
      */
-    private static $user = null;
+    private static ?User $user = null;
 
     /**
      * Sets the user object
-     * @param mixed $user
-     * @return void
      */
-    public static function setUserObject($user)
+    public static function setUserObject(User $user): void
     {
         self::$user = $user;
     }
 
     /**
-     * @return mixed
+     * @return User
      * @throws Exception
      */
-    public static function getUser()
+    public static function getUser(): User
     {
         if (self::$user == null) {
             // Attempt loading from a config.ini

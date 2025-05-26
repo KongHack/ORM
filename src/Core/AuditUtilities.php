@@ -12,12 +12,10 @@ use Ramsey\Uuid\Uuid;
 class AuditUtilities
 {
     /**
-     * @param string $table
-     * @param array  $after
-     * @param array  $before
-     * @return CleanAuditData
+     * @param array<string,mixed> $after
+     * @param array<string,mixed> $before
      */
-    public static function cleanData(string $table, array $after, array $before)
+    public static function cleanData(string $table, array $after, array $before): CleanAuditData
     {
         $cConfig = new Config();
         $config  = $cConfig->getConfig()['tables'] ?? [];
@@ -81,11 +79,7 @@ class AuditUtilities
         return $cData;
     }
 
-    /**
-     * @param mixed $str
-     * @return bool
-     */
-    public static function isBinary($str)
+    public static function isBinary(mixed $str): bool
     {
         if (!is_scalar($str)) {
             return true;

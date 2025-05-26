@@ -7,29 +7,17 @@ namespace GCWorld\ORM;
  */
 class FieldName
 {
-    /**
-     * @param string $field
-     * @return string
-     */
-    public static function getterName(string $field)
+    public static function getterName(string $field): string
     {
         return 'get'.self::nameConversion($field);
     }
 
-    /**
-     * @param string $field
-     * @return string
-     */
-    public static function setterName(string $field)
+    public static function setterName(string $field): string
     {
         return 'set'.self::nameConversion($field);
     }
 
-    /**
-     * @param string $name
-     * @return mixed
-     */
-    public static function nameConversion(string $name)
+    public static function nameConversion(string $name): string
     {
         return str_replace('_', '', ucwords($name, '_'));
     }

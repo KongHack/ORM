@@ -9,30 +9,24 @@ use GCWorld\ORM\Abstracts\DirectSingle;
  */
 abstract class DirectDBClass extends DirectSingle
 {
-    /**
-     * @param string $key
-     * @return mixed
-     */
-    public function get(string $key)
+    public function get(string $key): mixed
     {
         return parent::get($key);
     }
 
     /**
-     * @param array $fields
-     * @return array
+     * @param string[] $fields
+     * @return array<string,mixed>
      */
-    public function getArray(array $fields)
+    public function getArray(array $fields): array
     {
         return parent::getArray($fields);
     }
 
     /**
-     * @param string $key
-     * @param mixed  $val
-     * @return $this
+     * @return static
      */
-    public function set(string $key, $val)
+    public function set(string $key, mixed $val): static
     {
         parent::set($key, $val);
 
@@ -40,10 +34,10 @@ abstract class DirectDBClass extends DirectSingle
     }
 
     /**
-     * @param array $data
-     * @return $this
+     * @param array<string,mixed> $data
+     * @return static
      */
-    public function setArray(array $data)
+    public function setArray(array $data): static
     {
         parent::setArray($data);
 

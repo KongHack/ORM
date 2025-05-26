@@ -9,19 +9,12 @@ use GCWorld\ORM\Interfaces\FieldException;
  */
 class ModelInvalidOptionException extends Exception implements FieldException
 {
-    protected $chosen;
-    protected $possible;
-    protected $field_name;
+    protected readonly mixed $chosen;
+    protected readonly array $possible;
+    protected readonly string $field_name;
 
     /**
      * ModelInvalidOptionException constructor.
-     *
-     * @param string         $field_name
-     * @param mixed          $chosen
-     * @param array          $possible
-     * @param string         $message
-     * @param int            $code
-     * @param Exception|null $previous
      */
     public function __construct(
         string $field_name,
@@ -35,33 +28,24 @@ class ModelInvalidOptionException extends Exception implements FieldException
         $this->chosen     = $chosen;
         $this->possible   = $possible;
 
-        if (empty($message)) {
-            $message = 'Invalid Option ('.$this->chosen.') Selected in Field ('.
-                       \ucwords(\implode(' ', \explode('_', $field_name))).')';
+        $finalMessage = $message;
+        if (empty($finalMessage)) {
+            $finalMessage = 'Invalid Option ('.$this->chosen.') Selected in Field ('.
+                       \ucwords(\implode(' ', \explode('_', $this->field_name))).')';
         }
-
-        parent::__construct($message, $code, $previous);
+        parent::__construct($finalMessage, $code, $previous);
     }
 
-    /**
-     * @return string|null
-     */
-    public function getChosen(): ?string
+    public function getChosen(): mixed
     {
         return $this->chosen;
     }
 
-    /**
-     * @return array|null
-     */
-    public function getPossible(): ?array
+    public function getPossible(): array
     {
         return $this->possible;
     }
 
-    /**
-     * @return string
-     */
     public function getFieldName(): string
     {
         return $this->field_name;
