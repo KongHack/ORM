@@ -5,6 +5,16 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [6.4.10](https://github.com/KongHack/ORM/releases/tag/6.4.10)
+- @GameCharmer MERGE!
+
+
+
+## [6.4.9](https://github.com/KongHack/ORM/releases/tag/6.4.9)
+- @GameCharmer BROKEN
+
+
+
 ## [6.4.8](https://github.com/KongHack/ORM/releases/tag/6.4.8)
 - @GameCharmer More PHP 8.4 Cleanup
 
