@@ -2,6 +2,8 @@
 namespace GCWorld\ORM\Abstracts;
 
 use Exception;
+use GCWorld\Common\Common;
+use GCWorld\Database\Database;
 use GCWorld\Interfaces\CommonInterface;
 use GCWorld\Interfaces\Database\DatabaseInterface;
 use GCWorld\ORM\CommonLoader;
@@ -21,100 +23,83 @@ use Redis;
 abstract class DirectSingle implements DirectSingleInterface
 {
     /**
-     * Here for reference, will be created in child objects automatically.
-     *
-     * @var array
+     * Here for reference. Will be created in child objects automatically.
      */
-    public static $dbInfo = [];
-    /**
-     * @var \GCWorld\Common\Common|CommonInterface
-     */
-    protected $_common;
+    public static array $dbInfo = [];
+
+    protected Common|CommonInterface $_common;
+
     /**
      * Set this in the event your class needs a non-standard DB.
      *
      * @var string|null
      */
-    protected $_dbName;
+    protected ?string $_dbName;
 
-    /**
-     * @var \GCWorld\Database\Database|DatabaseInterface
-     */
-    protected ?DatabaseInterface $_db = null;
+    protected DatabaseInterface|Database|null $_db = null;
 
     /**
      * Set this in the event your class needs a non-standard Cache.
      *
      * @var string|null
      */
-    protected $_cacheName;
+    protected ?string $_cacheName;
 
     /**
      * @var bool
      *           Set to false if you want to omit this object from your memory cache all together
      */
-    protected $_canCache = true;
+    protected bool $_canCache = true;
 
     /**
      * @var int
      *          TTL for cache items.  -1 = disabled
      */
-    protected $_cacheTTL = 60;
+    protected int $_cacheTTL = 60;
 
     /**
      * @var bool
      *           Set this to false in your class when you don't want to auto re-cache after a purge
      */
-    protected $_canCacheAfterPurge = true;
+    protected bool $_canCacheAfterPurge = true;
 
     /**
      * @var Redis|null
      */
-    protected $_cache;
+    protected ?Redis $_cache;
 
     /**
      * @var array
      */
-    protected $_changed = [];
+    protected array $_changed = [];
 
     /**
      * @var array
      */
-    protected $_lastChanged = [];
+    protected array $_lastChanged = [];
 
     /**
      * Set this to false in your class when you don't want to log changes.
-     *
-     * @var bool
      */
-    protected $_audit = true;
+    protected bool $_audit = true;
 
-    /**
-     * @var ?string
-     */
     protected ?string $_auditHandler = null;
 
     /**
      * The last audit object will be set to this upon audit completion.
-     *
-     * @var AuditInterface|null
      */
-    protected $_lastAuditObject;
+    protected ?AuditInterface $_lastAuditObject;
 
     /**
      * Setting this to true will enable insert on duplicate key update features.
      * This also includes not throwing an error on 0 id construct.
-     *
-     * @var bool
      */
-    protected $_canInsert = false;
+    protected bool $_canInsert = false;
 
     /**
      * Used for reference and to reduce constant check calls.
-     *
-     * @var string
      */
-    protected $myName;
+    protected string $myName;
 
     /**
      * @param mixed|null $primary_id
@@ -144,7 +129,6 @@ abstract class DirectSingle implements DirectSingleInterface
 
         if ($cachable
             && !empty($primary_id)
-            && null !== $primary_id
             && 0 !== $primary_id
             && '' !== $primary_id
         ) {
@@ -154,7 +138,7 @@ abstract class DirectSingle implements DirectSingleInterface
                 'hash' => 'key_'.$primary_id,
                 'blob' => $blob,
             ]);
-            if (false !== $blob && null !== $blob && !empty($blob)) {
+            if (!empty($blob)) {
                 $cLogger->info('ORM: DS: '.$table_name.': Cache1: Blob is not false, not null, and not empty');
 
                 try {
@@ -170,7 +154,7 @@ abstract class DirectSingle implements DirectSingleInterface
                     $data = null;
                 }
 
-                if (null !== $data && \is_array($data) && !empty($data)) {
+                if (!empty($data) && \is_array($data)) {
                     $cLogger->info('ORM: DS: '.$table_name.': Cache1: Data is Good');
                     unset($data['ORM_TIME']); // This is our field
 
@@ -210,7 +194,6 @@ abstract class DirectSingle implements DirectSingleInterface
 
         $cLogger->info('ORM: DS: Cache1: '.$table_name.': Exiting Routine');
         if (!empty($primary_id)
-            && null !== $primary_id
             && 0 !== $primary_id
             && '' !== $primary_id
         ) {
@@ -459,7 +442,7 @@ abstract class DirectSingle implements DirectSingleInterface
      *
      * @return mixed
      */
-    protected function get(string $key)
+    protected function get(string $key): mixed
     {
         return $this->{$key};
     }
@@ -469,7 +452,7 @@ abstract class DirectSingle implements DirectSingleInterface
      *
      * @return array
      */
-    protected function getArray(array $fields)
+    protected function getArray(array $fields): array
     {
         $return = [];
         foreach ($fields as $k) {
@@ -485,7 +468,7 @@ abstract class DirectSingle implements DirectSingleInterface
      *
      * @return static
      */
-    protected function set(string $key, $val)
+    protected function set(string $key, mixed $val): static
     {
         if ($this->{$key} !== $val) {
             $this->{$key} = $val;
@@ -502,7 +485,7 @@ abstract class DirectSingle implements DirectSingleInterface
      *
      * @return static
      */
-    protected function setArray(array $data)
+    protected function setArray(array $data): static
     {
         foreach ($data as $k => $v) {
             $this->set($k, $v);
@@ -514,7 +497,7 @@ abstract class DirectSingle implements DirectSingleInterface
     /**
      * @return void
      */
-    protected function setCacheData()
+    protected function setCacheData(): void
     {
         // Caching Disabled
         if (!$this->_canCache || $this->_cacheTTL < 0) {
