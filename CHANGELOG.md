@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [6.4.14](https://github.com/KongHack/ORM/releases/tag/6.4.14)
+- @GameCharmer Patch getKeys method in Core
+
+
+
 ## [6.4.13](https://github.com/KongHack/ORM/releases/tag/6.4.13)
 - @GameCharmer Testing auto-release
 
