@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [6.4.10](https://github.com/KongHack/ORM/releases/tag/6.4.11)
+- @GameCharmer Attempt alternate config files, sub-namespaces, and alternative databases
+
+
+
 ## [6.4.10](https://github.com/KongHack/ORM/releases/tag/6.4.10)
 - @GameCharmer MERGE!
 

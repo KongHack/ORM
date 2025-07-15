@@ -4,7 +4,9 @@ general:
     user: \Your\Fully\Qualified\Class\Name\Here
     audit: true
     trust_cache: false
-    audit_handler:
+    audit_handler: '\\Your\\Fully\\Qualified\\Class\\Name\\Here (or omit entirely)'
+    sub_namespace: ''
+    database_name: 'default'
 options:
     get_set_funcs: true
     var_visibility: public

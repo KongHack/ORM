@@ -1,13 +1,11 @@
 <?php
-
 namespace GCWorld\ORM;
 
 use Exception;
 use Symfony\Component\Yaml\Yaml;
 
 /**
- * Class Config
- * @package GCWorld\ORM
+ * Class Config.
  */
 class Config
 {
@@ -17,29 +15,32 @@ class Config
     protected array  $config = [];
 
     /**
-     * Config constructor.
+     * @param string|null $file
+     *
      * @throws Exception
      */
-    public function __construct()
+    public function __construct(?string $file = null)
     {
         // Test for yml.  If not found, test for ini
-        $file  = rtrim(dirname(__FILE__), DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR;
-        $file .= 'config'.DIRECTORY_SEPARATOR.'config.yml';
+        if (empty($file)) {
+            $file  = \rtrim(\dirname(__FILE__), DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR;
+            $file .= 'config'.DIRECTORY_SEPARATOR.'config.yml';
+        }
 
         $usingCache = false;
         $writeCache = true;
         $config     = [];
-        $cache      = str_replace('.yml', '.php', $file);
-        if (file_exists($cache)) {
-            if (filemtime($file) < filemtime($cache)) {
+        $cache      = \str_replace('.yml', '.php', $file);
+        if (\file_exists($cache)) {
+            if (\filemtime($file) < \filemtime($cache)) {
                 $writeCache = false;
                 $config     = require $cache;
                 $usingCache = true;
             }
         }
 
-        if (empty($config) || !is_array($config)) {
-            if (!file_exists($file)) {
+        if (empty($config) || !\is_array($config)) {
+            if (!\file_exists($file)) {
                 throw new Exception('ORM Config File Not Found');
             }
             $config = Yaml::parseFile($file);
@@ -47,9 +48,9 @@ class Config
 
         if (isset($config['config_path'])) {
             $file  = __DIR__.DIRECTORY_SEPARATOR.$config['config_path'];
-            $cache = str_replace('.yml', '.php', $file);
-            if (file_exists($cache)
-                && filemtime($file) < filemtime($cache)
+            $cache = \str_replace('.yml', '.php', $file);
+            if (\file_exists($cache)
+                && \filemtime($file) < \filemtime($cache)
             ) {
                 $writeCache = false;
                 $config     = require $cache;
@@ -60,18 +61,19 @@ class Config
         }
 
         if (empty($config)) {
-            throw new \Exception('ORM Config Empty');
+            throw new Exception('ORM Config Empty');
         }
 
         $this->config_file = $file;
 
         // Trust model where the end user is deleting the cache file automatically
         if ($usingCache
-            && isset($config['general'])
-            && isset($config['general']['trust_cache'])
+            && isset($config['general'], $config['general']['trust_cache'])
+
             && $config['general']['trust_cache']
         ) {
             $this->config = $config;
+
             return;
         }
 
@@ -86,7 +88,7 @@ class Config
         if (isset($config['sort']) && $config['sort']) {
             $this->sortConfig($config);
             $new = Yaml::dump($config, 6);
-            file_put_contents($file, $new);
+            \file_put_contents($file, $new);
         }
 
         if (!isset($config['general'])) {
@@ -116,23 +118,26 @@ class Config
             && !empty($config['table_dir'])
         ) {
             $writeCache = true;
-            $tmp        = explode(DIRECTORY_SEPARATOR, $file);
-            array_pop($tmp);
-            $startPath = implode(DIRECTORY_SEPARATOR, $tmp).DIRECTORY_SEPARATOR;
+            $tmp        = \explode(DIRECTORY_SEPARATOR, $file);
+            \array_pop($tmp);
+            $startPath = \implode(DIRECTORY_SEPARATOR, $tmp).DIRECTORY_SEPARATOR;
             $tableDir  = $startPath.$config['table_dir'];
-            if (!is_dir($tableDir)) {
+            if (!\is_dir($tableDir)) {
                 throw new Exception('Table Dir is defined but cannot be found: ', $tableDir);
             }
 
             if (!isset($config['tables'])) {
                 $config['tables'] = [];
             }
+            if (!isset($config['general']['database_name'])) {
+                $config['general']['database_name'] = 'default'; // 'default' is used in Common
+            }
 
-            $tableFiles = glob($tableDir.'*.yml');
+            $tableFiles = \glob($tableDir.'*.yml');
             foreach ($tableFiles as $tableFile) {
-                $tmp                          = explode(DIRECTORY_SEPARATOR, $tableFile);
-                $fileName                     = array_pop($tmp);
-                $tableName                    = substr($fileName, 0, -4);
+                $tmp                          = \explode(DIRECTORY_SEPARATOR, $tableFile);
+                $fileName                     = \array_pop($tmp);
+                $tableName                    = \substr($fileName, 0, -4);
                 $config['tables'][$tableName] = Yaml::parseFile($tableFile);
             }
 
@@ -142,9 +147,9 @@ class Config
         }
 
         if ($writeCache) {
-            file_put_contents(
+            \file_put_contents(
                 $cache,
-                '<?php' . PHP_EOL . PHP_EOL . 'return ' . var_export($config, true) . ';' . PHP_EOL . PHP_EOL
+                '<?php'.PHP_EOL.PHP_EOL.'return '.\var_export($config, true).';'.PHP_EOL.PHP_EOL
             );
         }
 
@@ -154,16 +159,40 @@ class Config
     /**
      * @return array
      */
-    public function getConfig()
+    public function getConfig(): array
     {
         return $this->config;
     }
 
     /**
+     * @return string
+     */
+    public function getConfigFilePath(): string
+    {
+        return $this->config_file;
+    }
+
+    /**
+     * @return array
+     */
+    public static function getDefaultFieldConfig(): array
+    {
+        return [
+            'visibility'    => 'public',
+            'type_hint'     => '',
+            'audit_ignore'  => false,
+            'uuid_field'    => false,
+            'getter_ignore' => false,
+            'setter_ignore' => false,
+        ];
+    }
+
+    /**
      * @param array $config
+     *
      * @return void
      */
-    protected function upgradeConfig(array &$config)
+    protected function upgradeConfig(array &$config): void
     {
         if ($config['version'] < 4) {
             $config['version'] = 4;
@@ -226,7 +255,7 @@ class Config
                 }
 
                 $fConfig = [];
-                $fields  = array_unique($fields);
+                $fields  = \array_unique($fields);
                 foreach ($fields as $field) {
                     $fConfig[$field] = [];
                     if (isset($visibility[$field])) {
@@ -235,21 +264,21 @@ class Config
                     if (isset($type_hints[$field])) {
                         $fConfig[$field]['type_hint'] = $type_hints[$field];
                     }
-                    if (in_array($field, $audit_ignore_fields)) {
+                    if (\in_array($field, $audit_ignore_fields)) {
                         $fConfig[$field]['audit_ignore'] = true;
                     }
-                    if (in_array($field, $getter_ignore_fields)) {
+                    if (\in_array($field, $getter_ignore_fields)) {
                         $fConfig[$field]['getter_ignore'] = true;
                     }
-                    if (in_array($field, $setter_ignore_fields)) {
+                    if (\in_array($field, $setter_ignore_fields)) {
                         $fConfig[$field]['setter_ignore'] = true;
                     }
-                    if (in_array($field, $uuid_fields)) {
+                    if (\in_array($field, $uuid_fields)) {
                         $fConfig[$field]['uuid_fields'] = true;
                     }
                 }
 
-                if (count($fConfig) > 0) {
+                if (\count($fConfig) > 0) {
                     $table['fields'] = $fConfig;
                 } else {
                     unset($table['fields']);
@@ -260,46 +289,24 @@ class Config
 
     /**
      * @param array $config
+     *
      * @return void
      */
-    protected function sortConfig(array &$config)
+    protected function sortConfig(array &$config): void
     {
         unset($config['sort']);
         if (isset($config['tables'])) {
-            ksort($config['tables']);
+            \ksort($config['tables']);
         }
         foreach ($config['tables'] as &$table) {
-            if (isset($table['fields']) && is_array($table['fields'])) {
-                ksort($table['fields']);
+            if (isset($table['fields']) && \is_array($table['fields'])) {
+                \ksort($table['fields']);
                 foreach ($table['fields'] as &$field) {
-                    if (is_array($field)) {
-                        ksort($field);
+                    if (\is_array($field)) {
+                        \ksort($field);
                     }
                 }
             }
         }
-    }
-
-    /**
-     * @return string
-     */
-    public function getConfigFilePath(): string
-    {
-        return $this->config_file;
-    }
-
-    /**
-     * @return array
-     */
-    public static function getDefaultFieldConfig()
-    {
-        return [
-            'visibility'    => 'public',
-            'type_hint'     => '',
-            'audit_ignore'  => false,
-            'uuid_field'    => false,
-            'getter_ignore' => false,
-            'setter_ignore' => false,
-        ];
     }
 }

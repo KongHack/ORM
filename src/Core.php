@@ -1,32 +1,33 @@
 <?php
-
 namespace GCWorld\ORM;
 
+use BackedEnum;
+use Exception;
 use GCWorld\Interfaces\CommonInterface;
+use GCWorld\Interfaces\Database\DatabaseInterface;
 use Monolog\Logger;
 use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\PhpNamespace;
 use Nette\PhpGenerator\PsrPrinter;
-use Nette\PhpGenerator\TraitType;
-use ReflectionClass;
 use PDO;
-use Exception;
+use ReflectionClass;
 use Symfony\Component\Yaml\Yaml;
 
 /**
- * Class Core
- * @package GCWorld\ORM
+ * Class Core.
  */
 class Core
 {
     protected Config $cConfig;
 
     /** @var CommonInterface|\GCWorld\Common\Common */
-    protected mixed   $master_common   = null;
+    protected mixed   $master_common    = null;
     protected string  $master_namespace = '\\';
-    protected ?string $master_location = null;
-    protected array   $config          = [];
+    protected ?string $master_location  = null;
+    protected ?string $sub_namespace    = null;
+    protected array   $config           = [];
     protected Logger  $logger;
+    protected DatabaseInterface $_db;
 
     protected string  $var_visibility         = 'public';
     protected bool    $get_set_funcs          = true;
@@ -37,22 +38,27 @@ class Core
     protected bool    $audit                  = true;
 
     /**
-     * @param string $namespace
+     * @param string          $namespace
      * @param CommonInterface $common
+     * @param Config|null     $cConfig
      */
-    public function __construct(string $namespace, CommonInterface $common)
+    public function __construct(string $namespace, CommonInterface $common, ?Config $cConfig = new Config())
     {
         $this->master_namespace = $namespace;
         $this->master_common    = $common;
         $this->master_location  = __DIR__;
 
-        $cConfig       = new Config();
         $this->cConfig = $cConfig;
         $config        = $cConfig->getConfig();
         $this->config  = $config;
 
+        $this->_db = $common->getDatabase($config['general']['database_name'] ?? 'default');
+
         if (isset($config['general']['audit']) && !$config['general']['audit']) {
             $this->audit = false;
+        }
+        if (!empty($config['general']['sub_namespace'])) {
+            $this->sub_namespace = $config['general']['sub_namespace'];
         }
 
         if (isset($config['options']['get_set_funcs'])) {
@@ -60,11 +66,13 @@ class Core
                 $this->get_set_funcs = false;
             }
         }
+
         if (isset($config['options']['var_visibility'])
-            && in_array($config['options']['var_visibility'], ['public', 'protected'])
+            && \in_array($config['options']['var_visibility'], ['public', 'protected'])
         ) {
             $this->var_visibility = $config['options']['var_visibility'];
         }
+
         if (isset($config['options']['json_serialize']) && !$config['options']['json_serialize']) {
             $this->json_serialize = false;
         }
@@ -83,9 +91,10 @@ class Core
 
     /**
      * @param Logger $logger
+     *
      * @return void
      */
-    public function setLogger(Logger $logger)
+    public function setLogger(Logger $logger): void
     {
         $this->logger = $logger;
     }
@@ -93,22 +102,24 @@ class Core
     /**
      * @return Logger|null
      */
-    public function getLogger()
+    public function getLogger(): ?Logger
     {
         return $this->logger;
     }
 
     /**
      * @param string $table_name
-     * @return bool
+     *
      * @throws Exception
+     *
+     * @return bool
      */
-    public function generate(string $table_name)
+    public function generate(string $table_name): bool
     {
         $this->logger->info('Processing Table: '.$table_name);
 
         $sql   = 'SHOW FULL COLUMNS FROM '.$table_name;
-        $query = $this->master_common->getDatabase()->prepare($sql);
+        $query = $this->_db->prepare($sql);
         $query->execute();
         $fields = $query->fetchAll(PDO::FETCH_ASSOC);
         unset($query);
@@ -117,10 +128,10 @@ class Core
         $this->logger->debug('Found Fields', $fields);
         $this->logger->debug('Found Config', $config);
 
-        $config['constructor']   = $config['constructor'] ?? 'public';
-        $config['audit_ignore']  = $config['audit_ignore'] ?? false;
-        $config['fields']        = $config['fields'] ?? [];
-        $config['cache_ttl']     = $config['cache_ttl'] ?? 0;
+        $config['constructor'] ??= 'public';
+        $config['audit_ignore'] ??= false;
+        $config['fields'] ??= [];
+        $config['cache_ttl'] ??= 0;
         $config['audit_handler'] = ($config['audit_handler'] ?? ($this->config['general']['audit_handler'] ?? null));
 
         $save_hook      = isset($config['save_hook']);
@@ -130,7 +141,7 @@ class Core
         }
 
         $cache_after_purge = $config['cache_after_purge'] ?? null;
-        if ($cache_after_purge === null) {
+        if (null === $cache_after_purge) {
             $cache_after_purge = $this->config['options']['cache_after_purge'] ?? false;
         }
 
@@ -140,9 +151,15 @@ class Core
         $max_var_name   = 0;
         $max_var_type   = 0;
 
-        $path = $this->master_location.DIRECTORY_SEPARATOR.'Generated/';
-        if (!is_dir($path)) {
-            mkdir($path, 0755, true);
+        $path = $this->master_location.DIRECTORY_SEPARATOR.'Generated'.DIRECTORY_SEPARATOR;
+        if (!\is_dir($path)) {
+            \mkdir($path, 0o755, true);
+        }
+        if (!empty($this->sub_namespace)) {
+            $path .= $this->sub_namespace.DIRECTORY_SEPARATOR;
+            if (!\is_dir($path)) {
+                \mkdir($path, 0o755, true);
+            }
         }
 
         $default = Config::getDefaultFieldConfig();
@@ -150,22 +167,23 @@ class Core
             $this->logger->debug('Processing Field', $row);
 
             // Do not include virtual fields in the system
-            if (stripos($row['Extra'], 'VIRTUAL') !== false) {
+            if (false !== \stripos($row['Extra'], 'VIRTUAL')) {
                 $this->logger->debug('Unsetting Virtual: '.$row['Field']);
                 unset($fields[$i]);
+
                 continue;
             }
 
-            if (stristr($row['Key'], 'PRI')) {
+            if (\stristr($row['Key'], 'PRI')) {
                 $primaries[] = $row['Field'];
             }
-            if (strlen($row['Field']) > $max_var_name) {
-                $max_var_name = strlen($row['Field']);
+            if (\strlen($row['Field']) > $max_var_name) {
+                $max_var_name = \strlen($row['Field']);
             }
-            if (strlen($row['Type']) > $max_var_type) {
-                $max_var_type = strlen($row['Type']);
+            if (\strlen($row['Type']) > $max_var_type) {
+                $max_var_type = \strlen($row['Type']);
             }
-            if (stristr($row['Extra'], 'auto_increment')) {
+            if (\stristr($row['Extra'], 'auto_increment')) {
                 $auto_increment = true;
             }
             if (!isset($config['fields'][$row['Field']])) {
@@ -183,8 +201,8 @@ class Core
                 || !$config['fields'][$row['Field']]['uuid_field']
             ) {
                 $config['fields'][$row['Field']]['uuid_field'] = (
-                    stripos($row['Field'], '_uuid') !== false
-                    && strtolower($row['Type']) == 'binary(16)'
+                    false !== \stripos($row['Field'], '_uuid')
+                    && 'binary(16)' == \strtolower($row['Type'])
                 );
             }
 
@@ -197,24 +215,29 @@ class Core
 
             if (isset($config['fields'][$row['Field']]['type_hint'])
                 && !empty($config['fields'][$row['Field']]['type_hint'])
-                && str_contains($config['fields'][$row['Field']]['type_hint'], '\\')
-                && enum_exists($config['fields'][$row['Field']]['type_hint'])
+                && \str_contains($config['fields'][$row['Field']]['type_hint'], '\\')
+                && \enum_exists($config['fields'][$row['Field']]['type_hint'])
             ) {
                 $cReflection = new ReflectionClass($config['fields'][$row['Field']]['type_hint']);
-                $config['fields'][$row['Field']]['backed_enum'] = $cReflection->implementsInterface(\BackedEnum::class);
+                $config['fields'][$row['Field']]['backed_enum'] = $cReflection->implementsInterface(BackedEnum::class);
             }
         }
 
         $this->logger->debug('Discovered Primaries', $primaries);
 
-        if (count($primaries) !== 1) {
+        if (1 !== \count($primaries)) {
             return false;
         }
 
         $this->logger->debug('Generating Code');
 
+        $baseNamespace = 'GCWorld\\ORM\\Generated';
+        if (!empty($this->sub_namespace)) {
+            $baseNamespace .= '\\'.$this->sub_namespace;
+        }
+
         $filename   = $table_name.'.php';
-        $cNamespace = new PhpNamespace('GCWorld\\ORM\\Generated');
+        $cNamespace = new PhpNamespace($baseNamespace);
         $cClass     = $cNamespace->addClass($table_name);
         $cClass->setAbstract(true);
         $cClass->addConstant('CLASS_TABLE', $table_name)->setPublic();
@@ -267,8 +290,8 @@ class Core
         $cProperty->setNullable(true);
 
         foreach ($fields as $i => $row) {
-            $type = (stristr($row['Type'], 'int') ? 'int   ' : 'string');
-            if ($row['Null'] == 'YES') {
+            $type = (\stristr($row['Type'], 'int') ? 'int   ' : 'string');
+            if ('YES' == $row['Null']) {
                 $type .= '|null';
             }
 
@@ -286,7 +309,7 @@ class Core
         $dbInfo = [];
         $enums  = [];
         foreach ($fields as $i => $row) {
-            $dbInfo[$row['Field']] = $row['Type'].($row['Comment'] != '' ? ' - '.$row['Comment'] : '');
+            $dbInfo[$row['Field']] = $row['Type'].('' != $row['Comment'] ? ' - '.$row['Comment'] : '');
         }
         $cProperty = $cClass->addProperty('dbInfo', $dbInfo);
         $cProperty->setStatic(true);
@@ -327,7 +350,7 @@ class Core
                 $name        = FieldName::nameConversion($row['Field']);
                 $return_type = 'mixed';
 
-                if ($fieldConfig['type_hint'] != '') {
+                if ('' != $fieldConfig['type_hint']) {
                     $return_type = $fieldConfig['type_hint'];
                 } elseif ($this->type_hinting) {
                     $return_type = $this->defaultReturn($row['Type']);
@@ -335,7 +358,7 @@ class Core
 
                 $cMethod = $cClass->addMethod('get'.$name);
                 $cMethod->setPublic();
-                $cMethod->addComment('@return '.($row['Null'] == 'YES' ? '?' : '').$return_type);
+                $cMethod->addComment('@return '.('YES' == $row['Null'] ? '?' : '').$return_type);
 
                 if (isset($fieldConfig['backed_enum']) && $fieldConfig['backed_enum']) {
                     $body  = '$val = $this->get(\''.$row['Field'].'\');'.PHP_EOL;
@@ -371,7 +394,7 @@ class Core
                 $name        = FieldName::nameConversion($row['Field']);
                 $return_type = 'mixed';
 
-                if ($fieldConfig['type_hint'] != '') {
+                if ('' != $fieldConfig['type_hint']) {
                     $return_type = $fieldConfig['type_hint'];
                 } elseif ($this->type_hinting) {
                     $return_type = $this->defaultReturn($row['Type']);
@@ -380,7 +403,7 @@ class Core
                 $cSetter = $cClass->addMethod('set'.$name);
                 $cSetter->addComment('@param '.$return_type.' $value');
                 $cSetter->addComment('@return static');
-                $cSetter->addParameter('value')->setType($return_type == 'mixed' ? '' : $return_type);
+                $cSetter->addParameter('value')->setType('mixed' == $return_type ? '' : $return_type);
                 $cSetter->setVisibility($fieldConfig['visibility'] ?? 'public');
 
                 $body = '';
@@ -423,13 +446,15 @@ NOW;
                 if ($this->get_set_funcs) {
                     $name = FieldName::getterName($fName);
                     if ($fieldConfig['uuid_field']) {
-                        $body .= "    '$fName' => ".'$this->'.$name.'AsString(),'.PHP_EOL;
+                        $body .= "    '{$fName}' => ".'$this->'.$name.'AsString(),'.PHP_EOL;
+
                         continue;
                     }
-                    $body .= "    '$fName' => ".'$this->'.$name.'(),'.PHP_EOL;
+                    $body .= "    '{$fName}' => ".'$this->'.$name.'(),'.PHP_EOL;
+
                     continue;
                 }
-                $body .= "    '$fName' => ".'$this->'.$fName.','.PHP_EOL;
+                $body .= "    '{$fName}' => ".'$this->'.$fName.','.PHP_EOL;
             }
             $body .= '];';
             $cMethod->setBody($body);
@@ -452,7 +477,7 @@ NOW;
             $cMethod->setBody($body);
         }
 
-        if(!empty($enums)) {
+        if (!empty($enums)) {
             $cClass->addConstant('ORM_ENUMS', $enums);
         }
 
@@ -462,17 +487,16 @@ NOW;
         $this->logger->debug('ACTION: Calling doBaseExceptions');
         $this->doBaseExceptions($cClass, $cNamespace, $config['fields']);
 
-        if (isset($this->config['descriptions'])
-            && isset($this->config['descriptions']['enabled'])
+        if (isset($this->config['descriptions'], $this->config['descriptions']['enabled'])
             && $this->config['descriptions']['enabled']
             && isset($this->config['descriptions']['desc_dir'])
             && !empty($this->config['descriptions']['desc_dir'])
         ) {
-            $tmp = explode(DIRECTORY_SEPARATOR, $this->cConfig->getConfigFilePath());
-            array_pop($tmp);
-            $startPath = implode(DIRECTORY_SEPARATOR, $tmp).DIRECTORY_SEPARATOR;
+            $tmp = \explode(DIRECTORY_SEPARATOR, $this->cConfig->getConfigFilePath());
+            \array_pop($tmp);
+            $startPath = \implode(DIRECTORY_SEPARATOR, $tmp).DIRECTORY_SEPARATOR;
             $descDir   = $startPath.$this->config['descriptions']['desc_dir'];
-            if (!is_dir($descDir)) {
+            if (!\is_dir($descDir)) {
                 $this->logger->alert('Descriptions: Desc Dir is defined but cannot be found: '.$descDir);
             } else {
                 $this->doDescription($cClass, $cNamespace, $descDir, $table_name, $dbInfo);
@@ -484,25 +508,33 @@ NOW;
         $contents .= $cPrinter->printNamespace($cNamespace);
 
         $this->logger->info('DISK ACCESS: Writing File: '.$path.$filename);
-        file_put_contents($path.$filename, $contents);
-
+        \file_put_contents($path.$filename, $contents);
 
         $this->logger->info('ACTION: Generating Trait');
-        //Create a trait version
-        $path     = $this->master_location.DIRECTORY_SEPARATOR.'Generated/Traits/';
+        // Create a trait version
+        $path = $this->master_location.DIRECTORY_SEPARATOR.'Generated'.DIRECTORY_SEPARATOR;
+        if (!empty($this->sub_namespace)) {
+            $path .= $this->sub_namespace.DIRECTORY_SEPARATOR;
+        }
+        $path    .= 'Traits'.DIRECTORY_SEPARATOR;
         $filename = $table_name.'.php';
-        if (!is_dir($path)) {
-            mkdir($path, 0755, true);
+        if (!\is_dir($path)) {
+            \mkdir($path, 0o755, true);
         }
 
-        $cTraitNamespace = new PhpNamespace('GCWorld\\ORM\\Generated\\Traits');
+        $baseNamespace = 'GCWorld\\ORM\\Generated\\';
+        if (!empty($this->sub_namespace)) {
+            $baseNamespace .= $this->sub_namespace.'\\';
+        }
+        $baseNamespace .= 'Traits';
+        $cTraitNamespace = new PhpNamespace($baseNamespace);
         $cTraitClass     = $cTraitNamespace->addTrait($table_name);
 
         foreach ($fields as $i => $row) {
-            if (in_array($row['Field'], $primaries)) {
+            if (\in_array($row['Field'], $primaries)) {
                 continue;
             }
-            $type = (stristr($row['Type'], 'int') ? 'int   ' : 'string');
+            $type = (\stristr($row['Type'], 'int') ? 'int   ' : 'string');
 
             $cProperty = $cTraitClass->addProperty($row['Field']);
             $cProperty->addComment('@var '.$type);
@@ -511,9 +543,9 @@ NOW;
             $cProperty->setValue($this->use_defaults ? $this->formatDefault($row) : null);
         }
 
-        if ($this->get_set_funcs || $this->var_visibility == 'protected') {
+        if ($this->get_set_funcs || 'protected' == $this->var_visibility) {
             foreach ($fields as $i => $row) {
-                if (in_array($row['Field'], $primaries)) {
+                if (\in_array($row['Field'], $primaries)) {
                     continue;
                 }
                 $fieldConfig = $config['fields'][$row['Field']] ?? Config::getDefaultFieldConfig();
@@ -524,7 +556,7 @@ NOW;
                 $name        = FieldName::nameConversion($row['Field']);
                 $return_type = 'mixed';
 
-                if ($fieldConfig['type_hint'] != '') {
+                if ('' != $fieldConfig['type_hint']) {
                     $return_type = $fieldConfig['type_hint'];
                 } elseif ($this->type_hinting) {
                     $return_type = $this->defaultReturn($row['Type']);
@@ -552,7 +584,7 @@ NOW;
         $contents .= $cPrinter->printNamespace($cTraitNamespace);
 
         $this->logger->info('DISK ACCESS: Writing File: '.$path.$filename);
-        file_put_contents($path.$filename, $contents);
+        \file_put_contents($path.$filename, $contents);
 
         return true;
     }
@@ -562,7 +594,7 @@ NOW;
      *
      * @return array
      */
-    public function getKeys(string $table_name)
+    public function getKeys(string $table_name): array
     {
         $sql   = 'SHOW INDEX FROM '.$table_name;
         $query = $this->master_common->getDatabase()->prepare($sql);
@@ -573,7 +605,7 @@ NOW;
         $primary = null;
 
         // Factory Stuff
-        if (count($indexes) < 1) {
+        if (\count($indexes) < 1) {
             return [
                 'uniques' => $uniques,
                 'primary' => $primary,
@@ -584,8 +616,9 @@ NOW;
             if ($v['Non_unique']) {
                 continue;
             }
-            if ($v['Key_name'] == 'PRIMARY') {
+            if ('PRIMARY' == $v['Key_name']) {
                 $primary = $v['Column_name'];
+
                 continue;
             }
             if (!isset($uniques[$v['Key_name']])) {
@@ -594,7 +627,7 @@ NOW;
             $uniques[$v['Key_name']][] = $v;
         }
 
-        if ($primary === null || empty($uniques)) {
+        if (null === $primary || empty($uniques)) {
             return [
                 'uniques' => $uniques,
                 'primary' => $primary,
@@ -602,12 +635,13 @@ NOW;
         }
 
         foreach ($uniques as $k => $v) {
-            if (count($v) < 2) {
+            if (\count($v) < 2) {
                 unset($uniques[$k]);
+
                 continue;
             }
 
-            uasort($v, function ($a, $b) {
+            \uasort($v, function ($a, $b) {
                 return $a['Seq_in_index'] <=> $b['Seq_in_index'];
             });
             $uniques[$k] = $v;
@@ -620,13 +654,31 @@ NOW;
     }
 
     /**
+     * @return object
+     */
+    public function load()
+    {
+        $args       = \func_get_args();
+        $class_name = '\\GCWorld\\ORM\\Generated\\'.$args[0];
+
+        if (!\class_exists($class_name)) {
+            die('Invalid Class: '.$class_name);
+        }
+        $args[0] = $this->master_common;
+
+        $reflectionClass = new ReflectionClass($class_name);
+
+        return $reflectionClass->newInstanceArgs($args);
+    }
+
+    /**
      * @param ClassType    $cClass
      * @param PhpNamespace $cNamespace
      * @param array        $fields
      *
      * @return void
      */
-    protected function doFactory(ClassType $cClass, PhpNamespace $cNamespace, array $fields)
+    protected function doFactory(ClassType $cClass, PhpNamespace $cNamespace, array $fields): void
     {
         $keys    = $this->getKeys($cClass->getName());
         $uniques = $keys['uniques'];
@@ -635,17 +687,17 @@ NOW;
         $this->logger->debug('Discovered Uniques', $uniques);
 
         // We don't have a primary key.  That can't be good.
-        if ($primary == null) {
+        if (null == $primary) {
             return;
         }
 
-        if (count($uniques) > 0) {
+        if (\count($uniques) > 0) {
             $cNamespace->addUse('GCWorld\\ORM\\CommonLoader');
         }
 
         foreach ($uniques as $key => $unique) {
             $this->logger->debug('Processing Unique: '.$key);
-            $name   = str_replace(' ', '', ucwords(str_replace('_', ' ', $key)));
+            $name   = \str_replace(' ', '', \ucwords(\str_replace('_', ' ', $key)));
             $vars   = [];
             $varStr = [];
 
@@ -658,13 +710,13 @@ NOW;
             foreach ($unique as $item) {
                 $fieldConfig = $fields[$item['Column_name']] ?? Config::getDefaultFieldConfig();
                 $type        = 'mixed';
-                if ($fieldConfig['type_hint'] != '') {
+                if ('' != $fieldConfig['type_hint']) {
                     $type = $fieldConfig['type_hint'];
                 } elseif ($this->type_hinting) {
                     $type = $this->defaultReturn($item['Type']);
                 }
 
-                if (isset($item['Null']) && strtoupper($item['Null']) == 'YES') {
+                if (isset($item['Null']) && 'YES' == \strtoupper($item['Null'])) {
                     $cMethod->addComment('@param ?'.$type.' '.$item['Column_name']);
                     $cMethod->addParameter($item['Column_name'], null);
                 } else {
@@ -676,7 +728,7 @@ NOW;
                 $varStr[] = '$'.$item['Column_name'];
             }
 
-            $str   = implode(', ', $varStr);
+            $str   = \implode(', ', $varStr);
             $body  = '$id = self::find'.$name.'('.$str.');'.PHP_EOL;
             $body .= 'if(!empty($id)) {'.PHP_EOL;
             $body .= '    return new static($id);'.PHP_EOL;
@@ -714,7 +766,7 @@ NOW;
             foreach ($unique as $item) {
                 $fieldConfig = $fields[$item['Column_name']] ?? Config::getDefaultFieldConfig();
                 $type        = 'mixed';
-                if ($fieldConfig['type_hint'] != '') {
+                if ('' != $fieldConfig['type_hint']) {
                     $type = $fieldConfig['type_hint'];
                 } elseif ($this->type_hinting) {
                     $type = $this->defaultReturn($item['Type']);
@@ -728,19 +780,21 @@ NOW;
             $where  = [];
             foreach ($unique as $item) {
                 $var     = $item['Column_name'];
-                $enum    = isset($fields[$var]['backed_enum']) && isset($fields[$var]['backed_enum']);
+                $enum    = isset($fields[$var]['backed_enum'], $fields[$var]['backed_enum']);
                 $where[] = $var.' = :'.$var;
                 if ($enum) {
-                    $params[] = '\':' . $var . '\' => $' . $var . '->value,' . PHP_EOL;
+                    $params[] = '\':'.$var.'\' => $'.$var.'->value,'.PHP_EOL;
                 } else {
-                    $params[] = '\':' . $var . '\' => $' . $var . ',' . PHP_EOL;
+                    $params[] = '\':'.$var.'\' => $'.$var.','.PHP_EOL;
                 }
             }
-            $sWhere = 'WHERE '.implode(' AND ', $where);
+            $sWhere = 'WHERE '.\implode(' AND ', $where);
 
             $body  = '$sql   = \'SELECT '.$primary.' FROM '.$cClass->getName().PHP_EOL;
             $body .= '          '.$sWhere.'\';'.PHP_EOL;
-            $body .= '$query = CommonLoader::getCommon()->getDatabase()->prepare($sql);'.PHP_EOL;
+            $body .= '$query = CommonLoader::getCommon()->getDatabase(';
+            $body .= $this->config['general']['database_name'] ?? 'default';
+            $body .= ')->prepare($sql);'.PHP_EOL;
             $body .= '$query->execute(['.PHP_EOL;
             foreach ($params as $param) {
                 $body .= '    '.$param;
@@ -764,7 +818,7 @@ NOW;
      *
      * @return void
      */
-    protected function doBaseExceptions(ClassType $cClass, PhpNamespace $cNamespace, array $fields)
+    protected function doBaseExceptions(ClassType $cClass, PhpNamespace $cNamespace, array $fields): void
     {
         $columns = [];
         foreach ($fields as $id => $field) {
@@ -777,25 +831,25 @@ NOW;
         $uniques = $keys['uniques'];
         $primary = $keys['primary'];
 
-        if (count($columns) < 1) {
+        if (\count($columns) < 1) {
             foreach ($uniques as $unique) {
                 foreach ($unique as $item) {
                     $columns[] = $item['Column_name'];
                 }
             }
             foreach ($fields as $key => $field) {
-                if (isset($field['visibility']) && $field['visibility'] == 'protected') {
+                if (isset($field['visibility']) && 'protected' == $field['visibility']) {
                     $columns[] = $key;
                 }
             }
 
-            $columns = array_unique($columns);
+            $columns = \array_unique($columns);
         }
 
-        if (count($columns) < 1) {
+        if (\count($columns) < 1) {
             return;
         }
-        sort($columns);
+        \sort($columns);
 
         $cNamespace->addUse('GCWorld\\ORM\\Exceptions\\ModelSaveExceptions');
         $cNamespace->addUse('GCWorld\\ORM\\Exceptions\\ModelRequiredFieldException');
@@ -804,6 +858,7 @@ NOW;
         foreach ($columns as $k => $column) {
             if ($column == $primary) {
                 unset($columns[$k]);
+
                 continue;
             }
             if (isset($fields[$column]['uuid_field']) && $fields[$column]['uuid_field']) {
@@ -850,43 +905,27 @@ NOW;
     }
 
     /**
-     * @return object
-     */
-    public function load()
-    {
-        $args       = func_get_args();
-        $class_name = '\\GCWorld\\ORM\\Generated\\'.$args[0];
-
-        if (!class_exists($class_name)) {
-            die('Invalid Class: '.$class_name);
-        }
-        $args[0] = $this->master_common;
-
-        $reflectionClass = new ReflectionClass($class_name);
-        return $reflectionClass->newInstanceArgs($args);
-    }
-
-    /**
      * @param array $row
+     *
      * @return float|int|mixed
      */
     protected function formatDefault(array $row)
     {
         $default = $row['Default'];
-        if ($default === null) {
-            if ($row['Null'] == 'NO') {
+        if (null === $default) {
+            if ('NO' == $row['Null']) {
                 $default = $this->defaultData($row['Type']);
             }
-        } elseif (strtoupper($default) == 'CURRENT_TIMESTAMP') {
+        } elseif ('CURRENT_TIMESTAMP' == \strtoupper($default)) {
             $default = '0000-00-00 00:00:00';
         }
 
-        if (is_numeric($default)) {
-            if (strstr($default, '.')) {
-                return floatval($default);
+        if (\is_numeric($default)) {
+            if (\strstr($default, '.')) {
+                return \floatval($default);
             }
 
-            return intval($default);
+            return \intval($default);
         }
 
         return $default;
@@ -894,14 +933,15 @@ NOW;
 
     /**
      * @param mixed $type
+     *
      * @return mixed
      */
     protected function defaultData($type)
     {
-        $type = strtoupper($type);
-        $pos  = strpos($type, '(');
+        $type = \strtoupper($type);
+        $pos  = \strpos($type, '(');
         if ($pos > 0) {
-            $type = substr($type, 0, $pos);
+            $type = \substr($type, 0, $pos);
         }
 
         switch ($type) {
@@ -914,8 +954,6 @@ NOW;
             case 'BIGINT':
             case 'SERIAL':
                 return 0;
-
-
             case 'DECIMAL':
             case 'FLOAT':
             case 'DOUBLE':
@@ -924,21 +962,13 @@ NOW;
             case 'NUMERIC':
             case 'YEAR':
                 return 0.0;
-
-
             case 'DATE':
                 return '0000-00-00';
-
-
             case 'DATETIME':
             case 'TIMESTAMP':
                 return '0000-00-00 00:00:00';
-
-
             case 'TIME':
                 return '00:00:00';
-
-
             case 'CHAR':
             case 'VARCHAR':
             case 'TINYTEXT':
@@ -954,8 +984,6 @@ NOW;
             case 'ENUM':
             case 'SET':
                 return '';
-
-
             case 'JSON':
                 return '{}';  // Probably not necessary, but hey, stay safe
         }
@@ -966,14 +994,15 @@ NOW;
 
     /**
      * @param string $type
+     *
      * @return string
      */
     protected function defaultReturn(string $type)
     {
-        $type = strtoupper($type);
-        $pos  = strpos($type, '(');
+        $type = \strtoupper($type);
+        $pos  = \strpos($type, '(');
         if ($pos > 0) {
-            $type = substr($type, 0, $pos);
+            $type = \substr($type, 0, $pos);
         }
 
         switch ($type) {
@@ -986,10 +1015,8 @@ NOW;
             case 'SERIAL':
             case 'NUMERIC':
                 return 'int';
-
             case 'BOOLEAN':
                 return 'bool';
-
             case 'DECIMAL':
             case 'FLOAT':
             case 'DOUBLE':
@@ -997,7 +1024,6 @@ NOW;
             case 'BIT':
             case 'YEAR':
                 return 'float';
-
             case 'DATE':
             case 'DATETIME':
             case 'TIMESTAMP':
@@ -1040,13 +1066,13 @@ NOW;
         string $table_name,
         array $dbInfo
     ) {
-        //Create a trait version
+        // Create a trait version
         $existing = [];
         $changed  = false;
         $descFile = $descDir.$table_name.'.yml';
-        if (file_exists($descFile)) {
+        if (\file_exists($descFile)) {
             $existing = Yaml::parseFile($descFile);
-            if (!is_array($existing)) {
+            if (!\is_array($existing)) {
                 $existing = [];
             }
         }
@@ -1061,6 +1087,7 @@ NOW;
                     'tech'   => $techDesc,
                     'maxlen' => $this->determineMaxLen($techDesc),
                 ];
+
                 continue;
             }
             if (!isset($existing[$field]['title'])) {
@@ -1086,13 +1113,13 @@ NOW;
         }
 
         if ($changed) {
-            file_put_contents($descFile, Yaml::dump($existing, 4));
+            \file_put_contents($descFile, Yaml::dump($existing, 4));
         }
 
         $odiTrait = 'GCWorld\\ORM\\Traits\\ORMFieldsTrait';
         if (isset($this->config['descriptions']['desc_trait'])
             && !empty($this->config['descriptions']['desc_trait'])
-            && trait_exists($this->config['descriptions']['desc_trait'])
+            && \trait_exists($this->config['descriptions']['desc_trait'])
         ) {
             $odiTrait = $this->config['descriptions']['desc_trait'];
         }
@@ -1112,21 +1139,23 @@ NOW;
 
     /**
      * @param $techDesc
+     *
      * @return int
      */
     protected function determineMaxLen($techDesc): int
     {
-        $start = strpos($techDesc, '(');
-        if ($start === false) {
+        $start = \strpos($techDesc, '(');
+        if (false === $start) {
             return 0;
         }
-        $end = strpos($techDesc, ')', $start + 1);
-        if ($end === false) {
+        $end = \strpos($techDesc, ')', $start + 1);
+        if (false === $end) {
             return 0;
         }
 
         $length = $end - $start;
-        $result = substr($techDesc, $start + 1, $length - 1);
-        return intval($result);
+        $result = \substr($techDesc, $start + 1, $length - 1);
+
+        return \intval($result);
     }
 }
