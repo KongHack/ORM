@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [6.4.13](https://github.com/KongHack/ORM/releases/tag/6.4.13)
+- @GameCharmer Testing auto-release
+
+
+
 ## [6.4.12](https://github.com/KongHack/ORM/releases/tag/6.4.12)
 - @GameCharmer add missing quotes to string
 - @GameCharmer add github release on tag workflow
