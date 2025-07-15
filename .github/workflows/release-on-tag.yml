@@ -25,7 +25,12 @@ jobs:
         id: changelog
         run: |
           TAG_NAME=${{ steps.tag.outputs.TAG_NAME }}
-          NOTES=$(awk "/^## ${TAG_NAME}$/,/^## /" CHANGELOG.md | sed "1d;\$d")
+          TAG_REGEX=$(echo "$TAG_NAME" | sed 's/\./\\./g')
+          NOTES=$(awk "/^## \\[${TAG_REGEX}\\]/ {found=1; next} /^## \\[/ {if(found) exit} found" CHANGELOG.md)
+          if [ -z "$NOTES" ]; then
+            echo "Could not find changelog entry for tag $TAG_NAME"
+            NOTES="No changelog entry found for $TAG_NAME"
+          fi
           echo "RELEASE_NOTES<<EOF" >> "$GITHUB_OUTPUT"
           echo "$NOTES" >> "$GITHUB_OUTPUT"
           echo "EOF" >> "$GITHUB_OUTPUT"
