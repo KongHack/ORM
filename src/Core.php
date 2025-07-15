@@ -792,9 +792,9 @@ NOW;
 
             $body  = '$sql   = \'SELECT '.$primary.' FROM '.$cClass->getName().PHP_EOL;
             $body .= '          '.$sWhere.'\';'.PHP_EOL;
-            $body .= '$query = CommonLoader::getCommon()->getDatabase(';
+            $body .= '$query = CommonLoader::getCommon()->getDatabase(\'';
             $body .= $this->config['general']['database_name'] ?? 'default';
-            $body .= ')->prepare($sql);'.PHP_EOL;
+            $body .= '\')->prepare($sql);'.PHP_EOL;
             $body .= '$query->execute(['.PHP_EOL;
             foreach ($params as $param) {
                 $body .= '    '.$param;
