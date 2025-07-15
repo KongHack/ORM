@@ -597,7 +597,7 @@ NOW;
     public function getKeys(string $table_name): array
     {
         $sql   = 'SHOW INDEX FROM '.$table_name;
-        $query = $this->master_common->getDatabase()->prepare($sql);
+        $query = $this->_db->prepare($sql);
         $query->execute();
         $indexes = $query->fetchAll(PDO::FETCH_ASSOC);
         unset($query);
