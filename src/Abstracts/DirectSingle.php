@@ -275,8 +275,9 @@ abstract class DirectSingle implements DirectSingleInterface
      */
     public function save(): bool
     {
-        $table_name   = \constant($this->myName.'::CLASS_TABLE');
-        $primary_name = \constant($this->myName.'::CLASS_PRIMARY');
+        $table_name    = \constant($this->myName.'::CLASS_TABLE');
+        $primary_name  = \constant($this->myName.'::CLASS_PRIMARY');
+        $version_field = \constant($this->myName.'::VERSION_FIELD');
 
         if (empty($this->_changed)) {
             return false;
@@ -354,13 +355,16 @@ abstract class DirectSingle implements DirectSingleInterface
                 $sql             .= $key.' = :'.$key.', ';
                 $params[':'.$key] = $this->{$key};
             }
-            $sql  = \substr($sql, 0, -2);   // Remove last ', ';
+            $sql = \substr($sql, 0, -2);   // Remove last ', ';
+            if (!empty($version_field)) {
+                $sql .= ', '.$version_field.' = '.$version_field.' + 1';
+            }
             $sql .= ' WHERE '.$primary_name.' = :'.$primary_name;
 
-            $query = $this->_db->prepare($sql);
-            $query->execute($params);
-            $query->closeCursor();
-            unset($query);
+            $qry = $this->_db->prepare($sql);
+            $qry->execute($params);
+            $qry->closeCursor();
+            unset($qry);
         }
 
         // ============================================================================== Audit
@@ -514,7 +518,7 @@ abstract class DirectSingle implements DirectSingleInterface
     /**
      * @return void
      */
-    protected function setCacheData()
+    protected function setCacheData(): void
     {
         // Caching Disabled
         if (!$this->_canCache || $this->_cacheTTL < 0) {

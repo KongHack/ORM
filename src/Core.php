@@ -133,6 +133,13 @@ class Core
         $config['fields'] ??= [];
         $config['cache_ttl'] ??= 0;
         $config['audit_handler'] = ($config['audit_handler'] ?? ($this->config['general']['audit_handler'] ?? null));
+        $config['version_field'] ??= '';
+
+        if (!empty($config['version_field'])
+            && !isset($config['fields'][$config['version_field']]['visibility'])
+        ) {
+            $config['fields'][$config['version_field']]['visibility'] = 'protected';
+        }
 
         $save_hook      = isset($config['save_hook']);
         $save_hook_call = $config['save_hook'] ?? '';
@@ -262,6 +269,7 @@ class Core
         $cNamespace->addUse('GCWorld\\ORM\\Interfaces\\GeneratedInterface');
         $cClass->addImplement('GCWorld\\ORM\\Interfaces\\GeneratedInterface');
         $cClass->addConstant('CLASS_PRIMARY', $primaries[0])->setPublic();
+        $cClass->addConstant('VERSION_FIELD', $config['version_field'] ?? '');
 
         if ($this->json_serialize) {
             $cNamespace->addUse('JsonSerializable');

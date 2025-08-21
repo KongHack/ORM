@@ -23,6 +23,7 @@ tables:
         constructor: protected
         cache_ttl: 60
         cache_after_purge: false
+        version_field: my_version
         fields:
             example_field_1:
                 visibility: protected
