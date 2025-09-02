@@ -123,7 +123,7 @@ class Config
             $startPath = \implode(DIRECTORY_SEPARATOR, $tmp).DIRECTORY_SEPARATOR;
             $tableDir  = $startPath.$config['table_dir'];
             if (!\is_dir($tableDir)) {
-                throw new Exception('Table Dir is defined but cannot be found: ', $tableDir);
+                throw new Exception('Table Dir is defined but cannot be found: '.$tableDir);
             }
 
             if (!isset($config['tables'])) {
