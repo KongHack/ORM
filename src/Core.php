@@ -881,6 +881,11 @@ NOW;
 
         $body = '$cExceptions = new ModelSaveExceptions();'.PHP_EOL;
         foreach ($columns as $column) {
+            // Skip fields that are nullable
+            if ('YES' === $fields[$column]['Null']) {
+                continue;
+            }
+
             $body .= 'if(empty($this->'.$column.')) {'.PHP_EOL;
             $body .= '    $cExceptions->addException(new ModelRequiredFieldException(\''.$column.'\'));'.PHP_EOL;
             $body .= '}'.PHP_EOL;

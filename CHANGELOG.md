@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [6.4.17](https://github.com/KongHack/ORM/releases/tag/6.4.17)
+- @GameCharmer Add Nullable support to `saveTest` buildout
+
+
+
 ## [6.4.16](https://github.com/KongHack/ORM/releases/tag/6.4.16)
 - @GameCharmer Fix Typo
 
