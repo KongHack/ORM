@@ -228,6 +228,11 @@ class Core
                 $cReflection = new ReflectionClass($config['fields'][$row['Field']]['type_hint']);
                 $config['fields'][$row['Field']]['backed_enum'] = $cReflection->implementsInterface(BackedEnum::class);
             }
+
+            // Nullable
+            if (!isset($config['fields'][$row['Field']]['nullable'])) {
+                $config['fields'][$row['Field']]['nullable'] = ('YES' === $row['Null']);
+            }
         }
 
         $this->logger->debug('Discovered Primaries', $primaries);
@@ -882,7 +887,7 @@ NOW;
         $body = '$cExceptions = new ModelSaveExceptions();'.PHP_EOL;
         foreach ($columns as $column) {
             // Skip fields that are nullable
-            if ('YES' === $fields[$column]['Null']) {
+            if ($fields[$column]['nullable']) {
                 continue;
             }
 
