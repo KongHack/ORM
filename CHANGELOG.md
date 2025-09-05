@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [6.4.19](https://github.com/KongHack/ORM/releases/tag/6.4.19)
+- @GameCharmer Add exception for non-existent columns having config values set via yml
+
+
+
 ## [6.4.18](https://github.com/KongHack/ORM/releases/tag/6.4.18)
 - @GameCharmer use defined nullable field option instead of SQL result
 
