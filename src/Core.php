@@ -829,6 +829,8 @@ NOW;
      * @param PhpNamespace $cNamespace
      * @param array        $fields
      *
+     * @throws Exception
+     *
      * @return void
      */
     protected function doBaseExceptions(ClassType $cClass, PhpNamespace $cNamespace, array $fields): void
@@ -886,6 +888,10 @@ NOW;
 
         $body = '$cExceptions = new ModelSaveExceptions();'.PHP_EOL;
         foreach ($columns as $column) {
+            // If this field doesn't exist, then this column was added via config file but isn't in the DB, weird.
+            if (!isset($fields[$column]['nullable'])) {
+                throw new Exception('Unknown Column: '.$cClass->getName().'::'.$column);
+            }
             // Skip fields that are nullable
             if ($fields[$column]['nullable']) {
                 continue;
