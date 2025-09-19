@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [6.4.20](https://github.com/KongHack/ORM/releases/tag/6.4.20)
+- @GameCharmer Add `_dbName` to generated files
+
+
+
 ## [6.4.19](https://github.com/KongHack/ORM/releases/tag/6.4.19)
 - @GameCharmer Add exception for non-existent columns having config values set via yml
 

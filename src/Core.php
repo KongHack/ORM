@@ -302,6 +302,15 @@ class Core
         $cProperty->addComment('Class Name for audit handler'.PHP_EOL.'@var ?string');
         $cProperty->setNullable(true);
 
+        // DB Name override
+        $tmp       = $config['database_name'] ?? $this->config['general']['database_name'] ?? 'default';
+        $cProperty = $cClass->addProperty('_dbName', $tmp);
+        $cProperty->setVisibility('protected');
+        $cProperty->setType('?string');
+        $cProperty->setComment('Database Name'.PHP_EOL.'@var ?string');
+        $cProperty->setNullable(true);
+        unset($tmp);
+
         foreach ($fields as $i => $row) {
             $type = (\stristr($row['Type'], 'int') ? 'int   ' : 'string');
             if ('YES' == $row['Null']) {
