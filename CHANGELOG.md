@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [6.4.21](https://github.com/KongHack/ORM/releases/tag/6.4.21)
+- @GameCharmer Update `_dbName` in DirectSingle
+
+
+
 ## [6.4.20](https://github.com/KongHack/ORM/releases/tag/6.4.20)
 - @GameCharmer Add `_dbName` to generated files
 

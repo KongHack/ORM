@@ -35,7 +35,7 @@ abstract class DirectSingle implements DirectSingleInterface
      *
      * @var string|null
      */
-    protected $_dbName;
+    protected ?string $_dbName = null;
 
     /**
      * @var \GCWorld\Database\Database|DatabaseInterface
