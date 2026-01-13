@@ -22,5 +22,12 @@ interface AuditInterface
      *
      * @return mixed
      */
-    public function storeLog(string $table, mixed $primaryId, array $before, array $after, mixed $memberId = null);
+    public function storeLog(string $table, mixed $primaryId, array $before, array $after, mixed $memberId = null): mixed;
+
+    /**
+     * @param string|null $member_uuid
+     *
+     * @return void
+     */
+    public static function setOverrideMemberUuid(?string $member_uuid = null): void;
 }

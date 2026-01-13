@@ -144,7 +144,6 @@ abstract class DirectSingle implements DirectSingleInterface
 
         if ($cachable
             && !empty($primary_id)
-            && null !== $primary_id
             && 0 !== $primary_id
             && '' !== $primary_id
         ) {
@@ -154,7 +153,7 @@ abstract class DirectSingle implements DirectSingleInterface
                 'hash' => 'key_'.$primary_id,
                 'blob' => $blob,
             ]);
-            if (false !== $blob && null !== $blob && !empty($blob)) {
+            if (!empty($blob)) {
                 $cLogger->info('ORM: DS: '.$table_name.': Cache1: Blob is not false, not null, and not empty');
 
                 try {
@@ -210,7 +209,6 @@ abstract class DirectSingle implements DirectSingleInterface
 
         $cLogger->info('ORM: DS: Cache1: '.$table_name.': Exiting Routine');
         if (!empty($primary_id)
-            && null !== $primary_id
             && 0 !== $primary_id
             && '' !== $primary_id
         ) {
@@ -289,14 +287,14 @@ abstract class DirectSingle implements DirectSingleInterface
 
         // ============================================================================== Audit
         if ($this->_audit || $save_hook) {
-            $sql   = "SELECT * FROM {$table_name} WHERE {$primary_name} = :primary";
-            $query = $this->_db->prepare($sql);
-            $query->execute([
+            $sql = "SELECT * FROM {$table_name} WHERE {$primary_name} = :primary";
+            $qry = $this->_db->prepare($sql);
+            $qry->execute([
                 ':primary' => $this->{$primary_name},
             ]);
-            $before = $query->fetch(PDO::FETCH_ASSOC) ?? [];
-            $query->closeCursor();
-            unset($query);
+            $before = $qry->fetch(PDO::FETCH_ASSOC) ?? [];
+            $qry->closeCursor();
+            unset($qry);
         }
 
         // ============================================================================== Write Logic
@@ -318,15 +316,15 @@ abstract class DirectSingle implements DirectSingleInterface
                     }
                     $sql .= "{$field} = VALUES({$field}), \n";
                 }
-                $sql   = \rtrim($sql, ", \n");
-                $query = $this->_db->prepare($sql);
-                $query->execute($params);
+                $sql = \rtrim($sql, ", \n");
+                $qry = $this->_db->prepare($sql);
+                $qry->execute($params);
                 $newId = $this->_db->lastInsertId();
                 if ($newId > 0) {
                     $this->{$primary_name} = $newId;
                 }
-                $query->closeCursor();
-                unset($query);
+                $qry->closeCursor();
+                unset($qry);
             } else {
                 $sql = 'INSERT IGNORE INTO '.$table_name.
                     ' ('.\implode(', ', $fields).') VALUES (:'.
@@ -338,15 +336,15 @@ abstract class DirectSingle implements DirectSingleInterface
                     }
                     $sql .= "{$field} = VALUES({$field}), \n";
                 }
-                $sql   = \rtrim($sql, ", \n");
-                $query = $this->_db->prepare($sql);
-                $query->execute($params);
+                $sql = \rtrim($sql, ", \n");
+                $qry = $this->_db->prepare($sql);
+                $qry->execute($params);
                 $newId = $this->_db->lastInsertId();
                 if ($newId > 0) {
                     $this->{$primary_name} = $newId;
                 }
-                $query->closeCursor();
-                unset($query);
+                $qry->closeCursor();
+                unset($qry);
             }
         } else {
             $sql                       = 'UPDATE '.$table_name.' SET ';
@@ -370,13 +368,13 @@ abstract class DirectSingle implements DirectSingleInterface
         // ============================================================================== Audit
         if ($this->_audit || $save_hook) {
             $sql   = 'SELECT * FROM '.$table_name.' WHERE '.$primary_name.' = :primary';
-            $query = $this->_db->prepare($sql);
-            $query->execute([
+            $qry = $this->_db->prepare($sql);
+            $qry->execute([
                 ':primary' => $this->{$primary_name},
             ]);
-            $after = $query->fetch(PDO::FETCH_ASSOC) ?? [];
-            $query->closeCursor();
-            unset($query);
+            $after = $qry->fetch(PDO::FETCH_ASSOC) ?? [];
+            $qry->closeCursor();
+            unset($qry);
 
             // The is_array check solves issues with canInsert style objects
             if (\is_array($before) && \is_array($after) && !empty($this->_auditHandler)) {
@@ -463,7 +461,7 @@ abstract class DirectSingle implements DirectSingleInterface
      *
      * @return mixed
      */
-    protected function get(string $key)
+    protected function get(string $key): mixed
     {
         return $this->{$key};
     }
@@ -473,7 +471,7 @@ abstract class DirectSingle implements DirectSingleInterface
      *
      * @return array
      */
-    protected function getArray(array $fields)
+    protected function getArray(array $fields): array
     {
         $return = [];
         foreach ($fields as $k) {
