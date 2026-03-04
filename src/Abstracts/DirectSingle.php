@@ -75,19 +75,19 @@ abstract class DirectSingle implements DirectSingleInterface
     /**
      * @var array
      */
-    protected $_changed = [];
+    protected array $_changed = [];
 
     /**
      * @var array
      */
-    protected $_lastChanged = [];
+    protected array $_lastChanged = [];
 
     /**
      * Set this to false in your class when you don't want to log changes.
      *
      * @var bool
      */
-    protected $_audit = true;
+    protected bool $_audit = true;
 
     /**
      * @var ?string
@@ -99,7 +99,7 @@ abstract class DirectSingle implements DirectSingleInterface
      *
      * @var AuditInterface|null
      */
-    protected $_lastAuditObject;
+    protected ?AuditInterface $_lastAuditObject;
 
     /**
      * Setting this to true will enable insert on duplicate key update features.
@@ -107,14 +107,14 @@ abstract class DirectSingle implements DirectSingleInterface
      *
      * @var bool
      */
-    protected $_canInsert = false;
+    protected bool $_canInsert = false;
 
     /**
      * Used for reference and to reduce constant check calls.
      *
      * @var string
      */
-    protected $myName;
+    protected string $myName;
 
     /**
      * @param mixed|null $primary_id
@@ -153,7 +153,7 @@ abstract class DirectSingle implements DirectSingleInterface
                 'blob' => $blob,
             ]);
             if (!empty($blob)) {
-                $cLogger->info('ORM: DS: '.$table_name.': Cache1: Blob is not false, not null, and not empty');
+                $cLogger->info('ORM: DS: '.$table_name.': Cache1: Blob is not empty');
 
                 try {
                     $data = @\unserialize($blob);
@@ -204,10 +204,7 @@ abstract class DirectSingle implements DirectSingleInterface
         }
 
         $cLogger->info('ORM: DS: Cache1: '.$table_name.': Exiting Routine');
-        if (!empty($primary_id)
-            && 0 !== $primary_id
-            && '' !== $primary_id
-        ) {
+        if (!empty($primary_id)) {
             if (\defined($this->myName.'::SQL')) {
                 $sql = \constant($this->myName.'::SQL');
             } else {
@@ -219,11 +216,11 @@ abstract class DirectSingle implements DirectSingleInterface
                 'id'  => $primary_id,
             ]);
 
-            $query = $this->_db->prepare($sql);
-            $query->execute([':id' => $primary_id]);
-            $defaults = $query->fetch(PDO::FETCH_ASSOC);
-            $query->closeCursor();
-            unset($query);
+            $qry = $this->_db->prepare($sql);
+            $qry->execute([':id' => $primary_id]);
+            $defaults = $qry->fetch(PDO::FETCH_ASSOC);
+            $qry->closeCursor();
+            unset($qry);
             if (!\is_array($defaults)) {
                 $cLogger->info('ORM: DS: SELECT: '.$table_name.': Data Not Found');
                 if (!$this->_canInsert) {
