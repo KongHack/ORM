@@ -481,16 +481,10 @@ abstract class DirectSingle implements DirectSingleInterface
      * @param string $key
      * @param mixed  $val
      *
-     * @throws Exception
-     *
      * @return $this
      */
     protected function set(string $key, mixed $val)
     {
-        if ($key === $this->primary_name) {
-            throw new Exception('Cannot set the primary id via set');
-        }
-
         if ($this->{$key} !== $val) {
             $this->{$key} = $val;
             if (!\in_array($key, $this->_changed)) {
