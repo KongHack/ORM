@@ -6,14 +6,15 @@ use GCWorld\Database\Database;
 use GCWorld\Interfaces\CommonInterface;
 use GCWorld\ORM\Core\AuditUtilities;
 use GCWorld\ORM\Core\CreateAuditTable;
+use GCWorld\ORM\Interfaces\AuditInterface;
 use PDOException;
 
 /**
  * Class Audit.
  */
-class Audit
+class Audit implements AuditInterface
 {
-    protected static ?int $overrideMemberId = null;
+    protected static mixed $overrideMemberId = null;
     protected static ?array $config = null;
 
     protected bool $canAudit            = true;
@@ -25,9 +26,9 @@ class Audit
 
     protected ?string $table     = null;
     protected ?string $primaryId = null;
-    protected ?int $memberId     = null;
-    protected array $before      = [];
-    protected array $after       = [];
+    protected mixed   $memberId  = null;
+    protected array   $before    = [];
+    protected array   $after     = [];
 
     /**
      * @param CommonInterface $cCommon
@@ -207,6 +208,16 @@ class Audit
     public function getAfter(): array
     {
         return $this->after;
+    }
+
+    /**
+     * @param string|null $member_uuid
+     *
+     * @return void
+     */
+    public static function setOverrideMemberUuid(?string $member_uuid = null): void
+    {
+        self::$overrideMemberId = $member_uuid;
     }
 
     /**
