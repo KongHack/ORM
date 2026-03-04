@@ -283,18 +283,18 @@ class Core
         $cClass->addConstant('AUTO_INCREMENT', $auto_increment)->setPublic();
 
         $cProperty = $cClass->addProperty('_cacheTTL', (int) $config['cache_ttl']);
+        $cProperty->setType('int');
         $cProperty->setVisibility('protected');
-        $cProperty->addComment('@var int');
 
         if ($config['cache_ttl'] < 0) {
             $cProperty = $cClass->addProperty('_canCache', false);
             $cProperty->setVisibility('protected');
-            $cProperty->addComment('@var bool');
+            $cProperty->setType('bool');
         }
 
         $cProperty = $cClass->addProperty('_canCacheAfterPurge', $cache_after_purge);
+        $cProperty->setType('bool');
         $cProperty->setVisibility('protected');
-        $cProperty->addComment('@var bool');
 
         $cProperty = $cClass->addProperty('_auditHandler', $config['audit_handler']);
         $cProperty->setVisibility('protected');
@@ -312,7 +312,7 @@ class Core
         unset($tmp);
 
         foreach ($fields as $i => $row) {
-            $type = (\stristr($row['Type'], 'int') ? 'int   ' : 'string');
+            $type = (\stristr($row['Type'], 'int') ? 'int' : 'string');
             if ('YES' == $row['Null']) {
                 $type .= '|null';
             }
@@ -335,17 +335,17 @@ class Core
         }
         $cProperty = $cClass->addProperty('dbInfo', $dbInfo);
         $cProperty->setStatic(true);
+        $cProperty->setType('array');
         $cProperty->addComment('Contains an array of all fields and the database notation for field type');
-        $cProperty->addComment('@var array');
 
         $cMethodConstructor = $cClass->addMethod('__construct');
 
         // Let's add some variable defaults to make life easier on us
         if ($config['audit_ignore'] || !$this->audit) {
             $cProperty = $cClass->addProperty('_audit', false);
+            $cProperty->setType('bool');
             $cProperty->setVisibility('protected');
             $cProperty->addComment('Disabled via ORM Config');
-            $cProperty->addComment('@var bool');
         }
 
         // CONSTRUCTOR!

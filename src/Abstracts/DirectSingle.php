@@ -47,25 +47,22 @@ abstract class DirectSingle implements DirectSingleInterface
      *
      * @var string|null
      */
-    protected $_cacheName;
+    protected ?string $_cacheName;
 
     /**
-     * @var bool
-     *           Set to false if you want to omit this object from your memory cache all together
+     * Set to false if you want to omit this object from your memory cache all together.
      */
-    protected $_canCache = true;
+    protected bool $_canCache = true;
 
     /**
-     * @var int
-     *          TTL for cache items.  -1 = disabled
+     * TTL for cache items.  -1 = disabled.
      */
-    protected $_cacheTTL = 60;
+    protected int $_cacheTTL = 60;
 
     /**
-     * @var bool
-     *           Set this to false in your class when you don't want to auto re-cache after a purge
+     * Set this to false in your class when you don't want to auto re-cache after a purge.
      */
-    protected $_canCacheAfterPurge = true;
+    protected bool $_canCacheAfterPurge = true;
 
     /**
      * @var Redis|null
@@ -124,8 +121,9 @@ abstract class DirectSingle implements DirectSingleInterface
     protected string $primary_name;
 
     /**
-     * @param mixed|null $primary_id
-     * @param array|null $defaults
+     * @param mixed|null  $primary_id
+     * @param array|null  $defaults
+     * @param string|null $overrideTableName
      *
      * @throws ORMException
      */
