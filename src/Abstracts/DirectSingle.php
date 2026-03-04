@@ -140,13 +140,12 @@ abstract class DirectSingle implements DirectSingleInterface
             throw new ORMException('Primary ID is not scalar');
         }
 
-        $cachable = $this->_canCache && !empty($this->_cache) && 0 !== $this->_cacheTTL;
+        $cachable = $this->_canCache
+            && !empty($this->_cache)
+            && $this->_cacheTTL >= 0
+            && !empty($primary_id);
 
-        if ($cachable
-            && !empty($primary_id)
-            && 0 !== $primary_id
-            && '' !== $primary_id
-        ) {
+        if ($cachable) {
             $blob = $this->_cache->hGet($this->myName, 'key_'.$primary_id);
             $cLogger->info('ORM: DS: '.$table_name.': Cache1: Blob Acquired', [
                 'key'  => $this->myName,
@@ -169,7 +168,7 @@ abstract class DirectSingle implements DirectSingleInterface
                     $data = null;
                 }
 
-                if (null !== $data && \is_array($data) && !empty($data)) {
+                if (!empty($data) && \is_array($data)) {
                     $cLogger->info('ORM: DS: '.$table_name.': Cache1: Data is Good');
                     unset($data['ORM_TIME']); // This is our field
 
@@ -197,12 +196,9 @@ abstract class DirectSingle implements DirectSingleInterface
         } else {
             $cLogger->info('ORM: DS: Cache1: '.$table_name.': Bad Options', [
                 $this->_canCache,
-                null !== $this->_cache,
-                false !== $this->_cache,
+                !empty($this->_cache),
+                $this->_cacheTTL >= 0,
                 !empty($primary_id),
-                null !== $primary_id,
-                0 !== $primary_id,
-                '' !== $primary_id,
                 $primary_id,
             ]);
         }

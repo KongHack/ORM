@@ -60,14 +60,14 @@ class AuditUtilities
 
                 if (empty($v)) {
                     $B[$k] = '';
-                } elseif (false !== \strpos($k, '_uuid') && 16 == \strlen($v)) {
+                } elseif (\str_contains($k, '_uuid') && 16 == \strlen($v)) {
                     $B[$k] = Uuid::fromBytes($v)->toString();
                 } elseif (self::isBinary($v)) {
                     $B[$k] = \base64_encode($v);
                 }
                 if (empty($after[$k])) {
                     $A[$k] = '';
-                } elseif (false !== \strpos($k, '_uuid') && 16 == \strlen($after[$k])) {
+                } elseif (\str_contains($k, '_uuid') && 16 == \strlen($after[$k])) {
                     $A[$k] = Uuid::fromBytes($after[$k])->toString();
                 } elseif (self::isBinary($after[$k])) {
                     $A[$k] = \base64_encode($after[$k]);
