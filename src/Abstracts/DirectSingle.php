@@ -22,14 +22,14 @@ abstract class DirectSingle implements DirectSingleInterface
 {
     /**
      * Here for reference, will be created in child objects automatically.
-     *
-     * @var array
      */
-    public static $dbInfo = [];
+    public static array $dbInfo = [];
+
     /**
      * @var \GCWorld\Common\Common|CommonInterface
      */
     protected $_common;
+
     /**
      * Set this in the event your class needs a non-standard DB.
      *
