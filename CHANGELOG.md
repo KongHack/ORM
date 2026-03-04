@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [6.4.24](https://github.com/KongHack/ORM/releases/tag/6.4.24)
+- @GameCharmer Add types to generated code
+
+
+
 ## [6.4.23](https://github.com/KongHack/ORM/releases/tag/6.4.23)
 - @GameCharmer Cleanup and Modernization
 
