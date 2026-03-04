@@ -3,3 +3,4 @@ src/Generated/*
 vendor/*
 config/*
 !config/config.example.yml
+phpstan_local.neon

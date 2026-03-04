@@ -8,7 +8,7 @@ use Exception;
  */
 class ORMException extends Exception
 {
-    public $backtrace;
+    public array $backtrace;
 
     /**
      * ORMException constructor.

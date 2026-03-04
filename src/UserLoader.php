@@ -2,57 +2,61 @@
 namespace GCWorld\ORM;
 
 use Exception;
-use GCWorld\Interfaces\User;
+use stdClass;
 
 /**
- * Class UserLoader
- * @package GCWorld\ORM
+ * Class UserLoader.
  */
 class UserLoader
 {
     /**
-     * @var User
+     * @var mixed
      */
-    private static $user = null;
+    private static mixed $user = null;
 
     /**
-     * Sets the user object
+     * Sets the user object.
+     *
      * @param mixed $user
+     *
      * @return void
      */
-    public static function setUserObject($user)
+    public static function setUserObject(mixed $user)
     {
         self::$user = $user;
     }
 
     /**
-     * @return mixed
      * @throws Exception
+     *
+     * @return mixed
      */
-    public static function getUser()
+    public static function getUser(): mixed
     {
-        if (self::$user == null) {
+        if (null == self::$user) {
             // Attempt loading from a config.ini
-            $file  = rtrim(dirname(__FILE__), DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR;
+            $file  = \rtrim(\dirname(__FILE__), DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR;
             $file .= 'config'.DIRECTORY_SEPARATOR.'config.ini';
-            if (!file_exists($file)) {
+            if (!\file_exists($file)) {
                 throw new Exception('Config File Not Found');
             }
-            $config = parse_ini_file($file, true);
+            $config = \parse_ini_file($file, true);
             if (isset($config['config_path'])) {
-                $config = parse_ini_file($config['config_path'], true);
+                $config = \parse_ini_file($config['config_path'], true);
             }
             if (!isset($config['general']['user'])) {
                 throw new Exception('Config does not contain "user" value!');
             }
-            /** @var \stdClass $class */
+            /** @var stdClass $class */
             $class = $config['general']['user'];
-            if (!method_exists($class, 'getInstance')) {
+            if (!\method_exists($class, 'getInstance')) {
                 throw new Exception('getInstance method not found');
             }
+            // @phpstan-ignore-next-line
             $obj        = $class::getInstance();
             self::$user = $obj;
         }
+
         return self::$user;
     }
 }

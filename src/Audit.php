@@ -1,41 +1,40 @@
 <?php
-
 namespace GCWorld\ORM;
 
-use GCWorld\Interfaces\CommonInterface;
+use Exception;
 use GCWorld\Database\Database;
+use GCWorld\Interfaces\CommonInterface;
 use GCWorld\ORM\Core\AuditUtilities;
 use GCWorld\ORM\Core\CreateAuditTable;
-use Ramsey\Uuid\Uuid;
+use PDOException;
 
 /**
- * Class Audit
- * @package GCWorld\ORM
+ * Class Audit.
  */
 class Audit
 {
-    protected static $overrideMemberId = null;
-    protected static $config = null;
+    protected static ?int $overrideMemberId = null;
+    protected static ?array $config = null;
 
-    protected $canAudit   = true;
-    protected $cCommon     = null;
-    protected $database   = null;
-    protected $connection = 'default';
-    protected $prefix     = '_Audit_';
-    protected $enable     = true;
+    protected bool $canAudit            = true;
+    protected ?CommonInterface $cCommon = null;
+    protected ?string         $database = null;
+    protected string $connection        = 'default';
+    protected string $prefix            = '_Audit_';
+    protected bool $enable              = true;
 
-    protected $table     = null;
-    protected $primaryId = null;
-    protected $memberId  = null;
-    protected $before    = [];
-    protected $after     = [];
+    protected ?string $table     = null;
+    protected ?string $primaryId = null;
+    protected ?int $memberId     = null;
+    protected array $before      = [];
+    protected array $after       = [];
 
     /**
      * @param CommonInterface $cCommon
      */
     public function __construct(CommonInterface $cCommon)
     {
-        if (self::$config === null) {
+        if (null === self::$config) {
             $cConfig      = new Config();
             $config       = $cConfig->getConfig();
             self::$config = $config;
@@ -47,9 +46,8 @@ class Audit
 
         if ($this->canAudit) {
             $this->cCommon = $cCommon;
-            /** @var array $audit */
-            $audit = $cCommon->getConfig('audit');
-            if (is_array($audit)) {
+            $audit         = $cCommon->getConfig('audit');
+            if (\is_array($audit)) {
                 $this->enable     = $audit['enable'] ?? false;
                 $this->database   = $audit['database'] ?? $this->database;
                 $this->connection = $audit['connection'] ?? $this->connection;
@@ -60,9 +58,10 @@ class Audit
 
     /**
      * @param mixed $memberId
+     *
      * @return void
      */
-    public static function setOverrideMemberId($memberId)
+    public static function setOverrideMemberId($memberId): void
     {
         self::$overrideMemberId = $memberId;
     }
@@ -70,7 +69,7 @@ class Audit
     /**
      * @return void
      */
-    public static function clearOverrideMemberId()
+    public static function clearOverrideMemberId(): void
     {
         self::$overrideMemberId = null;
     }
@@ -81,16 +80,23 @@ class Audit
      * @param array  $before
      * @param array  $after
      * @param mixed  $memberId
+     *
+     * @throws Exception
+     *
      * @return int|string
-     * @throws \Exception
      */
-    public function storeLog(string $table, $primaryId, array $before, array $after, $memberId = null)
-    {
+    public function storeLog(
+        string $table,
+        mixed $primaryId,
+        array $before,
+        array $after,
+        mixed $memberId = null
+    ): int|string {
         if (!$this->canAudit) {
             return 0;
         }
 
-        if ($memberId === null) {
+        if (null === $memberId) {
             $memberId = $this->determineMemberId();
         }
 
@@ -100,23 +106,22 @@ class Audit
         $this->before    = $before;
         $this->after     = $after;
 
-
         if (!$this->enable) {
             return 0;
         }
 
         if (empty($primaryId)) {
-            throw new \Exception('AUDIT LOG:: Invalid Primary ID Passed');
+            throw new Exception('AUDIT LOG:: Invalid Primary ID Passed');
         }
 
         $storeTable = $this->prefix.$table;
-        if ($this->database != null) {
+        if (null != $this->database) {
             $storeTable = $this->database.'.'.$storeTable;
         }
         /** @var Database $db */
         $db = $this->cCommon->getDatabase($this->connection);
 
-        //Determine only things changed.
+        // Determine only things changed.
         $cData = AuditUtilities::cleanData($table, $after, $before);
         $A = $cData->getAfter();
         $B = $cData->getBefore();
@@ -132,18 +137,19 @@ class Audit
                 (primary_id, member_id, log_request_uri, log_before, log_after)
                 VALUES
                 (:pid, :mid, :uri, :logB, :logA)';
+
         try {
             $query = $db->prepare($sql);
             $query->execute([
                 ':pid'  => $primaryId,
                 ':mid'  => $memberId,
                 ':uri'  => $request,
-                ':logB' => json_encode($B),
-                ':logA' => json_encode($A)
+                ':logB' => \json_encode($B),
+                ':logA' => \json_encode($A),
             ]);
             $query->closeCursor();
-        } catch (\PDOException $e) {
-            if (stristr($e->getMessage(), 'Base table or view not found') === false) {
+        } catch (PDOException $e) {
+            if (false === \stristr($e->getMessage(), 'Base table or view not found')) {
                 throw $e;
             }
 
@@ -154,8 +160,8 @@ class Audit
                 ':pid'  => $primaryId,
                 ':mid'  => $memberId,
                 ':uri'  => $request,
-                ':logB' => json_encode($B),
-                ':logA' => json_encode($A)
+                ':logB' => \json_encode($B),
+                ':logA' => \json_encode($A),
             ]);
             $query->closeCursor();
         }
@@ -164,37 +170,25 @@ class Audit
     }
 
     /**
-     * More Info: http://stackoverflow.com/questions/1318608/php-get-parent-script-name
-     * @return mixed
+     * @return string|null
      */
-    protected function getTopScript()
-    {
-        $backtrace = debug_backtrace(defined("DEBUG_BACKTRACE_IGNORE_ARGS") ? DEBUG_BACKTRACE_IGNORE_ARGS : false);
-        $top_frame = array_pop($backtrace);
-
-        return $top_frame['file'];
-    }
-
-    /**
-     * @return null|string
-     */
-    public function getTable()
+    public function getTable(): ?string
     {
         return $this->table;
     }
 
     /**
-     * @return null|int
+     * @return int|string|null
      */
-    public function getPrimaryId()
+    public function getPrimaryId(): int|string|null
     {
         return $this->primaryId;
     }
 
     /**
-     * @return null|int
+     * @return int|null
      */
-    public function getMemberId()
+    public function getMemberId(): ?int
     {
         return $this->memberId;
     }
@@ -202,7 +196,7 @@ class Audit
     /**
      * @return array
      */
-    public function getBefore()
+    public function getBefore(): array
     {
         return $this->before;
     }
@@ -210,49 +204,62 @@ class Audit
     /**
      * @return array
      */
-    public function getAfter()
+    public function getAfter(): array
     {
         return $this->after;
     }
 
     /**
+     * More Info: http://stackoverflow.com/questions/1318608/php-get-parent-script-name.
+     *
+     * @return mixed
+     */
+    protected function getTopScript(): mixed
+    {
+        $backtrace = \debug_backtrace(\defined('DEBUG_BACKTRACE_IGNORE_ARGS') ? DEBUG_BACKTRACE_IGNORE_ARGS : false);
+        $top_frame = \array_pop($backtrace);
+
+        return $top_frame['file'] ?? '';
+    }
+
+    /**
      * @return int
      */
-    protected function determineMemberId()
+    protected function determineMemberId(): int
     {
-        if (self::$overrideMemberId !== null) {
-            return intval(self::$overrideMemberId);
+        if (null !== self::$overrideMemberId) {
+            return \intval(self::$overrideMemberId);
         }
 
-        if (!method_exists($this->cCommon, 'getUser')) {
+        if (!\method_exists($this->cCommon, 'getUser')) {
             return 0;
         }
         $user = $this->cCommon->getUser();
-        if (!is_object($user)) {
+        if (!\is_object($user)) {
             return 0;
         }
 
-        if (method_exists($user, 'getRealMemberUuid')) {
+        if (\method_exists($user, 'getRealMemberUuid')) {
             return $user->getRealMemberUuid();
         }
 
-        if (method_exists($user, 'getRealMemberId')) {
+        if (\method_exists($user, 'getRealMemberId')) {
             return $user->getRealMemberId();
         }
 
-        if (method_exists($user, 'getMemberId')) {
+        if (\method_exists($user, 'getMemberId')) {
             return $user->getMemberId();
         }
 
-        if (defined(get_class($user).'::CLASS_PRIMARY')) {
-            $user_primary = constant(get_class($user).'::CLASS_PRIMARY');
-            if (property_exists($user, $user_primary)) {
-                return $user->$user_primary;
+        if (\defined(\get_class($user).'::CLASS_PRIMARY')) {
+            $user_primary = \constant(\get_class($user).'::CLASS_PRIMARY');
+            if (\property_exists($user, $user_primary)) {
+                return $user->{$user_primary};
             }
-            if (method_exists($user, 'get')) {
+            if (\method_exists($user, 'get')) {
                 try {
                     return $user->get($user_primary);
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     // Silently fail.
                 }
             }

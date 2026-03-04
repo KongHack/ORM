@@ -5,20 +5,18 @@ use Monolog\Handler\NullHandler;
 use Monolog\Logger;
 
 /**
- * Class ORMLogger
- *
- * @package GCWorld\ORM
+ * Class ORMLogger.
  */
 class ORMLogger
 {
-    protected static $logger = null;
+    protected static ?Logger $logger = null;
 
     /**
      * @param Logger $logger
      *
      * @return void
      */
-    public static function setLogger(Logger $logger)
+    public static function setLogger(Logger $logger): void
     {
         self::$logger = $logger;
     }
@@ -28,7 +26,7 @@ class ORMLogger
      */
     public static function getLogger(): Logger
     {
-        if (self::$logger === null) {
+        if (null === self::$logger) {
             $cLogger = new Logger('orm_logger_empty');
             $cLogger->pushHandler(new NullHandler());
 

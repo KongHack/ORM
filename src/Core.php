@@ -1171,11 +1171,11 @@ NOW;
     }
 
     /**
-     * @param $techDesc
+     * @param string $techDesc
      *
      * @return int
      */
-    protected function determineMaxLen($techDesc): int
+    protected function determineMaxLen(string $techDesc): int
     {
         $start = \strpos($techDesc, '(');
         if (false === $start) {

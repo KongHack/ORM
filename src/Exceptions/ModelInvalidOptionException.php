@@ -9,9 +9,9 @@ use GCWorld\ORM\Interfaces\FieldException;
  */
 class ModelInvalidOptionException extends Exception implements FieldException
 {
-    protected $chosen;
-    protected $possible;
-    protected $field_name;
+    protected mixed  $chosen;
+    protected array  $possible;
+    protected string $field_name;
 
     /**
      * ModelInvalidOptionException constructor.

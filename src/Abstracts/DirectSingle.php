@@ -117,25 +117,35 @@ abstract class DirectSingle implements DirectSingleInterface
     protected string $myName;
 
     /**
+     * @var string
+     */
+    protected string $table_name;
+
+    protected string $primary_name;
+
+    /**
      * @param mixed|null $primary_id
      * @param array|null $defaults
      *
      * @throws ORMException
      */
-    protected function __construct(mixed $primary_id = null, ?array $defaults = null)
-    {
-        $cLogger       = ORMLogger::getLogger();
-        $this->myName  = \get_class($this);
-        $table_name    = \constant($this->myName.'::CLASS_TABLE');
-        $primary_name  = \constant($this->myName.'::CLASS_PRIMARY');
-        $this->_common = CommonLoader::getCommon();
+    protected function __construct(
+        mixed $primary_id = null,
+        ?array $defaults = null,
+        ?string $overrideTableName = null
+    ) {
+        $cLogger             = ORMLogger::getLogger();
+        $this->myName        = \get_class($this);
+        $this->table_name    = $overrideTableName ?? \constant($this->myName.'::CLASS_TABLE');
+        $this->primary_name  = \constant($this->myName.'::CLASS_PRIMARY');
+        $this->_common       = CommonLoader::getCommon();
 
-        $cLogger->info('ORM: DS: '.$table_name, \func_get_args());
+        $cLogger->info('ORM: DS: '.$this->table_name, \func_get_args());
         $this->_db    = $this->_common->getDatabase($this->_dbName);
         $this->_cache = $this->_common->getCache($this->_cacheName);
 
         if (null !== $primary_id && !\is_scalar($primary_id)) {
-            $cLogger->info('ORM: DS: '.$table_name.': Primary ID is not scalar', \debug_backtrace());
+            $cLogger->info('ORM: DS: '.$this->table_name.': Primary ID is not scalar', \debug_backtrace());
 
             throw new ORMException('Primary ID is not scalar');
         }
@@ -147,13 +157,13 @@ abstract class DirectSingle implements DirectSingleInterface
 
         if ($cachable) {
             $blob = $this->_cache->hGet($this->myName, 'key_'.$primary_id);
-            $cLogger->info('ORM: DS: '.$table_name.': Cache1: Blob Acquired', [
+            $cLogger->info('ORM: DS: '.$this->table_name.': Cache1: Blob Acquired', [
                 'key'  => $this->myName,
                 'hash' => 'key_'.$primary_id,
                 'blob' => $blob,
             ]);
             if (!empty($blob)) {
-                $cLogger->info('ORM: DS: '.$table_name.': Cache1: Blob is not empty');
+                $cLogger->info('ORM: DS: '.$this->table_name.': Cache1: Blob is not empty');
 
                 try {
                     $data = @\unserialize($blob);
@@ -164,28 +174,28 @@ abstract class DirectSingle implements DirectSingleInterface
                     && $this->_cacheTTL > 0
                     && (!isset($data['ORM_TIME']) || $data['ORM_TIME'] < \time())
                 ) {
-                    $cLogger->info('ORM: DS: '.$table_name.': Cache1: Data is Expired');
+                    $cLogger->info('ORM: DS: '.$this->table_name.': Cache1: Data is Expired');
                     $data = null;
                 }
 
                 if (!empty($data) && \is_array($data)) {
-                    $cLogger->info('ORM: DS: '.$table_name.': Cache1: Data is Good');
+                    $cLogger->info('ORM: DS: '.$this->table_name.': Cache1: Data is Good');
                     unset($data['ORM_TIME']); // This is our field
 
                     $fields = \array_keys(static::$dbInfo);
                     if (\count($fields) == \count($data)) {
-                        $cLogger->info('ORM: DS: '.$table_name.': Cache1: Count Matches');
+                        $cLogger->info('ORM: DS: '.$this->table_name.': Cache1: Count Matches');
                         // $properties = array_keys(get_object_vars($this));
                         foreach ($data as $k => $v) {
                             if (\in_array($k, $fields)) {
                                 $this->{$k} = $v;
                             }
                         }
-                        $cLogger->info('ORM: DS: '.$table_name.': Cache1: All Good!');
+                        $cLogger->info('ORM: DS: '.$this->table_name.': Cache1: All Good!');
 
                         return;
                     }
-                    $cLogger->info('ORM: DS: '.$table_name.': Cache1: Count does not match', [
+                    $cLogger->info('ORM: DS: '.$this->table_name.': Cache1: Count does not match', [
                         $fields,
                         $data,
                     ]);
@@ -194,7 +204,7 @@ abstract class DirectSingle implements DirectSingleInterface
                 $this->_cache->hDel($this->myName, 'key_'.$primary_id);
             }
         } else {
-            $cLogger->info('ORM: DS: Cache1: '.$table_name.': Bad Options', [
+            $cLogger->info('ORM: DS: Cache1: '.$this->table_name.': Bad Options', [
                 $this->_canCache,
                 !empty($this->_cache),
                 $this->_cacheTTL >= 0,
@@ -203,15 +213,15 @@ abstract class DirectSingle implements DirectSingleInterface
             ]);
         }
 
-        $cLogger->info('ORM: DS: Cache1: '.$table_name.': Exiting Routine');
+        $cLogger->info('ORM: DS: Cache1: '.$this->table_name.': Exiting Routine');
         if (!empty($primary_id)) {
             if (\defined($this->myName.'::SQL')) {
                 $sql = \constant($this->myName.'::SQL');
             } else {
                 $tmp = ($cachable ? 'SQL_NO_CACHE' : '');
-                $sql = "SELECT {$tmp} * FROM {$table_name} WHERE {$primary_name} = :id";
+                $sql = "SELECT {$tmp} * FROM {$this->table_name} WHERE {$this->primary_name} = :id";
             }
-            $cLogger->info('ORM: DS: SELECT: '.$table_name.': Start', [
+            $cLogger->info('ORM: DS: SELECT: '.$this->table_name.': Start', [
                 'sql' => $sql,
                 'id'  => $primary_id,
             ]);
@@ -222,7 +232,7 @@ abstract class DirectSingle implements DirectSingleInterface
             $qry->closeCursor();
             unset($qry);
             if (!\is_array($defaults)) {
-                $cLogger->info('ORM: DS: SELECT: '.$table_name.': Data Not Found');
+                $cLogger->info('ORM: DS: SELECT: '.$this->table_name.': Data Not Found');
                 if (!$this->_canInsert) {
                     $cConfig = new Config();
                     $config  = $cConfig->getConfig();
@@ -232,7 +242,7 @@ abstract class DirectSingle implements DirectSingleInterface
                             d(\func_get_args());
                         }
                     } else {
-                        $cLogger->info('ORM: DS: SELECT: '.$table_name.': Backtrace', [
+                        $cLogger->info('ORM: DS: SELECT: '.$this->table_name.': Backtrace', [
                             'args'  => \func_get_args(),
                             'trace' => \debug_backtrace(),
                         ]);
@@ -241,7 +251,7 @@ abstract class DirectSingle implements DirectSingleInterface
                     throw new ORMException($this->myName.' Construct Failed');
                 }
             } else {
-                $cLogger->info('ORM: DS: SELECT: '.$table_name.': Select Success', $defaults);
+                $cLogger->info('ORM: DS: SELECT: '.$this->table_name.': Select Success', $defaults);
             }
         }
 
@@ -254,7 +264,7 @@ abstract class DirectSingle implements DirectSingleInterface
             }
         }
         if ($cachable) {
-            $cLogger->info('ORM: DS: SELECT: '.$table_name.': Can Cache');
+            $cLogger->info('ORM: DS: SELECT: '.$this->table_name.': Can Cache');
             if ($primary_id > 0) {
                 $this->setCacheData();
             }
@@ -266,8 +276,6 @@ abstract class DirectSingle implements DirectSingleInterface
      */
     public function save(): bool
     {
-        $table_name    = \constant($this->myName.'::CLASS_TABLE');
-        $primary_name  = \constant($this->myName.'::CLASS_PRIMARY');
         $version_field = \constant($this->myName.'::VERSION_FIELD');
 
         if (empty($this->_changed)) {
@@ -280,10 +288,10 @@ abstract class DirectSingle implements DirectSingleInterface
 
         // ============================================================================== Audit
         if ($this->_audit || $save_hook) {
-            $sql = "SELECT * FROM {$table_name} WHERE {$primary_name} = :primary";
+            $sql = "SELECT * FROM {$this->table_name} WHERE {$this->primary_name} = :primary";
             $qry = $this->_db->prepare($sql);
             $qry->execute([
-                ':primary' => $this->{$primary_name},
+                ':primary' => $this->{$this->primary_name},
             ]);
             $before = $qry->fetch(PDO::FETCH_ASSOC) ?? [];
             $qry->closeCursor();
@@ -294,17 +302,17 @@ abstract class DirectSingle implements DirectSingleInterface
         if ($this->_canInsert) {
             $auto_increment = \constant($this->myName.'::CLASS_PRIMARY');
             $fields         = \array_keys(static::$dbInfo);
-            if (!\in_array($primary_name, $fields)) {
-                $fields[] = $primary_name;
+            if (!\in_array($this->primary_name, $fields)) {
+                $fields[] = $this->primary_name;
             }
             $params = [];
             if (\count($fields) > 1) {    // 1 being the primary key
-                $sql = 'INSERT INTO '.$table_name.
+                $sql = 'INSERT INTO '.$this->table_name.
                     ' ('.\implode(', ', $fields).
                     ') VALUES (:'.\implode(', :', $fields).') ON DUPLICATE KEY UPDATE ';
                 foreach ($fields as $field) {
                     $params[':'.$field] = (null == $this->{$field} ? '' : $this->{$field});
-                    if ($field == $primary_name && !$auto_increment) {
+                    if ($field == $this->primary_name && !$auto_increment) {
                         continue;
                     }
                     $sql .= "{$field} = VALUES({$field}), \n";
@@ -314,17 +322,17 @@ abstract class DirectSingle implements DirectSingleInterface
                 $qry->execute($params);
                 $newId = $this->_db->lastInsertId();
                 if ($newId > 0) {
-                    $this->{$primary_name} = $newId;
+                    $this->{$this->primary_name} = $newId;
                 }
                 $qry->closeCursor();
                 unset($qry);
             } else {
-                $sql = 'INSERT IGNORE INTO '.$table_name.
+                $sql = 'INSERT IGNORE INTO '.$this->table_name.
                     ' ('.\implode(', ', $fields).') VALUES (:'.
                     \implode(', :', $fields).')';
                 foreach ($fields as $field) {
                     $params[':'.$field] = (null == $this->{$field} ? '' : $this->{$field});
-                    if ($field == $primary_name && !$auto_increment) {
+                    if ($field == $this->primary_name && !$auto_increment) {
                         continue;
                     }
                     $sql .= "{$field} = VALUES({$field}), \n";
@@ -334,14 +342,14 @@ abstract class DirectSingle implements DirectSingleInterface
                 $qry->execute($params);
                 $newId = $this->_db->lastInsertId();
                 if ($newId > 0) {
-                    $this->{$primary_name} = $newId;
+                    $this->{$this->primary_name} = $newId;
                 }
                 $qry->closeCursor();
                 unset($qry);
             }
         } else {
-            $sql                       = 'UPDATE '.$table_name.' SET ';
-            $params[':'.$primary_name] = $this->{$primary_name};
+            $sql                       = 'UPDATE '.$this->table_name.' SET ';
+            $params[':'.$this->primary_name] = $this->{$this->primary_name};
             foreach ($this->_changed as $key) {
                 $sql             .= $key.' = :'.$key.', ';
                 $params[':'.$key] = $this->{$key};
@@ -350,7 +358,7 @@ abstract class DirectSingle implements DirectSingleInterface
             if (!empty($version_field)) {
                 $sql .= ', '.$version_field.' = '.$version_field.' + 1';
             }
-            $sql .= ' WHERE '.$primary_name.' = :'.$primary_name;
+            $sql .= ' WHERE '.$this->primary_name.' = :'.$this->primary_name;
 
             $qry = $this->_db->prepare($sql);
             $qry->execute($params);
@@ -360,10 +368,10 @@ abstract class DirectSingle implements DirectSingleInterface
 
         // ============================================================================== Audit
         if ($this->_audit || $save_hook) {
-            $sql   = 'SELECT * FROM '.$table_name.' WHERE '.$primary_name.' = :primary';
+            $sql   = 'SELECT * FROM '.$this->table_name.' WHERE '.$this->primary_name.' = :primary';
             $qry = $this->_db->prepare($sql);
             $qry->execute([
-                ':primary' => $this->{$primary_name},
+                ':primary' => $this->{$this->primary_name},
             ]);
             $after = $qry->fetch(PDO::FETCH_ASSOC) ?? [];
             $qry->closeCursor();
@@ -373,7 +381,7 @@ abstract class DirectSingle implements DirectSingleInterface
             if (\is_array($before) && \is_array($after) && !empty($this->_auditHandler)) {
                 /** @var AuditInterface $cAudit */
                 $cAudit = new $this->_auditHandler($this->_common);
-                $cAudit->storeLog($table_name, $this->{$primary_name}, $before, $after);
+                $cAudit->storeLog($this->table_name, $this->{$this->primary_name}, $before, $after);
                 $this->_lastAuditObject = $cAudit;
             }
         }
@@ -406,8 +414,7 @@ abstract class DirectSingle implements DirectSingleInterface
     public function purgeCache(): void
     {
         if ($this->_canCache && $this->_cache) {
-            $primary_name = \constant($this->myName.'::CLASS_PRIMARY');
-            $this->_cache->hDel($this->myName, 'key_'.$this->{$primary_name});
+            $this->_cache->hDel($this->myName, 'key_'.$this->{$this->primary_name});
 
             if ($this->_canCacheAfterPurge) {
                 $this->setCacheData();
@@ -478,10 +485,16 @@ abstract class DirectSingle implements DirectSingleInterface
      * @param string $key
      * @param mixed  $val
      *
-     * @return static
+     * @throws Exception
+     *
+     * @return $this
      */
-    protected function set(string $key, $val)
+    protected function set(string $key, mixed $val)
     {
+        if ($key === $this->primary_name) {
+            throw new Exception('Cannot set the primary id via set');
+        }
+
         if ($this->{$key} !== $val) {
             $this->{$key} = $val;
             if (!\in_array($key, $this->_changed)) {
@@ -516,8 +529,6 @@ abstract class DirectSingle implements DirectSingleInterface
             return;
         }
 
-        $table_name = \constant($this->myName.'::CLASS_TABLE');
-        $primary    = \constant($this->myName.'::CLASS_PRIMARY');
         $fields     = \array_keys(static::$dbInfo);
         $data       = [];
         foreach ($fields as $field) {
@@ -527,8 +538,8 @@ abstract class DirectSingle implements DirectSingleInterface
             $data['ORM_TIME'] = \time() + $this->_cacheTTL;
         }
 
-        ORMLogger::getLogger()->info('ORM: DS: SCD: '.$table_name.': Setting Cache Data', $data);
+        ORMLogger::getLogger()->info('ORM: DS: SCD: '.$this->table_name.': Setting Cache Data', $data);
 
-        $this->_cache->hSet($this->myName, 'key_'.$this->{$primary}, \serialize($data));
+        $this->_cache->hSet($this->myName, 'key_'.$this->{$this->primary_name}, \serialize($data));
     }
 }

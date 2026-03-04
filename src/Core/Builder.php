@@ -2,6 +2,7 @@
 namespace GCWorld\ORM\Core;
 
 use Exception;
+use GCWorld\Database\Database;
 use GCWorld\Interfaces\CommonInterface;
 use GCWorld\Interfaces\Database\DatabaseInterface;
 use GCWorld\ORM\Config;
@@ -15,17 +16,17 @@ class Builder
 {
     public const BUILDER_VERSION = 3;
 
-    protected $common;
+    protected CommonInterface $common;
 
     /**
-     * @var DatabaseInterface|\GCWorld\Database\Database
+     * @var DatabaseInterface|Database
      */
-    protected $_db;
+    protected DatabaseInterface|Database $_db;
 
     /**
-     * @var DatabaseInterface|\GCWorld\Database\Database
+     * @var DatabaseInterface|Database
      */
-    protected $_audit;
+    protected DatabaseInterface|Database $_audit;
 
     protected array   $coreConfig  = [];
     protected array   $auditConfig = [];
@@ -80,10 +81,7 @@ class Builder
             return;
         }
 
-        $master = $this->auditConfig['prefix'].'_GCAuditMaster';
-        if (null != $this->auditDB) {
-            $master = $this->auditDB.'.'.$master;
-        }
+        $master = $this->auditDB.'.'.$this->auditConfig['prefix'].'_GCAuditMaster';
 
         if (!$this->_audit->tableExists($master)) {
             // This will create the audit master
@@ -123,7 +121,7 @@ class Builder
         }
 
         if (null == $schema) {
-            $schema = $this->auditDB ?? $this->_audit->getWorkingDatabaseName();
+            $schema = $this->auditDB;
         }
 
         $sql   = 'SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = :schema AND TABLE_TYPE = :type';
@@ -186,9 +184,9 @@ class Builder
 
                         try {
                             $this->_audit->exec($sql);
-                            $this->_audit->setTableComment($audit, $fileNumber);
+                            $this->_audit->setTableComment($audit, (string) $fileNumber);
                         } catch (PDOException $e) {
-                            if (false !== \strpos($e->getMessage(), 'Column already exists')) {
+                            if (\str_contains($e->getMessage(), 'Column already exists')) {
                                 continue;
                             }
 
@@ -244,14 +242,14 @@ class Builder
                         audit_datetime_updated = NOW()";
             $query = $this->_audit->prepare($sql);
             $query->execute([
-                ':audit_schema'  => $this->auditDB ?? $schema,
+                ':audit_schema'  => $this->auditDB,
                 ':audit_table'   => $auditBase,
                 ':audit_version' => self::BUILDER_VERSION,
             ]);
             $query->closeCursor();
 
             if (self::BUILDER_VERSION != $version) {
-                $this->_audit->setTableComment($audit, self::BUILDER_VERSION);
+                $this->_audit->setTableComment($audit, (string) self::BUILDER_VERSION);
             }
         }
     }
@@ -259,7 +257,7 @@ class Builder
     /**
      * @return string
      */
-    public static function getDataModelDirectory()
+    public static function getDataModelDirectory(): string
     {
         $base  = \rtrim(__DIR__, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR;
         $base .= 'datamodel'.DIRECTORY_SEPARATOR.'audit'.DIRECTORY_SEPARATOR;
