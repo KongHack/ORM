@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [6.4.26](https://github.com/KongHack/ORM/releases/tag/6.4.26)
+- @GameCharmer Set `_cacheName` to `default` to align with Common, remove nullable 
+
+
+
 ## [6.4.25](https://github.com/KongHack/ORM/releases/tag/6.4.25)
 - @GameCharmer patch missing `array` on `dbInfo` in `DirectSingle`
 

@@ -44,10 +44,8 @@ abstract class DirectSingle implements DirectSingleInterface
 
     /**
      * Set this in the event your class needs a non-standard Cache.
-     *
-     * @var string|null
      */
-    protected ?string $_cacheName;
+    protected string $_cacheName = 'default';
 
     /**
      * Set to false if you want to omit this object from your memory cache all together.
