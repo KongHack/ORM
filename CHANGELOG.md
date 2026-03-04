@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [6.4.28](https://github.com/KongHack/ORM/releases/tag/6.4.28)
+- @GameCharmer Patch included Audit class
+
+
+
 ## [6.4.27](https://github.com/KongHack/ORM/releases/tag/6.4.27)
 - @GameCharmer remove exception if attempting to set the primary key to a value. Apparently this is used somewhere
 
