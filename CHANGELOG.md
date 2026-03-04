@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [6.4.23](https://github.com/KongHack/ORM/releases/tag/6.4.23)
+- @GameCharmer Cleanup and Modernization
+
+
+
 ## [6.4.22](https://github.com/KongHack/ORM/releases/tag/6.4.22)
 - @GameCharmer Patch cacheable in Direct Single
 
