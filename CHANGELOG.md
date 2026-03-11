@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [6.4.29](https://github.com/KongHack/ORM/releases/tag/6.4.29)
+- @GameCharmer Add reflection backing type if available to getter generation
+
+
+
 ## [6.4.28](https://github.com/KongHack/ORM/releases/tag/6.4.28)
 - @GameCharmer Patch included Audit class
 
