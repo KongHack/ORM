@@ -11,6 +11,7 @@ use Nette\PhpGenerator\PhpNamespace;
 use Nette\PhpGenerator\PsrPrinter;
 use PDO;
 use ReflectionClass;
+use ReflectionEnum;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -384,7 +385,14 @@ class Core
 
                 if (isset($fieldConfig['backed_enum']) && $fieldConfig['backed_enum']) {
                     $body  = '$val = $this->get(\''.$row['Field'].'\');'.PHP_EOL;
-                    $body .= 'return '.$return_type.'::from($val);';
+
+                    $rEnum = new ReflectionEnum($return_type);
+                    $rBackingType = $rEnum->getBackingType();
+                    if (null !== $rBackingType) {
+                        $body .= 'return '.$return_type.'::from(('.$rBackingType.') $val);';
+                    } else {
+                        $body .= 'return '.$return_type.'::from($val);';
+                    }
 
                     $enums[$row['Field']] = $return_type;
                     $cMethod->setBody($body);
