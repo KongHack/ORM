@@ -412,6 +412,20 @@ class Core
                         ->setPublic()
                         ->addComment('@return string|null')
                         ->setBody($body);
+
+                    $body  = '$value = $this->get(\''.$row['Field'].'\');'.PHP_EOL;
+                    $body .= 'if(empty($value)) { '.PHP_EOL;
+                    $body .= '    return null;'.PHP_EOL;
+                    $body .= '}'.PHP_EOL;
+                    $body .= PHP_EOL;
+                    $body .= 'return Uuid::fromBytes($value);';
+
+                    $cClass->addMethod('get'.$name.'AsObject')
+                        ->setPublic()
+                        ->addComment('@return Uuid|null')
+                        ->setReturnType('Uuid')
+                        ->setReturnNullable(true)
+                        ->setBody($body);
                 }
             }
 
