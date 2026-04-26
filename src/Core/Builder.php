@@ -190,8 +190,6 @@ class Builder
                                 continue;
                             }
 
-                            echo 'BAD SQL: ',PHP_EOL,PHP_EOL,$sql,PHP_EOL,PHP_EOL;
-
                             throw $e;
                         }
                     }

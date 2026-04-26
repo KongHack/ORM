@@ -162,6 +162,7 @@ abstract class DirectSingle implements DirectSingleInterface
                 $cLogger->info('ORM: DS: '.$this->table_name.': Cache1: Blob is not empty');
 
                 try {
+                    // Suppressed intentionally: host error handlers may escalate unserialize warnings into fatal app-level errors.
                     $data = @\unserialize($blob, ['allowed_classes' => false]);
                 } catch (Exception $e) {
                     $data = null;
@@ -233,6 +234,7 @@ abstract class DirectSingle implements DirectSingleInterface
                     $cConfig = new Config();
                     $config  = $cConfig->getConfig();
                     if (isset($config['options']['enable_backtrace']) && $config['options']['enable_backtrace']) {
+                        // Intentional opt-in developer diagnostic output; disabled unless explicitly enabled in config.
                         \debug_print_backtrace();
                         if (\function_exists('d')) {
                             d(\func_get_args());
@@ -296,7 +298,7 @@ abstract class DirectSingle implements DirectSingleInterface
 
         // ============================================================================== Write Logic
         if ($this->_canInsert) {
-            $auto_increment = \constant($this->myName.'::CLASS_PRIMARY');
+            $auto_increment = \constant($this->myName.'::AUTO_INCREMENT');
             $fields         = \array_keys(static::$dbInfo);
             if (!\in_array($this->primary_name, $fields)) {
                 $fields[] = $this->primary_name;
@@ -308,7 +310,7 @@ abstract class DirectSingle implements DirectSingleInterface
                     ') VALUES (:'.\implode(', :', $fields).') ON DUPLICATE KEY UPDATE ';
                 foreach ($fields as $field) {
                     $params[':'.$field] = (null == $this->{$field} ? '' : $this->{$field});
-                    if ($field == $this->primary_name && !$auto_increment) {
+                    if ($field == $this->primary_name && $auto_increment) {
                         continue;
                     }
                     $sql .= "{$field} = VALUES({$field}), \n";
@@ -328,11 +330,8 @@ abstract class DirectSingle implements DirectSingleInterface
                     \implode(', :', $fields).')';
                 foreach ($fields as $field) {
                     $params[':'.$field] = (null == $this->{$field} ? '' : $this->{$field});
-                    if ($field == $this->primary_name && !$auto_increment) {
-                        continue;
-                    }
-                    $sql .= "{$field} = VALUES({$field}), \n";
                 }
+
                 $sql = \rtrim($sql, ", \n");
                 $qry = $this->_db->prepare($sql);
                 $qry->execute($params);

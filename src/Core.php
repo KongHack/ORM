@@ -698,15 +698,17 @@ NOW;
     }
 
     /**
+     * @throws Exception
+     *
      * @return object
      */
-    public function load()
+    public function load(): object
     {
         $args       = \func_get_args();
         $class_name = '\\GCWorld\\ORM\\Generated\\'.$args[0];
 
         if (!\class_exists($class_name)) {
-            die('Invalid Class: '.$class_name);
+            throw new Exception('Invalid Class: '.$class_name);
         }
         $args[0] = $this->master_common;
 
@@ -1120,7 +1122,7 @@ NOW;
         string $descDir,
         string $table_name,
         array $dbInfo
-    ) {
+    ): void {
         // Create a trait version
         $existing = [];
         $changed  = false;
