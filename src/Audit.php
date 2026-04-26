@@ -24,11 +24,11 @@ class Audit implements AuditInterface
     protected string $prefix            = '_Audit_';
     protected bool $enable              = true;
 
-    protected ?string $table     = null;
-    protected ?string $primaryId = null;
-    protected mixed   $memberId  = null;
-    protected array   $before    = [];
-    protected array   $after     = [];
+    protected ?string $table            = null;
+    protected ?string $primaryId        = null;
+    protected int|string|null $memberId = null;
+    protected array   $before           = [];
+    protected array   $after            = [];
 
     /**
      * @param CommonInterface $cCommon
@@ -187,9 +187,9 @@ class Audit implements AuditInterface
     }
 
     /**
-     * @return int|null
+     * @return int|string|null
      */
-    public function getMemberId(): ?int
+    public function getMemberId(): int|string|null
     {
         return $this->memberId;
     }
@@ -234,12 +234,16 @@ class Audit implements AuditInterface
     }
 
     /**
-     * @return int
+     * @return int|string
      */
-    protected function determineMemberId(): int
+    protected function determineMemberId(): int|string
     {
         if (null !== self::$overrideMemberId) {
-            return \intval(self::$overrideMemberId);
+            if (\is_int(self::$overrideMemberId) || \is_string(self::$overrideMemberId)) {
+                return self::$overrideMemberId;
+            }
+
+            return 0;
         }
 
         if (!\method_exists($this->cCommon, 'getUser')) {
@@ -265,11 +269,19 @@ class Audit implements AuditInterface
         if (\defined(\get_class($user).'::CLASS_PRIMARY')) {
             $user_primary = \constant(\get_class($user).'::CLASS_PRIMARY');
             if (\property_exists($user, $user_primary)) {
-                return $user->{$user_primary};
+                $memberId = $user->{$user_primary};
+                if (\is_int($memberId) || \is_string($memberId)) {
+                    return $memberId;
+                }
+
+                return 0;
             }
             if (\method_exists($user, 'get')) {
                 try {
-                    return $user->get($user_primary);
+                    $memberId = $user->get($user_primary);
+                    if (\is_int($memberId) || \is_string($memberId)) {
+                        return $memberId;
+                    }
                 } catch (Exception $e) {
                     // Silently fail.
                 }

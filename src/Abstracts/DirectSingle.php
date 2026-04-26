@@ -162,7 +162,7 @@ abstract class DirectSingle implements DirectSingleInterface
                 $cLogger->info('ORM: DS: '.$this->table_name.': Cache1: Blob is not empty');
 
                 try {
-                    $data = @\unserialize($blob);
+                    $data = @\unserialize($blob, ['allowed_classes' => false]);
                 } catch (Exception $e) {
                     $data = null;
                 }
