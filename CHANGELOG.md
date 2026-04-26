@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [6.4.31](https://github.com/KongHack/ORM/releases/tag/6.4.31)
+- @GameCharmer Overarching cleanup, bug patching, and code fixes
+
+
+
 ## [6.4.30](https://github.com/KongHack/ORM/releases/tag/6.4.30)
 - @GameCharmer Update Dependencies, add `AsObject` method for UUIDs
 
