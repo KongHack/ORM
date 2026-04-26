@@ -34,7 +34,8 @@ class UserLoader
     public static function getUser(): mixed
     {
         if (null == self::$user) {
-            // Attempt loading from a config.ini
+            // Intentionally bootstrap from the lightweight project config.ini here: this path is used at runtime
+            // and only needs enough information to locate the ORM-specific config generated during installation.
             $file  = \rtrim(\dirname(__FILE__), DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR;
             $file .= 'config'.DIRECTORY_SEPARATOR.'config.ini';
             if (!\file_exists($file)) {
