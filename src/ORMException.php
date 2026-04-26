@@ -36,7 +36,7 @@ class ORMException extends Exception
     /**
      * @return array|null
      */
-    public function geTrace()
+    public function getBacktrace(): ?array
     {
         return $this->backtrace;
     }

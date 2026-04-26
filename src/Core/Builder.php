@@ -240,7 +240,7 @@ class Builder
                         audit_datetime_updated = NOW()";
             $query = $this->_audit->prepare($sql);
             $query->execute([
-                ':audit_schema'  => $this->auditDB,
+                ':audit_schema'  => $schema,
                 ':audit_table'   => $auditBase,
                 ':audit_version' => self::BUILDER_VERSION,
             ]);
