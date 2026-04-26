@@ -705,7 +705,11 @@ NOW;
     public function load(): object
     {
         $args       = \func_get_args();
-        $class_name = '\\GCWorld\\ORM\\Generated\\'.$args[0];
+        $class_name = '\\GCWorld\\ORM\\Generated\\';
+        if (!empty($this->sub_namespace)) {
+            $class_name .= $this->sub_namespace.'\\';
+        }
+        $class_name .= $args[0];
 
         if (!\class_exists($class_name)) {
             throw new Exception('Invalid Class: '.$class_name);
