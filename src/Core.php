@@ -10,6 +10,8 @@ use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\PhpNamespace;
 use Nette\PhpGenerator\PsrPrinter;
 use PDO;
+use Ramsey\Uuid\Uuid;
+use Ramsey\Uuid\UuidInterface;
 use ReflectionClass;
 use ReflectionEnum;
 use Symfony\Component\Yaml\Yaml;
@@ -256,7 +258,8 @@ class Core
         $cClass->addConstant('CLASS_TABLE', $table_name)->setPublic();
         $cClass->addComment('Generated Class for Table '.$table_name);
         if ($uuid_fields) {
-            $cNamespace->addUse('Ramsey\\Uuid\\Uuid');
+            $cNamespace->addUse(Uuid::class);
+            $cNamespace->addUse(UuidInterface::class);
         }
 
         // NOTE: As of nette/php-generator 4.1.2, class aliases are broken.
@@ -422,8 +425,8 @@ class Core
 
                     $cClass->addMethod('get'.$name.'AsObject')
                         ->setPublic()
-                        ->addComment('@return Uuid|null')
-                        ->setReturnType('Uuid')
+                        ->addComment('@return UuidInterface|null')
+                        ->setReturnType('UuidInterface')
                         ->setReturnNullable(true)
                         ->setBody($body);
                 }
