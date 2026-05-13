@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [6.4.33](https://github.com/KongHack/ORM/releases/tag/6.4.33)
+- @GameCharmer Patch UuidInterface again
+
+
+
 ## [6.4.32](https://github.com/KongHack/ORM/releases/tag/6.4.32)
 - @GameCharmer Swap hard `Uuid` for `UuidInterface`
 

@@ -426,7 +426,7 @@ class Core
                     $cClass->addMethod('get'.$name.'AsObject')
                         ->setPublic()
                         ->addComment('@return UuidInterface|null')
-                        ->setReturnType('UuidInterface')
+                        ->setReturnType(UuidInterface::class)
                         ->setReturnNullable(true)
                         ->setBody($body);
                 }
