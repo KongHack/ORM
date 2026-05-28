@@ -5,6 +5,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [6.4.34](https://github.com/KongHack/ORM/releases/tag/6.4.34)
+- @GameCharmer Update Composer Dependencies
+
+
+
 ## [6.4.33](https://github.com/KongHack/ORM/releases/tag/6.4.33)
 - @GameCharmer Patch UuidInterface again
 
