@@ -1,4 +1,5 @@
 <?php
+
 namespace GCWorld\ORM;
 
 use BackedEnum;
@@ -23,22 +24,24 @@ class Core
 {
     protected Config $cConfig;
 
-    /** @var CommonInterface|\GCWorld\Common\Common */
-    protected mixed   $master_common    = null;
-    protected string  $master_namespace = '\\';
+    /** @var CommonInterface|\GCWorld\Common\Common|null */
+    protected mixed $master_common    = null;
+    protected string $master_namespace = '\\';
     protected ?string $master_location  = null;
     protected ?string $sub_namespace    = null;
-    protected array   $config           = [];
-    protected Logger  $logger;
+
+    /** @var array<string, mixed> */
+    protected array $config           = [];
+    protected Logger $logger;
     protected DatabaseInterface $_db;
 
-    protected string  $var_visibility         = 'public';
-    protected bool    $get_set_funcs          = true;
-    protected bool    $json_serialize         = true;
-    protected bool    $use_defaults           = true;
-    protected bool    $defaults_override_null = true;
-    protected bool    $type_hinting           = false;
-    protected bool    $audit                  = true;
+    protected string $var_visibility         = 'public';
+    protected bool $get_set_funcs          = true;
+    protected bool $json_serialize         = true;
+    protected bool $use_defaults           = true;
+    protected bool $defaults_override_null = true;
+    protected bool $type_hinting           = false;
+    protected bool $audit                  = true;
 
     /**
      * @param string          $namespace
@@ -70,7 +73,8 @@ class Core
             }
         }
 
-        if (isset($config['options']['var_visibility'])
+        if (
+            isset($config['options']['var_visibility'])
             && \in_array($config['options']['var_visibility'], ['public', 'protected'])
         ) {
             $this->var_visibility = $config['options']['var_visibility'];
@@ -119,9 +123,9 @@ class Core
      */
     public function generate(string $table_name): bool
     {
-        $this->logger->info('Processing Table: '.$table_name);
+        $this->logger->info('Processing Table: ' . $table_name);
 
-        $sql   = 'SHOW FULL COLUMNS FROM '.$table_name;
+        $sql   = 'SHOW FULL COLUMNS FROM ' . $table_name;
         $query = $this->_db->prepare($sql);
         $query->execute();
         $fields = $query->fetchAll(PDO::FETCH_ASSOC);
@@ -138,7 +142,8 @@ class Core
         $config['audit_handler'] = ($config['audit_handler'] ?? ($this->config['general']['audit_handler'] ?? null));
         $config['version_field'] ??= '';
 
-        if (!empty($config['version_field'])
+        if (
+            !empty($config['version_field'])
             && !isset($config['fields'][$config['version_field']]['visibility'])
         ) {
             $config['fields'][$config['version_field']]['visibility'] = 'protected';
@@ -161,12 +166,12 @@ class Core
         $max_var_name   = 0;
         $max_var_type   = 0;
 
-        $path = $this->master_location.DIRECTORY_SEPARATOR.'Generated'.DIRECTORY_SEPARATOR;
+        $path = $this->master_location . DIRECTORY_SEPARATOR . 'Generated' . DIRECTORY_SEPARATOR;
         if (!\is_dir($path)) {
             \mkdir($path, 0o755, true);
         }
         if (!empty($this->sub_namespace)) {
-            $path .= $this->sub_namespace.DIRECTORY_SEPARATOR;
+            $path .= $this->sub_namespace . DIRECTORY_SEPARATOR;
             if (!\is_dir($path)) {
                 \mkdir($path, 0o755, true);
             }
@@ -178,7 +183,7 @@ class Core
 
             // Do not include virtual fields in the system
             if (false !== \stripos($row['Extra'], 'VIRTUAL')) {
-                $this->logger->debug('Unsetting Virtual: '.$row['Field']);
+                $this->logger->debug('Unsetting Virtual: ' . $row['Field']);
                 unset($fields[$i]);
 
                 continue;
@@ -207,7 +212,8 @@ class Core
             }
 
             // In the event this isn't set, or if it's false, double check
-            if (!isset($config['fields'][$row['Field']]['uuid_field'])
+            if (
+                !isset($config['fields'][$row['Field']]['uuid_field'])
                 || !$config['fields'][$row['Field']]['uuid_field']
             ) {
                 $config['fields'][$row['Field']]['uuid_field'] = (
@@ -216,14 +222,16 @@ class Core
                 );
             }
 
-            if (!$uuid_fields
+            if (
+                !$uuid_fields
                 && isset($config['fields'][$row['Field']]['uuid_field'])
                 && $config['fields'][$row['Field']]['uuid_field']
             ) {
                 $uuid_fields = true;
             }
 
-            if (isset($config['fields'][$row['Field']]['type_hint'])
+            if (
+                isset($config['fields'][$row['Field']]['type_hint'])
                 && !empty($config['fields'][$row['Field']]['type_hint'])
                 && \str_contains($config['fields'][$row['Field']]['type_hint'], '\\')
                 && \enum_exists($config['fields'][$row['Field']]['type_hint'])
@@ -248,15 +256,15 @@ class Core
 
         $baseNamespace = 'GCWorld\\ORM\\Generated';
         if (!empty($this->sub_namespace)) {
-            $baseNamespace .= '\\'.$this->sub_namespace;
+            $baseNamespace .= '\\' . $this->sub_namespace;
         }
 
-        $filename   = $table_name.'.php';
+        $filename   = $table_name . '.php';
         $cNamespace = new PhpNamespace($baseNamespace);
         $cClass     = $cNamespace->addClass($table_name);
         $cClass->setAbstract(true);
         $cClass->addConstant('CLASS_TABLE', $table_name)->setPublic();
-        $cClass->addComment('Generated Class for Table '.$table_name);
+        $cClass->addComment('Generated Class for Table ' . $table_name);
         if ($uuid_fields) {
             $cNamespace->addUse(Uuid::class);
             $cNamespace->addUse(UuidInterface::class);
@@ -303,7 +311,7 @@ class Core
         $cProperty = $cClass->addProperty('_auditHandler', $config['audit_handler']);
         $cProperty->setVisibility('protected');
         $cProperty->setType('?string');
-        $cProperty->addComment('Class Name for audit handler'.PHP_EOL.'@var ?string');
+        $cProperty->addComment('Class Name for audit handler' . PHP_EOL . '@var ?string');
         $cProperty->setNullable(true);
 
         // DB Name override
@@ -311,7 +319,7 @@ class Core
         $cProperty = $cClass->addProperty('_dbName', $tmp);
         $cProperty->setVisibility('protected');
         $cProperty->setType('?string');
-        $cProperty->setComment('Database Name'.PHP_EOL.'@var ?string');
+        $cProperty->setComment('Database Name' . PHP_EOL . '@var ?string');
         $cProperty->setNullable(true);
         unset($tmp);
 
@@ -328,14 +336,14 @@ class Core
 
             $cProperty = $cClass->addProperty($row['Field'], $default);
             $cProperty->setVisibility($this->var_visibility);
-            $cProperty->addComment('@var '.$type);
-            $cProperty->addComment('@db-info '.$row['Type']);
+            $cProperty->addComment('@var ' . $type);
+            $cProperty->addComment('@db-info ' . $row['Type']);
         }
 
         $dbInfo = [];
         $enums  = [];
         foreach ($fields as $i => $row) {
-            $dbInfo[$row['Field']] = $row['Type'].('' != $row['Comment'] ? ' - '.$row['Comment'] : '');
+            $dbInfo[$row['Field']] = $row['Type'] . ('' != $row['Comment'] ? ' - ' . $row['Comment'] : '');
         }
         $cProperty = $cClass->addProperty('dbInfo', $dbInfo);
         $cProperty->setStatic(true);
@@ -382,48 +390,48 @@ class Core
                     $return_type = $this->defaultReturn($row['Type']);
                 }
 
-                $cMethod = $cClass->addMethod('get'.$name);
+                $cMethod = $cClass->addMethod('get' . $name);
                 $cMethod->setPublic();
-                $cMethod->addComment('@return '.('YES' == $row['Null'] ? '?' : '').$return_type);
+                $cMethod->addComment('@return ' . ('YES' == $row['Null'] ? '?' : '') . $return_type);
 
                 if (isset($fieldConfig['backed_enum']) && $fieldConfig['backed_enum']) {
-                    $body  = '$val = $this->get(\''.$row['Field'].'\');'.PHP_EOL;
+                    $body  = '$val = $this->get(\'' . $row['Field'] . '\');' . PHP_EOL;
 
                     $rEnum = new ReflectionEnum($return_type);
                     $rBackingType = $rEnum->getBackingType();
                     if (null !== $rBackingType) {
-                        $body .= 'return '.$return_type.'::from(('.$rBackingType.') $val);';
+                        $body .= 'return ' . $return_type . '::from((' . $rBackingType . ') $val);';
                     } else {
-                        $body .= 'return '.$return_type.'::from($val);';
+                        $body .= 'return ' . $return_type . '::from($val);';
                     }
 
                     $enums[$row['Field']] = $return_type;
                     $cMethod->setBody($body);
                 } else {
-                    $cMethod->setBody('return $this->get(\''.$row['Field'].'\');');
+                    $cMethod->setBody('return $this->get(\'' . $row['Field'] . '\');');
                 }
 
                 if ($fieldConfig['uuid_field']) {
-                    $body  = '$value = $this->get(\''.$row['Field'].'\');'.PHP_EOL;
-                    $body .= 'if(empty($value)) { '.PHP_EOL;
-                    $body .= '    return null;'.PHP_EOL;
-                    $body .= '}'.PHP_EOL;
+                    $body  = '$value = $this->get(\'' . $row['Field'] . '\');' . PHP_EOL;
+                    $body .= 'if(empty($value)) { ' . PHP_EOL;
+                    $body .= '    return null;' . PHP_EOL;
+                    $body .= '}' . PHP_EOL;
                     $body .= PHP_EOL;
                     $body .= 'return (Uuid::fromBytes($value))->toString();';
 
-                    $cClass->addMethod('get'.$name.'AsString')
+                    $cClass->addMethod('get' . $name . 'AsString')
                         ->setPublic()
                         ->addComment('@return string|null')
                         ->setBody($body);
 
-                    $body  = '$value = $this->get(\''.$row['Field'].'\');'.PHP_EOL;
-                    $body .= 'if(empty($value)) { '.PHP_EOL;
-                    $body .= '    return null;'.PHP_EOL;
-                    $body .= '}'.PHP_EOL;
+                    $body  = '$value = $this->get(\'' . $row['Field'] . '\');' . PHP_EOL;
+                    $body .= 'if(empty($value)) { ' . PHP_EOL;
+                    $body .= '    return null;' . PHP_EOL;
+                    $body .= '}' . PHP_EOL;
                     $body .= PHP_EOL;
                     $body .= 'return Uuid::fromBytes($value);';
 
-                    $cClass->addMethod('get'.$name.'AsObject')
+                    $cClass->addMethod('get' . $name . 'AsObject')
                         ->setPublic()
                         ->addComment('@return UuidInterface|null')
                         ->setReturnType(UuidInterface::class)
@@ -447,8 +455,8 @@ class Core
                     $return_type = $this->defaultReturn($row['Type']);
                 }
 
-                $cSetter = $cClass->addMethod('set'.$name);
-                $cSetter->addComment('@param '.$return_type.' $value');
+                $cSetter = $cClass->addMethod('set' . $name);
+                $cSetter->addComment('@param ' . $return_type . ' $value');
                 $cSetter->addComment('@return static');
                 $cSetter->addParameter('value')->setType('mixed' == $return_type ? '' : $return_type);
                 $cSetter->setVisibility($fieldConfig['visibility'] ?? 'public');
@@ -471,9 +479,9 @@ NOW;
                 }
                 $body .= PHP_EOL;
                 if (isset($fieldConfig['backed_enum']) && $fieldConfig['backed_enum']) {
-                    $body .= 'return $this->set(\''.$row['Field'].'\', $value->value);'.PHP_EOL;
+                    $body .= 'return $this->set(\'' . $row['Field'] . '\', $value->value);' . PHP_EOL;
                 } else {
-                    $body .= 'return $this->set(\''.$row['Field'].'\', $value);';
+                    $body .= 'return $this->set(\'' . $row['Field'] . '\', $value);';
                 }
 
                 $cSetter->setBody($body);
@@ -485,7 +493,7 @@ NOW;
             $cMethod->addComment('@return array');
             $cMethod->setReturnType('mixed');
 
-            $body = 'return ['.PHP_EOL;
+            $body = 'return [' . PHP_EOL;
 
             foreach ($fields as $i => $row) {
                 $fName       = $row['Field'];
@@ -493,15 +501,15 @@ NOW;
                 if ($this->get_set_funcs) {
                     $name = FieldName::getterName($fName);
                     if ($fieldConfig['uuid_field']) {
-                        $body .= "    '{$fName}' => ".'$this->'.$name.'AsString(),'.PHP_EOL;
+                        $body .= "    '{$fName}' => " . '$this->' . $name . 'AsString(),' . PHP_EOL;
 
                         continue;
                     }
-                    $body .= "    '{$fName}' => ".'$this->'.$name.'(),'.PHP_EOL;
+                    $body .= "    '{$fName}' => " . '$this->' . $name . '(),' . PHP_EOL;
 
                     continue;
                 }
-                $body .= "    '{$fName}' => ".'$this->'.$fName.','.PHP_EOL;
+                $body .= "    '{$fName}' => " . '$this->' . $fName . ',' . PHP_EOL;
             }
             $body .= '];';
             $cMethod->setBody($body);
@@ -516,11 +524,11 @@ NOW;
             $cMethod->addParameter('after')->setType('array');
             $cMethod->addParameter('changed')->setType('array');
             $cMethod->setVisibility('protected');
-            $body  = '$table_name    = constant($this->myName.\'::CLASS_TABLE\');'.PHP_EOL;
-            $body .= '$primary_name  = constant($this->myName.\'::CLASS_PRIMARY\');'.PHP_EOL;
-            $body .= '$primary_id    = $this->$primary_name;'.PHP_EOL;
+            $body  = '$table_name    = constant($this->myName.\'::CLASS_TABLE\');' . PHP_EOL;
+            $body .= '$primary_name  = constant($this->myName.\'::CLASS_PRIMARY\');' . PHP_EOL;
+            $body .= '$primary_id    = $this->$primary_name;' . PHP_EOL;
             $body .= PHP_EOL;
-            $body .= $save_hook_call.'($table_name, $primary_id, $before, $after, $changed);';
+            $body .= $save_hook_call . '($table_name, $primary_id, $before, $after, $changed);';
             $cMethod->setBody($body);
         }
 
@@ -534,44 +542,45 @@ NOW;
         $this->logger->debug('ACTION: Calling doBaseExceptions');
         $this->doBaseExceptions($cClass, $cNamespace, $config['fields']);
 
-        if (isset($this->config['descriptions'], $this->config['descriptions']['enabled'])
+        if (
+            isset($this->config['descriptions'], $this->config['descriptions']['enabled'])
             && $this->config['descriptions']['enabled']
             && isset($this->config['descriptions']['desc_dir'])
             && !empty($this->config['descriptions']['desc_dir'])
         ) {
             $tmp = \explode(DIRECTORY_SEPARATOR, $this->cConfig->getConfigFilePath());
             \array_pop($tmp);
-            $startPath = \implode(DIRECTORY_SEPARATOR, $tmp).DIRECTORY_SEPARATOR;
-            $descDir   = $startPath.$this->config['descriptions']['desc_dir'];
+            $startPath = \implode(DIRECTORY_SEPARATOR, $tmp) . DIRECTORY_SEPARATOR;
+            $descDir   = $startPath . $this->config['descriptions']['desc_dir'];
             if (!\is_dir($descDir)) {
-                $this->logger->alert('Descriptions: Desc Dir is defined but cannot be found: '.$descDir);
+                $this->logger->alert('Descriptions: Desc Dir is defined but cannot be found: ' . $descDir);
             } else {
                 $this->doDescription($cClass, $cNamespace, $descDir, $table_name, $dbInfo);
             }
         }
 
         $cPrinter  = new PsrPrinter();
-        $contents  = '<?php'.PHP_EOL;
+        $contents  = '<?php' . PHP_EOL;
         $contents .= $cPrinter->printNamespace($cNamespace);
 
-        $this->logger->info('DISK ACCESS: Writing File: '.$path.$filename);
-        \file_put_contents($path.$filename, $contents);
+        $this->logger->info('DISK ACCESS: Writing File: ' . $path . $filename);
+        \file_put_contents($path . $filename, $contents);
 
         $this->logger->info('ACTION: Generating Trait');
         // Create a trait version
-        $path = $this->master_location.DIRECTORY_SEPARATOR.'Generated'.DIRECTORY_SEPARATOR;
+        $path = $this->master_location . DIRECTORY_SEPARATOR . 'Generated' . DIRECTORY_SEPARATOR;
         if (!empty($this->sub_namespace)) {
-            $path .= $this->sub_namespace.DIRECTORY_SEPARATOR;
+            $path .= $this->sub_namespace . DIRECTORY_SEPARATOR;
         }
-        $path    .= 'Traits'.DIRECTORY_SEPARATOR;
-        $filename = $table_name.'.php';
+        $path    .= 'Traits' . DIRECTORY_SEPARATOR;
+        $filename = $table_name . '.php';
         if (!\is_dir($path)) {
             \mkdir($path, 0o755, true);
         }
 
         $baseNamespace = 'GCWorld\\ORM\\Generated\\';
         if (!empty($this->sub_namespace)) {
-            $baseNamespace .= $this->sub_namespace.'\\';
+            $baseNamespace .= $this->sub_namespace . '\\';
         }
         $baseNamespace .= 'Traits';
         $cTraitNamespace = new PhpNamespace($baseNamespace);
@@ -584,8 +593,8 @@ NOW;
             $type = (\stristr($row['Type'], 'int') ? 'int   ' : 'string');
 
             $cProperty = $cTraitClass->addProperty($row['Field']);
-            $cProperty->addComment('@var '.$type);
-            $cProperty->addComment('@db-info '.$row['Type']);
+            $cProperty->addComment('@var ' . $type);
+            $cProperty->addComment('@db-info ' . $row['Type']);
             $cProperty->setVisibility($this->var_visibility);
             $cProperty->setValue($this->use_defaults ? $this->formatDefault($row) : null);
         }
@@ -609,29 +618,29 @@ NOW;
                     $return_type = $this->defaultReturn($row['Type']);
                 }
 
-                $cMethod = $cTraitClass->addMethod('get'.$name);
-                $cMethod->addComment('@return '.$return_type);
-                $cMethod->setBody('return $this->'.$row['Field'].';');
+                $cMethod = $cTraitClass->addMethod('get' . $name);
+                $cMethod->addComment('@return ' . $return_type);
+                $cMethod->setBody('return $this->' . $row['Field'] . ';');
 
                 if ($fieldConfig['uuid_field']) {
-                    $cMethod = $cTraitClass->addMethod('get'.$name.'AsString');
+                    $cMethod = $cTraitClass->addMethod('get' . $name . 'AsString');
                     $cMethod->addComment('@return string');
-                    $body  = '$value = $this->get(\''.$row['Field']."');".PHP_EOL;
-                    $body .= 'if(empty($value)) {'.PHP_EOL;
-                    $body .= '    return \'\';'.PHP_EOL;
-                    $body .= '}'.PHP_EOL.PHP_EOL;
-                    $body .= 'return (Uuid::fromBytes($value))->toString();'.PHP_EOL;
+                    $body  = '$value = $this->get(\'' . $row['Field'] . "');" . PHP_EOL;
+                    $body .= 'if(empty($value)) {' . PHP_EOL;
+                    $body .= '    return \'\';' . PHP_EOL;
+                    $body .= '}' . PHP_EOL . PHP_EOL;
+                    $body .= 'return (Uuid::fromBytes($value))->toString();' . PHP_EOL;
                     $cMethod->setBody($body);
                 }
             }
         }
 
         $cPrinter  = new PsrPrinter();
-        $contents  = '<?php'.PHP_EOL;
+        $contents  = '<?php' . PHP_EOL;
         $contents .= $cPrinter->printNamespace($cTraitNamespace);
 
-        $this->logger->info('DISK ACCESS: Writing File: '.$path.$filename);
-        \file_put_contents($path.$filename, $contents);
+        $this->logger->info('DISK ACCESS: Writing File: ' . $path . $filename);
+        \file_put_contents($path . $filename, $contents);
 
         return true;
     }
@@ -639,11 +648,11 @@ NOW;
     /**
      * @param string $table_name
      *
-     * @return array
+     * @return array<string, mixed>
      */
     public function getKeys(string $table_name): array
     {
-        $sql   = 'SHOW INDEX FROM '.$table_name;
+        $sql   = 'SHOW INDEX FROM ' . $table_name;
         $query = $this->_db->prepare($sql);
         $query->execute();
         $indexes = $query->fetchAll(PDO::FETCH_ASSOC);
@@ -710,12 +719,12 @@ NOW;
         $args       = \func_get_args();
         $class_name = '\\GCWorld\\ORM\\Generated\\';
         if (!empty($this->sub_namespace)) {
-            $class_name .= $this->sub_namespace.'\\';
+            $class_name .= $this->sub_namespace . '\\';
         }
         $class_name .= $args[0];
 
         if (!\class_exists($class_name)) {
-            throw new Exception('Invalid Class: '.$class_name);
+            throw new Exception('Invalid Class: ' . $class_name);
         }
         $args[0] = $this->master_common;
 
@@ -725,9 +734,9 @@ NOW;
     }
 
     /**
-     * @param ClassType    $cClass
-     * @param PhpNamespace $cNamespace
-     * @param array        $fields
+     * @param ClassType            $cClass
+     * @param PhpNamespace         $cNamespace
+     * @param array<string, mixed> $fields
      *
      * @return void
      */
@@ -749,14 +758,14 @@ NOW;
         }
 
         foreach ($uniques as $key => $unique) {
-            $this->logger->debug('Processing Unique: '.$key);
+            $this->logger->debug('Processing Unique: ' . $key);
             $name   = \str_replace(' ', '', \ucwords(\str_replace('_', ' ', $key)));
             $vars   = [];
             $varStr = [];
 
             // Factory All Method =====================================================================================
-            $cMethod = $cClass->addMethod('factory'.$name.'All');
-            $this->logger->debug('Creating Method: '.$cMethod->getName());
+            $cMethod = $cClass->addMethod('factory' . $name . 'All');
+            $this->logger->debug('Creating Method: ' . $cMethod->getName());
             $cMethod->setPublic();
             $cMethod->setStatic(true);
             $cMethod->addComment('@return static');
@@ -770,49 +779,49 @@ NOW;
                 }
 
                 if (isset($item['Null']) && 'YES' == \strtoupper($item['Null'])) {
-                    $cMethod->addComment('@param ?'.$type.' '.$item['Column_name']);
+                    $cMethod->addComment('@param ?' . $type . ' ' . $item['Column_name']);
                     $cMethod->addParameter($item['Column_name'], null);
                 } else {
-                    $cMethod->addComment('@param '.$type.' '.$item['Column_name']);
+                    $cMethod->addComment('@param ' . $type . ' ' . $item['Column_name']);
                     $cMethod->addParameter($item['Column_name']);
                 }
 
                 $vars[]   = $item['Column_name'];
-                $varStr[] = '$'.$item['Column_name'];
+                $varStr[] = '$' . $item['Column_name'];
             }
 
             $str   = \implode(', ', $varStr);
-            $body  = '$id = self::find'.$name.'('.$str.');'.PHP_EOL;
-            $body .= 'if(!empty($id)) {'.PHP_EOL;
-            $body .= '    return new static($id);'.PHP_EOL;
-            $body .= '}'.PHP_EOL.PHP_EOL;
-            $body .= '$cObj = new static();'.PHP_EOL;
+            $body  = '$id = self::find' . $name . '(' . $str . ');' . PHP_EOL;
+            $body .= 'if(!empty($id)) {' . PHP_EOL;
+            $body .= '    return new static($id);' . PHP_EOL;
+            $body .= '}' . PHP_EOL . PHP_EOL;
+            $body .= '$cObj = new static();' . PHP_EOL;
             foreach ($vars as $var) {
                 $setter = FieldName::setterName($var);
-                $body  .= '$cObj->'.$setter.'($'.$var.');'.PHP_EOL;
+                $body  .= '$cObj->' . $setter . '($' . $var . ');' . PHP_EOL;
             }
             $body .= PHP_EOL;
-            $body .= 'return $cObj;'.PHP_EOL;
+            $body .= 'return $cObj;' . PHP_EOL;
             $cMethod->setBody($body);
 
             // Factory ID Method ======================================================================================
-            $cMethod = $cClass->addMethod('factory'.$name);
-            $this->logger->debug('Creating Method: '.$cMethod->getName());
+            $cMethod = $cClass->addMethod('factory' . $name);
+            $this->logger->debug('Creating Method: ' . $cMethod->getName());
             $cMethod->setPublic();
             $cMethod->setStatic(true);
             $cMethod->addParameter($primary);
-            $cMethod->addComment('@param mixed $'.$primary);
+            $cMethod->addComment('@param mixed $' . $primary);
             $cMethod->addComment('@return static');
 
-            $body  = 'if(empty($'.$primary.')) {'.PHP_EOL;
-            $body .= '    throw new \\Exception(\'Primary cannot be empty\');'.PHP_EOL;
-            $body .= '}'.PHP_EOL.PHP_EOL;
-            $body .= 'return new static($'.$primary.');'.PHP_EOL;
+            $body  = 'if(empty($' . $primary . ')) {' . PHP_EOL;
+            $body .= '    throw new \\Exception(\'Primary cannot be empty\');' . PHP_EOL;
+            $body .= '}' . PHP_EOL . PHP_EOL;
+            $body .= 'return new static($' . $primary . ');' . PHP_EOL;
             $cMethod->setBody($body);
 
             // Find Primary Function ==================================================================================
-            $cMethod = $cClass->addMethod('find'.$name);
-            $this->logger->debug('Creating Method: '.$cMethod->getName());
+            $cMethod = $cClass->addMethod('find' . $name);
+            $this->logger->debug('Creating Method: ' . $cMethod->getName());
             $cMethod->setPublic();
             $cMethod->setStatic(true);
             $cMethod->addComment('@return mixed');
@@ -825,7 +834,7 @@ NOW;
                     $type = $this->defaultReturn($item['Type']);
                 }
 
-                $cMethod->addComment('@param mixed $'.$item['Column_name']);
+                $cMethod->addComment('@param mixed $' . $item['Column_name']);
                 $cMethod->addParameter($item['Column_name'])->setType($type);
             }
 
@@ -834,40 +843,40 @@ NOW;
             foreach ($unique as $item) {
                 $var     = $item['Column_name'];
                 $enum    = isset($fields[$var]['backed_enum'], $fields[$var]['backed_enum']);
-                $where[] = $var.' = :'.$var;
+                $where[] = $var . ' = :' . $var;
                 if ($enum) {
-                    $params[] = '\':'.$var.'\' => $'.$var.'->value,'.PHP_EOL;
+                    $params[] = '\':' . $var . '\' => $' . $var . '->value,' . PHP_EOL;
                 } else {
-                    $params[] = '\':'.$var.'\' => $'.$var.','.PHP_EOL;
+                    $params[] = '\':' . $var . '\' => $' . $var . ',' . PHP_EOL;
                 }
             }
-            $sWhere = 'WHERE '.\implode(' AND ', $where);
+            $sWhere = 'WHERE ' . \implode(' AND ', $where);
 
-            $body  = '$sql   = \'SELECT '.$primary.' FROM '.$cClass->getName().PHP_EOL;
-            $body .= '          '.$sWhere.'\';'.PHP_EOL;
+            $body  = '$sql   = \'SELECT ' . $primary . ' FROM ' . $cClass->getName() . PHP_EOL;
+            $body .= '          ' . $sWhere . '\';' . PHP_EOL;
             $body .= '$query = CommonLoader::getCommon()->getDatabase(\'';
             $body .= $this->config['general']['database_name'] ?? 'default';
-            $body .= '\')->prepare($sql);'.PHP_EOL;
-            $body .= '$query->execute(['.PHP_EOL;
+            $body .= '\')->prepare($sql);' . PHP_EOL;
+            $body .= '$query->execute([' . PHP_EOL;
             foreach ($params as $param) {
-                $body .= '    '.$param;
+                $body .= '    ' . $param;
             }
-            $body .= ']);'.PHP_EOL;
-            $body .= '$row = $query->fetch();'.PHP_EOL;
-            $body .= '$query->closeCursor();'.PHP_EOL;
-            $body .= 'unset($query);'.PHP_EOL;
-            $body .= 'if($row) {'.PHP_EOL;
-            $body .= '    return $row[\''.$primary.'\'];'.PHP_EOL;
-            $body .= '}'.PHP_EOL.PHP_EOL;
-            $body .= 'return null;'.PHP_EOL;
+            $body .= ']);' . PHP_EOL;
+            $body .= '$row = $query->fetch();' . PHP_EOL;
+            $body .= '$query->closeCursor();' . PHP_EOL;
+            $body .= 'unset($query);' . PHP_EOL;
+            $body .= 'if($row) {' . PHP_EOL;
+            $body .= '    return $row[\'' . $primary . '\'];' . PHP_EOL;
+            $body .= '}' . PHP_EOL . PHP_EOL;
+            $body .= 'return null;' . PHP_EOL;
             $cMethod->setBody($body);
         }
     }
 
     /**
-     * @param ClassType    $cClass
-     * @param PhpNamespace $cNamespace
-     * @param array        $fields
+     * @param ClassType            $cClass
+     * @param PhpNamespace         $cNamespace
+     * @param array<string, mixed> $fields
      *
      * @throws Exception
      *
@@ -926,24 +935,24 @@ NOW;
         $cMethod->addComment('@throws ModelSaveExceptions');
         $cMethod->setPublic();
 
-        $body = '$cExceptions = new ModelSaveExceptions();'.PHP_EOL;
+        $body = '$cExceptions = new ModelSaveExceptions();' . PHP_EOL;
         foreach ($columns as $column) {
             // If this field doesn't exist, then this column was added via config file but isn't in the DB, weird.
             if (!isset($fields[$column]['nullable'])) {
-                throw new Exception('Unknown Column: '.$cClass->getName().'::'.$column);
+                throw new Exception('Unknown Column: ' . $cClass->getName() . '::' . $column);
             }
             // Skip fields that are nullable
             if ($fields[$column]['nullable']) {
                 continue;
             }
 
-            $body .= 'if(empty($this->'.$column.')) {'.PHP_EOL;
-            $body .= '    $cExceptions->addException(new ModelRequiredFieldException(\''.$column.'\'));'.PHP_EOL;
-            $body .= '}'.PHP_EOL;
+            $body .= 'if(empty($this->' . $column . ')) {' . PHP_EOL;
+            $body .= '    $cExceptions->addException(new ModelRequiredFieldException(\'' . $column . '\'));' . PHP_EOL;
+            $body .= '}' . PHP_EOL;
         }
-        $body .= 'if($cExceptions->isThrowable()){'.PHP_EOL;
-        $body .= '    throw $cExceptions;'.PHP_EOL;
-        $body .= '}'.PHP_EOL.PHP_EOL;
+        $body .= 'if($cExceptions->isThrowable()){' . PHP_EOL;
+        $body .= '    throw $cExceptions;' . PHP_EOL;
+        $body .= '}' . PHP_EOL . PHP_EOL;
 
         if ($uuid_fields) {
             $cNamespace->addUse('GCWorld\\ORM\\Exceptions\\ModelInvalidUUIDFormatException');
@@ -954,22 +963,22 @@ NOW;
                     continue;
                 }
 
-                $body .= 'try {'.PHP_EOL;
-                $body .= '    Uuid::fromBytes($this->'.$column.');'.PHP_EOL;
-                $body .= '} catch (Exception $e) {'.PHP_EOL;
-                $body .= '    $cExceptions->addException(new ModelInvalidUUIDFormatException(\''.$column.'\'));'.PHP_EOL;
-                $body .= '}'.PHP_EOL;
+                $body .= 'try {' . PHP_EOL;
+                $body .= '    Uuid::fromBytes($this->' . $column . ');' . PHP_EOL;
+                $body .= '} catch (Exception $e) {' . PHP_EOL;
+                $body .= '    $cExceptions->addException(new ModelInvalidUUIDFormatException(\'' . $column . '\'));' . PHP_EOL;
+                $body .= '}' . PHP_EOL;
             }
-            $body .= 'if($cExceptions->isThrowable()){'.PHP_EOL;
-            $body .= '    throw $cExceptions;'.PHP_EOL;
-            $body .= '}'.PHP_EOL.PHP_EOL;
+            $body .= 'if($cExceptions->isThrowable()){' . PHP_EOL;
+            $body .= '    throw $cExceptions;' . PHP_EOL;
+            $body .= '}' . PHP_EOL . PHP_EOL;
         }
 
         $cMethod->setBody($body);
     }
 
     /**
-     * @param array $row
+     * @param array<string, mixed> $row
      *
      * @return float|int|mixed
      */
@@ -1115,11 +1124,11 @@ NOW;
     }
 
     /**
-     * @param ClassType    $cClass
-     * @param PhpNamespace $cNamespace
-     * @param string       $descDir
-     * @param string       $table_name
-     * @param array        $dbInfo
+     * @param ClassType            $cClass
+     * @param PhpNamespace         $cNamespace
+     * @param string               $descDir
+     * @param string               $table_name
+     * @param array<string, mixed> $dbInfo
      *
      * @return void
      */
@@ -1133,7 +1142,7 @@ NOW;
         // Create a trait version
         $existing = [];
         $changed  = false;
-        $descFile = $descDir.$table_name.'.yml';
+        $descFile = $descDir . $table_name . '.yml';
         if (\file_exists($descFile)) {
             $existing = Yaml::parseFile($descFile);
             if (!\is_array($existing)) {
@@ -1181,7 +1190,8 @@ NOW;
         }
 
         $odiTrait = 'GCWorld\\ORM\\Traits\\ORMFieldsTrait';
-        if (isset($this->config['descriptions']['desc_trait'])
+        if (
+            isset($this->config['descriptions']['desc_trait'])
             && !empty($this->config['descriptions']['desc_trait'])
             && \trait_exists($this->config['descriptions']['desc_trait'])
         ) {

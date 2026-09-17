@@ -1,4 +1,5 @@
 <?php
+
 namespace GCWorld\ORM;
 
 use Exception;
@@ -12,7 +13,9 @@ class Config
     public const VERSION = 5;
 
     protected string $config_file;
-    protected array  $config = [];
+
+    /** @var array<string, mixed> */
+    protected array $config = [];
 
     /**
      * @param string|null $file
@@ -23,8 +26,8 @@ class Config
     {
         // Test for yml.  If not found, test for ini
         if (empty($file)) {
-            $file  = \rtrim(\dirname(__FILE__), DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR;
-            $file .= 'config'.DIRECTORY_SEPARATOR.'config.yml';
+            $file  = \rtrim(\dirname(__FILE__), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR;
+            $file .= 'config' . DIRECTORY_SEPARATOR . 'config.yml';
         }
 
         $usingCache = false;
@@ -47,9 +50,10 @@ class Config
         }
 
         if (isset($config['config_path'])) {
-            $file  = __DIR__.DIRECTORY_SEPARATOR.$config['config_path'];
+            $file  = __DIR__ . DIRECTORY_SEPARATOR . $config['config_path'];
             $cache = \str_replace('.yml', '.php', $file);
-            if (\file_exists($cache)
+            if (
+                \file_exists($cache)
                 && \filemtime($file) < \filemtime($cache)
             ) {
                 $writeCache = false;
@@ -67,7 +71,8 @@ class Config
         $this->config_file = $file;
 
         // Trust model where the end user is deleting the cache file automatically
-        if ($usingCache
+        if (
+            $usingCache
             && isset($config['general'], $config['general']['trust_cache'])
 
             && $config['general']['trust_cache']
@@ -100,7 +105,8 @@ class Config
         if (!isset($config['general']['user'])) {
             throw new Exception('Missing User Variable In General');
         }
-        if (!isset($config['general']['audit_handler'])
+        if (
+            !isset($config['general']['audit_handler'])
             || empty($config['general']['audit_handler'])
         ) {
             $config['general']['audit_handler'] = Audit::class;
@@ -114,16 +120,17 @@ class Config
             ];
         }
 
-        if (isset($config['table_dir'])
+        if (
+            isset($config['table_dir'])
             && !empty($config['table_dir'])
         ) {
             $writeCache = true;
             $tmp        = \explode(DIRECTORY_SEPARATOR, $file);
             \array_pop($tmp);
-            $startPath = \implode(DIRECTORY_SEPARATOR, $tmp).DIRECTORY_SEPARATOR;
-            $tableDir  = $startPath.$config['table_dir'];
+            $startPath = \implode(DIRECTORY_SEPARATOR, $tmp) . DIRECTORY_SEPARATOR;
+            $tableDir  = $startPath . $config['table_dir'];
             if (!\is_dir($tableDir)) {
-                throw new Exception('Table Dir is defined but cannot be found: '.$tableDir);
+                throw new Exception('Table Dir is defined but cannot be found: ' . $tableDir);
             }
 
             if (!isset($config['tables'])) {
@@ -133,7 +140,7 @@ class Config
                 $config['general']['database_name'] = 'default'; // 'default' is used in Common
             }
 
-            $tableFiles = \glob($tableDir.'*.yml');
+            $tableFiles = \glob($tableDir . '*.yml');
             foreach ($tableFiles as $tableFile) {
                 $tmp                          = \explode(DIRECTORY_SEPARATOR, $tableFile);
                 $fileName                     = \array_pop($tmp);
@@ -149,7 +156,7 @@ class Config
         if ($writeCache) {
             \file_put_contents(
                 $cache,
-                '<?php'.PHP_EOL.PHP_EOL.'return '.\var_export($config, true).';'.PHP_EOL.PHP_EOL
+                '<?php' . PHP_EOL . PHP_EOL . 'return ' . \var_export($config, true) . ';' . PHP_EOL . PHP_EOL
             );
         }
 
@@ -157,7 +164,7 @@ class Config
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
      */
     public function getConfig(): array
     {
@@ -173,7 +180,7 @@ class Config
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
      */
     public static function getDefaultFieldConfig(): array
     {
@@ -188,7 +195,7 @@ class Config
     }
 
     /**
-     * @param array $config
+     * @param array<string, mixed> $config
      *
      * @return void
      */
@@ -288,7 +295,7 @@ class Config
     }
 
     /**
-     * @param array $config
+     * @param array<string, mixed> $config
      *
      * @return void
      */

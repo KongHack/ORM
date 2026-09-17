@@ -1,4 +1,5 @@
 <?php
+
 namespace GCWorld\ORM\Exceptions;
 
 use Exception;
@@ -24,7 +25,7 @@ class ModelInvalidUUIDFormatException extends Exception implements FieldExceptio
         $this->field_name = $field_name;
 
         if (empty($message)) {
-            $message = 'Invalid UUID Format In: '.\ucwords(\implode(' ', \explode('_', $field_name)));
+            $message = 'Invalid UUID Format In: ' . \ucwords(\implode(' ', \explode('_', $field_name)));
         }
 
         parent::__construct($message, $code, $previous);

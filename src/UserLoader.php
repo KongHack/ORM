@@ -1,4 +1,5 @@
 <?php
+
 namespace GCWorld\ORM;
 
 use Exception;
@@ -36,8 +37,8 @@ class UserLoader
         if (null == self::$user) {
             // Intentionally bootstrap from the lightweight project config.ini here: this path is used at runtime
             // and only needs enough information to locate the ORM-specific config generated during installation.
-            $file  = \rtrim(\dirname(__FILE__), DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR;
-            $file .= 'config'.DIRECTORY_SEPARATOR.'config.ini';
+            $file  = \rtrim(\dirname(__FILE__), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR;
+            $file .= 'config' . DIRECTORY_SEPARATOR . 'config.ini';
             if (!\file_exists($file)) {
                 throw new Exception('Config File Not Found');
             }

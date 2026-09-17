@@ -1,4 +1,5 @@
 <?php
+
 namespace GCWorld\ORM\Exceptions;
 
 use Exception;
@@ -27,8 +28,8 @@ class ModelUniqueValueException extends Exception implements FieldException
         $this->value      = $value;
 
         if (empty($message)) {
-            $message  = \ucwords(\implode(' ', \explode('_', $field_name))).' is a unique field. ';
-            $message .= 'A value of "'.$value.'" has already been used';
+            $message  = \ucwords(\implode(' ', \explode('_', $field_name))) . ' is a unique field. ';
+            $message .= 'A value of "' . $value . '" has already been used';
         }
 
         parent::__construct($message, $code, $previous);

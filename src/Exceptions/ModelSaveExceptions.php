@@ -1,4 +1,5 @@
 <?php
+
 namespace GCWorld\ORM\Exceptions;
 
 use Exception;
@@ -35,13 +36,13 @@ class ModelSaveExceptions extends Exception implements ModelSaveExceptionsInterf
     public function addException(Exception $e)
     {
         $this->exceptArray[] = $e;
-        $this->message      .= PHP_EOL.$e->getMessage();
+        $this->message      .= PHP_EOL . $e->getMessage();
 
         return $this;
     }
 
     /**
-     * @return array
+     * @return array<string, string>
      */
     public function getFieldMessages(): array
     {
@@ -57,7 +58,7 @@ class ModelSaveExceptions extends Exception implements ModelSaveExceptionsInterf
                 continue;
             }
 
-            $messages['UNDEFINED_'.$k] = $e->getMessage();
+            $messages['UNDEFINED_' . $k] = $e->getMessage();
         }
 
         return $messages;

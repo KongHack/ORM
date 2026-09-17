@@ -1,4 +1,5 @@
 <?php
+
 namespace GCWorld\ORM\Core;
 
 use Exception;
@@ -28,9 +29,12 @@ class Builder
      */
     protected DatabaseInterface|Database $_audit;
 
-    protected array   $coreConfig  = [];
-    protected array   $auditConfig = [];
-    protected bool    $doAudit     = false;
+    /** @var array<string, mixed> */
+    protected array $coreConfig = [];
+
+    /** @var array<string, mixed> */
+    protected array $auditConfig = [];
+    protected bool $doAudit     = false;
     protected ?string $auditDB     = null;
 
     /**
@@ -81,16 +85,16 @@ class Builder
             return;
         }
 
-        $master = $this->auditDB.'.'.$this->auditConfig['prefix'].'_GCAuditMaster';
+        $master = $this->auditDB . '.' . $this->auditConfig['prefix'] . '_GCAuditMaster';
 
         if (!$this->_audit->tableExists($master)) {
             // This will create the audit master
-            $file    = self::getDataModelDirectory().'master.sql';
+            $file    = self::getDataModelDirectory() . 'master.sql';
             $content = \file_get_contents($file);
             $content = \str_replace('__REPLACE__', $master, $content);
             $this->_audit->exec($content);
         } else {
-            $sql   = 'SHOW COLUMNS FROM '.$master;
+            $sql   = 'SHOW COLUMNS FROM ' . $master;
             $query = $this->_audit->prepare($sql);
             $query->execute();
             $rows    = $query->fetchAll();
@@ -148,17 +152,15 @@ class Builder
                 }
             }
 
-            $audit = $auditBase = $this->auditConfig['prefix'].$table;
-            if (null != $this->auditDB) {
-                $audit = $this->auditDB.'.'.$audit;
-            }
+            $auditBase = $this->auditConfig['prefix'] . $table;
+            $audit     = $this->auditDB . '.' . $auditBase;
 
             if (!isset($existing[$schema][$auditBase])) {
                 if ($this->_audit->tableExists($audit)) {
                     $existing[$schema][$auditBase]['audit_version'] = $this->_audit->getTableComment($audit);
                     $existing[$schema][$auditBase]['audit_pk_set']  = 0;
                 } else {
-                    $source = \file_get_contents(self::getDataModelDirectory().'source.sql');
+                    $source = \file_get_contents(self::getDataModelDirectory() . 'source.sql');
                     $sql    = \str_replace('__REPLACE__', $audit, $source);
                     $this->_audit->exec($sql);
                     $this->_audit->setTableComment($audit, '0');
@@ -169,7 +171,7 @@ class Builder
 
             $version = $existing[$schema][$auditBase]['audit_version'];
             if ($version < self::BUILDER_VERSION) {
-                $versionFiles = \glob(self::getDataModelDirectory().'revisions'.DIRECTORY_SEPARATOR.'*.sql');
+                $versionFiles = \glob(self::getDataModelDirectory() . 'revisions' . DIRECTORY_SEPARATOR . '*.sql');
                 \sort($versionFiles);
                 foreach ($versionFiles as $file) {
                     $tmp        = \explode(DIRECTORY_SEPARATOR, $file);
@@ -201,7 +203,7 @@ class Builder
             if (!$existing[$schema][$auditBase]['audit_pk_set']) {
                 // Determine our primary field type
                 $keys  = 0;
-                $sql   = 'SHOW COLUMNS FROM '.$table;
+                $sql   = 'SHOW COLUMNS FROM ' . $table;
                 $query = $this->_db->prepare($sql);
                 $query->execute();
                 $data = $query->fetchAll();
@@ -257,8 +259,8 @@ class Builder
      */
     public static function getDataModelDirectory(): string
     {
-        $base  = \rtrim(__DIR__, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR;
-        $base .= 'datamodel'.DIRECTORY_SEPARATOR.'audit'.DIRECTORY_SEPARATOR;
+        $base  = \rtrim(__DIR__, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR;
+        $base .= 'datamodel' . DIRECTORY_SEPARATOR . 'audit' . DIRECTORY_SEPARATOR;
 
         return $base;
     }

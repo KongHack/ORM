@@ -1,13 +1,12 @@
 <?php
+
 namespace GCWorld\ORM\Exceptions;
 
 use Exception;
 
 /**
- * Class UuidException
- * @package GCWorld\ORM\Exceptions
+ * Class UuidException.
  */
 class UuidException extends Exception
 {
-
 }

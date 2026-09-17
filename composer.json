@@ -8,28 +8,32 @@
     }
   ],
   "require": {
-    "php": ">=8.1",
+    "php": ">=8.4",
     "ext-json": "*",
     "ext-pdo": "*",
-    "gcworld/common":"^2.7.0",
-    "gcworld/globals":">=4.0",
-    "gcworld/interfaces": ">=4.1.5",
-    "gcworld/database": ">=2.6.2",
-    "composer/composer": ">=2.7",
-    "composer/installers": ">=2.2",
-    "symfony/yaml": "^6.0",
-    "ramsey/uuid": ">=4.0",
-    "monolog/monolog": ">=1.0",
-    "nette/php-generator": "^4.1.5"
+    "gcworld/common": "^2.7",
+    "gcworld/globals": "^4.0",
+    "gcworld/interfaces": "^4.4",
+    "gcworld/database": "^2.7",
+    "composer/composer": "^2.10",
+    "composer/installers": "^2.3",
+    "symfony/yaml": "^6.4",
+    "ramsey/uuid": "^4.9",
+    "monolog/monolog": "^3.10",
+    "nette/php-generator": "^4.2"
   },
   "require-dev": {
-    "gcworld/code_sniffer_contrib": "^2.0.1",
-    "phpstan/phpstan": "^1.9",
-    "phpmd/phpmd": ">=2.6",
-    "friendsofphp/php-cs-fixer": "^3.14"
+    "phpstan/phpstan": "^2.1",
+    "phpunit/phpunit": "^12.0",
+    "squizlabs/php_codesniffer": "^4.0",
+    "phpmd/phpmd": "^2.15",
+    "friendsofphp/php-cs-fixer": "^3.95"
   },
   "autoload": {
     "psr-4": {"GCWorld\\ORM\\": "src/"}
+  },
+  "autoload-dev": {
+    "psr-4": {"GCWorld\\ORM\\Tests\\": "tests/"}
   },
   "scripts": {
     "post-autoload-dump": [
@@ -38,10 +42,22 @@
     ],
     "post-install-cmd": [
       "bash contrib/setup.sh"
+    ],
+    "lint": "find src tests -name '*.php' -print0 | xargs -0 -n1 php -l",
+    "phpstan": "phpstan analyse --no-progress --memory-limit=1G",
+    "phpcs": "phpcs",
+    "phpcbf": "phpcbf",
+    "test": "phpunit",
+    "check": [
+      "@lint",
+      "@phpstan",
+      "@phpcs",
+      "@test"
     ]
   },
   "license":"MIT",
   "config": {
+    "sort-packages": true,
     "allow-plugins": {
       "composer/installers": true
     }

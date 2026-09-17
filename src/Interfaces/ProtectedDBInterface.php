@@ -1,9 +1,9 @@
 <?php
+
 namespace GCWorld\ORM\Interfaces;
 
 /**
- * Interface ProtectedDBInterface
- * @package GCWorld\ORM\Interfaces
+ * Interface ProtectedDBInterface.
  */
 interface ProtectedDBInterface
 {

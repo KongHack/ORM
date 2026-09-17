@@ -1,4 +1,5 @@
 <?php
+
 namespace GCWorld\ORM;
 
 use Exception;
@@ -8,6 +9,7 @@ use Exception;
  */
 class ORMException extends Exception
 {
+    /** @var array<mixed> */
     public array $backtrace;
 
     /**
@@ -30,11 +32,11 @@ class ORMException extends Exception
      */
     public function __toString()
     {
-        return __CLASS__.": [{$this->code}]: {$this->message}\n";
+        return __CLASS__ . ": [{$this->code}]: {$this->message}\n";
     }
 
     /**
-     * @return array|null
+     * @return array<mixed>|null
      */
     public function getBacktrace(): ?array
     {

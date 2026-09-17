@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-
-if [[ "$PWD" =~ "ORM" ]]; then
-	composer install;
-fi;

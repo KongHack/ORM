@@ -1,4 +1,5 @@
 <?php
+
 namespace GCWorld\ORM\Helpers;
 
 /**
@@ -6,11 +7,14 @@ namespace GCWorld\ORM\Helpers;
  */
 class CleanAuditData
 {
+    /** @var array<array-key, mixed> */
     protected array $after  = [];
+
+    /** @var array<array-key, mixed> */
     protected array $before = [];
 
     /**
-     * @param array $after
+     * @param array<array-key, mixed> $after
      *
      * @return void
      */
@@ -20,7 +24,7 @@ class CleanAuditData
     }
 
     /**
-     * @param array $before
+     * @param array<array-key, mixed> $before
      *
      * @return void
      */
@@ -52,7 +56,7 @@ class CleanAuditData
     }
 
     /**
-     * @return array
+     * @return array<array-key, mixed>
      */
     public function getAfter(): array
     {
@@ -60,7 +64,7 @@ class CleanAuditData
     }
 
     /**
-     * @return array
+     * @return array<array-key, mixed>
      */
     public function getBefore(): array
     {

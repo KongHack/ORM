@@ -1,12 +1,11 @@
 <?php
+
 namespace GCWorld\ORM\Interfaces;
 
 /**
- * Interface GeneratedInterface
- * @package GCWorld\ORM\Interfaces
- * Only used for identification
+ * Interface GeneratedInterface.
  */
 interface GeneratedInterface
 {
-    //Note, only used for identification
+    // Note, only used for identification
 }

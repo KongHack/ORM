@@ -1,4 +1,5 @@
 <?php
+
 namespace GCWorld\ORM\Exceptions;
 
 use Exception;
@@ -24,7 +25,7 @@ class ModelImmutableException extends Exception implements FieldException
         $this->field_name = $field_name;
 
         if (empty($message)) {
-            $message = \ucwords(\implode(' ', \explode('_', $field_name))).' is an immutable field and cannot be changed';
+            $message = \ucwords(\implode(' ', \explode('_', $field_name))) . ' is an immutable field and cannot be changed';
         }
 
         parent::__construct($message, $code, $previous);

@@ -1,4 +1,5 @@
 <?php
+
 namespace GCWorld\ORM\Interfaces;
 
 use GCWorld\Interfaces\CommonInterface;
@@ -14,11 +15,11 @@ interface AuditInterface
     public function __construct(CommonInterface $cCommon);
 
     /**
-     * @param string $table
-     * @param mixed  $primaryId
-     * @param array  $before
-     * @param array  $after
-     * @param mixed  $memberId
+     * @param string               $table
+     * @param mixed                $primaryId
+     * @param array<string, mixed> $before
+     * @param array<string, mixed> $after
+     * @param mixed                $memberId
      *
      * @return mixed
      */

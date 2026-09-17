@@ -1,4 +1,5 @@
 <?php
+
 namespace GCWorld\ORM\Core;
 
 use GCWorld\Interfaces\Database\DatabaseInterface;
@@ -16,7 +17,7 @@ class CreateAuditTable
      */
     protected $_destination;
     /**
-     * @var array
+     * @var array<string, mixed>
      */
     protected $config       = [];
 
@@ -49,15 +50,15 @@ class CreateAuditTable
                 return;
             }
         }
-        $audit = $this->config['prefix'].$table;
+        $audit = $this->config['prefix'] . $table;
 
-        $source = \file_get_contents(Builder::getDataModelDirectory().'source.sql');
+        $source = \file_get_contents(Builder::getDataModelDirectory() . 'source.sql');
         $sql    = \str_replace('__REPLACE__', $audit, $source);
         $this->_destination->exec($sql);
         $this->_destination->setTableComment($audit, '0');
 
         $version      = 0;
-        $versionFiles = \glob(Builder::getDataModelDirectory().'revisions'.DIRECTORY_SEPARATOR.'*.sql');
+        $versionFiles = \glob(Builder::getDataModelDirectory() . 'revisions' . DIRECTORY_SEPARATOR . '*.sql');
         \sort($versionFiles);
         foreach ($versionFiles as $file) {
             $tmp        = \explode(DIRECTORY_SEPARATOR, $file);

@@ -1,4 +1,5 @@
 <?php
+
 namespace GCWorld\ORM\Exceptions;
 
 use Exception;
@@ -9,8 +10,10 @@ use GCWorld\ORM\Interfaces\FieldException;
  */
 class ModelInvalidOptionException extends Exception implements FieldException
 {
-    protected mixed  $chosen;
-    protected array  $possible;
+    protected mixed $chosen;
+
+    /** @var list<mixed> */
+    protected array $possible;
     protected string $field_name;
 
     /**
@@ -18,7 +21,7 @@ class ModelInvalidOptionException extends Exception implements FieldException
      *
      * @param string         $field_name
      * @param mixed          $chosen
-     * @param array          $possible
+     * @param list<mixed>    $possible
      * @param string         $message
      * @param int            $code
      * @param Exception|null $previous
@@ -36,8 +39,8 @@ class ModelInvalidOptionException extends Exception implements FieldException
         $this->possible   = $possible;
 
         if (empty($message)) {
-            $message = 'Invalid Option ('.$this->chosen.') Selected in Field ('.
-                       \ucwords(\implode(' ', \explode('_', $field_name))).')';
+            $message = 'Invalid Option (' . $this->chosen . ') Selected in Field (' .
+                       \ucwords(\implode(' ', \explode('_', $field_name))) . ')';
         }
 
         parent::__construct($message, $code, $previous);
@@ -52,7 +55,7 @@ class ModelInvalidOptionException extends Exception implements FieldException
     }
 
     /**
-     * @return array|null
+     * @return list<mixed>|null
      */
     public function getPossible(): ?array
     {

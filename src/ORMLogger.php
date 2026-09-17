@@ -1,4 +1,5 @@
 <?php
+
 namespace GCWorld\ORM;
 
 use Monolog\Handler\NullHandler;

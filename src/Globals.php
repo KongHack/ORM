@@ -1,8 +1,9 @@
 <?php
+
 namespace GCWorld\ORM;
 
 /**
- * Class Globals
+ * Class Globals.
  */
 class Globals extends \GCWorld\Globals\Globals
 {

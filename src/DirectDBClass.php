@@ -1,4 +1,5 @@
 <?php
+
 namespace GCWorld\ORM;
 
 use GCWorld\ORM\Abstracts\DirectSingle;
@@ -19,9 +20,9 @@ abstract class DirectDBClass extends DirectSingle
     }
 
     /**
-     * @param array $fields
+     * @param list<string> $fields
      *
-     * @return array
+     * @return array<string, mixed>
      */
     public function getArray(array $fields): array
     {
@@ -42,7 +43,7 @@ abstract class DirectDBClass extends DirectSingle
     }
 
     /**
-     * @param array $data
+     * @param array<string, mixed> $data
      *
      * @return $this
      */

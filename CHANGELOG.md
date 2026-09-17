@@ -1,7 +1,41 @@
 
 # Change Log
+
 All notable changes to this project will be documented in this file.
-This project adheres to [Semantic Versioning](http://semver.org/).
+This project adheres to [Semantic Versioning](https://semver.org/).
+
+## [Unreleased](https://github.com/KongHack/ORM/commits/master)
+
+
+
+## [6.5.0](https://github.com/KongHack/ORM/releases/tag/6.5.0)
+
+### Added
+
+- Added a Docker Compose development environment using the same KongHack PHP
+  image family as CI.
+- Added Composer scripts for syntax checks, PHPStan, PHPCS, PHPUnit, and the
+  combined quality suite.
+- Added PHPStan level 6, PSR-12, and PHPUnit configuration with regression
+  coverage for field-name conversion, audit data, model-save exceptions, and
+  generated field metadata.
+- Added GitHub Actions quality checks on PHP 8.4 and 8.5, strict Composer
+  validation, dependency auditing, release metadata validation, and
+  tag-driven GitHub Release creation.
+- Added weekly Dependabot checks for Composer lockfile and non-major GitHub
+  Actions updates.
+
+### Changed
+
+- Raised the minimum supported PHP version to 8.4 and refreshed the Composer
+  dependency graph and lockfile.
+- Removed `gcworld/code_sniffer_contrib` in favor of upstream PHP_CodeSniffer.
+- Applied PSR-12 formatting across the package and documented iterable value
+  types throughout the public interfaces and implementations.
+- Replaced the standalone release workflow with a quality-gated release
+  workflow shared with pull requests and branch builds.
+- Expanded the README with installation, configuration, generation, runtime,
+  caching, auditing, development, and release documentation.
 
 
 
@@ -1199,4 +1233,3 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - @GameCharmer Start of changelog tracking
 - @GameCharmer Added a UserLoader class **(and config requirement)** to streamline loading singleton user classes.
 - @GameCharmer NOTE: user config option will not be fully required until 3.0
-

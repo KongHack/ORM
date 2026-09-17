@@ -1,13 +1,14 @@
 <?php
+
 namespace GCWorld\ORM\Interfaces;
 
 /**
- * Interface ModelSaveExceptionsInterface
+ * Interface ModelSaveExceptionsInterface.
  */
 interface ModelSaveExceptionsInterface
 {
     /**
-     * @return array
+     * @return array<string, string>
      */
     public function getFieldMessages(): array;
 

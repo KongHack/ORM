@@ -1,4 +1,5 @@
 <?php
+
 namespace GCWorld\ORM\Core;
 
 use BackedEnum;
@@ -12,9 +13,9 @@ use Ramsey\Uuid\Uuid;
 class AuditUtilities
 {
     /**
-     * @param string $table
-     * @param array  $after
-     * @param array  $before
+     * @param string               $table
+     * @param array<string, mixed> $after
+     * @param array<string, mixed> $before
      *
      * @return CleanAuditData
      */

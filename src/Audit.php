@@ -1,4 +1,5 @@
 <?php
+
 namespace GCWorld\ORM;
 
 use Exception;
@@ -15,11 +16,13 @@ use PDOException;
 class Audit implements AuditInterface
 {
     protected static mixed $overrideMemberId = null;
+
+    /** @var array<string, mixed>|null */
     protected static ?array $config = null;
 
     protected bool $canAudit            = true;
     protected ?CommonInterface $cCommon = null;
-    protected ?string         $database = null;
+    protected ?string $database = null;
     protected string $connection        = 'default';
     protected string $prefix            = '_Audit_';
     protected bool $enable              = true;
@@ -27,8 +30,11 @@ class Audit implements AuditInterface
     protected ?string $table            = null;
     protected ?string $primaryId        = null;
     protected int|string|null $memberId = null;
-    protected array   $before           = [];
-    protected array   $after            = [];
+    /** @var array<string, mixed> */
+    protected array $before = [];
+
+    /** @var array<string, mixed> */
+    protected array $after = [];
 
     /**
      * @param CommonInterface $cCommon
@@ -47,13 +53,11 @@ class Audit implements AuditInterface
 
         if ($this->canAudit) {
             $this->cCommon = $cCommon;
-            $audit         = $cCommon->getConfig('audit');
-            if (\is_array($audit)) {
-                $this->enable     = $audit['enable'] ?? false;
-                $this->database   = $audit['database'] ?? $this->database;
-                $this->connection = $audit['connection'] ?? $this->connection;
-                $this->prefix     = $audit['prefix'] ?? $this->prefix;
-            }
+            $audit            = $cCommon->getConfig('audit');
+            $this->enable     = $audit['enable'] ?? false;
+            $this->database   = $audit['database'] ?? $this->database;
+            $this->connection = $audit['connection'] ?? $this->connection;
+            $this->prefix     = $audit['prefix'] ?? $this->prefix;
         }
     }
 
@@ -76,11 +80,11 @@ class Audit implements AuditInterface
     }
 
     /**
-     * @param string $table
-     * @param mixed  $primaryId
-     * @param array  $before
-     * @param array  $after
-     * @param mixed  $memberId
+     * @param string               $table
+     * @param mixed                $primaryId
+     * @param array<string, mixed> $before
+     * @param array<string, mixed> $after
+     * @param mixed                $memberId
      *
      * @throws Exception
      *
@@ -115,9 +119,9 @@ class Audit implements AuditInterface
             throw new Exception('AUDIT LOG:: Invalid Primary ID Passed');
         }
 
-        $storeTable = $this->prefix.$table;
+        $storeTable = $this->prefix . $table;
         if (null != $this->database) {
-            $storeTable = $this->database.'.'.$storeTable;
+            $storeTable = $this->database . '.' . $storeTable;
         }
         /** @var Database $db */
         $db = $this->cCommon->getDatabase($this->connection);
@@ -134,7 +138,7 @@ class Audit implements AuditInterface
         $cGlobals = new Globals();
         $request  = $cGlobals->string()->SERVER('REQUEST_URI') ?? $this->getTopScript();
 
-        $sql = 'INSERT INTO '.$storeTable.'
+        $sql = 'INSERT INTO ' . $storeTable . '
                 (primary_id, member_id, log_request_uri, log_before, log_after)
                 VALUES
                 (:pid, :mid, :uri, :logB, :logA)';
@@ -195,7 +199,7 @@ class Audit implements AuditInterface
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
      */
     public function getBefore(): array
     {
@@ -203,7 +207,7 @@ class Audit implements AuditInterface
     }
 
     /**
-     * @return array
+     * @return array<string, mixed>
      */
     public function getAfter(): array
     {
@@ -266,8 +270,8 @@ class Audit implements AuditInterface
             return $user->getMemberId();
         }
 
-        if (\defined(\get_class($user).'::CLASS_PRIMARY')) {
-            $user_primary = \constant(\get_class($user).'::CLASS_PRIMARY');
+        if (\defined(\get_class($user) . '::CLASS_PRIMARY')) {
+            $user_primary = \constant(\get_class($user) . '::CLASS_PRIMARY');
             if (\property_exists($user, $user_primary)) {
                 $memberId = $user->{$user_primary};
                 if (\is_int($memberId) || \is_string($memberId)) {

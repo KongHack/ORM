@@ -1,39 +1,18 @@
 <?xml version="1.0"?>
-<ruleset name="ACEMAPP_CodeSniffer">
-    <description>ACEMAPP Coding Standard and Config</description>
+<ruleset name="ORM">
+    <description>ORM coding standard.</description>
 
-    <file>src/</file>
-    <exclude-pattern>*/Generated/*</exclude-pattern>
-
-    <arg name="encoding" value="UTF-8"/>
+    <arg name="colors"/>
     <arg name="extensions" value="php"/>
-    <arg value="s"/>
-    <arg name="tab-width" value="4"/>
+    <arg name="parallel" value="8"/>
+    <arg name="warning-severity" value="0"/>
 
-    <rule ref="Generic.Files.LineLength">
-        <properties>
-            <property name="lineLimit" value="140"/>
-            <property name="absoluteLineLimit" value="140"/>
-        </properties>
+    <file>src</file>
+    <file>tests</file>
+
+    <exclude-pattern>src/Generated/*</exclude-pattern>
+
+    <rule ref="PSR12">
+        <exclude name="PSR2.Methods.MethodDeclaration.Underscore"/>
     </rule>
-    <rule ref="Generic.Strings.UnnecessaryStringConcat">
-        <properties>
-            <property name="allowMultiline" value="true" />
-            <property name="error" value="false" />
-        </properties>
-        <exclude name="Generic.Strings.UnnecessaryStringConcat.Found"/>
-    </rule>
-    <rule ref="Squiz.WhiteSpace.OperatorSpacing">
-        <properties>
-            <property name="ignoreNewlines" value="true"/>
-        </properties>
-    </rule>
-    <rule ref="Generic.PHP.ForbiddenFunctions">
-      <properties>
-        <property name="forbiddenFunctions" type="array" value="sizeof=>count,delete=>unset,print=>echo,is_null=>null,create_function=>null"/>
-      </properties>
-    </rule>
-    <rule ref="Generic.Arrays.DisallowLongArraySyntax"/>
-    <rule ref="Squiz.Arrays.ArrayBracketSpacing"/>
-    <rule ref="Generic.Arrays.ArrayIndent"/>
 </ruleset>

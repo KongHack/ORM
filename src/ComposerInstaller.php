@@ -1,4 +1,5 @@
 <?php
+
 namespace GCWorld\ORM;
 
 use Composer\Script\Event;
@@ -22,29 +23,28 @@ class ComposerInstaller
         $myDir     = \dirname(__FILE__);
 
         // Determine if ORM yml already exists.
-        $ymlPath = $vendorDir.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'config';
+        $ymlPath = $vendorDir . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'config';
         $realPath = \realpath($ymlPath);
         if (false !== $realPath) {
             $ymlPath = $realPath;
         }
-        $ymlPath = \rtrim($ymlPath, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR;
+        $ymlPath = \rtrim($ymlPath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
 
         if (!\is_dir($ymlPath)) {
             @\mkdir($ymlPath);
             if (!\is_dir($ymlPath)) {
-                $event->getIO()->writeError('<warning>Cannot create config folder in application root: '.$ymlPath.'</warning>');
+                $event->getIO()->writeError('<warning>Cannot create config folder in application root: ' . $ymlPath . '</warning>');
 
                 return false;   // Silently Fail.
             }
         }
 
-        if (!\file_exists($ymlPath.self::CONFIG_FILE_NAME)) {
-            $example = \file_get_contents($myDir.
-                                         DIRECTORY_SEPARATOR.'..'.
-                                         DIRECTORY_SEPARATOR.'config'.
-                                         DIRECTORY_SEPARATOR.'config.example.yml'
-            );
-            \file_put_contents($ymlPath.self::CONFIG_FILE_NAME, $example);
+        if (!\file_exists($ymlPath . self::CONFIG_FILE_NAME)) {
+            $example = \file_get_contents($myDir .
+                                         DIRECTORY_SEPARATOR . '..' .
+                                         DIRECTORY_SEPARATOR . 'config' .
+                                         DIRECTORY_SEPARATOR . 'config.example.yml');
+            \file_put_contents($ymlPath . self::CONFIG_FILE_NAME, $example);
         }
 
         $tmpYml = \explode(DIRECTORY_SEPARATOR, $ymlPath);
@@ -63,17 +63,16 @@ class ComposerInstaller
             }
         }
 
-        $relPath  = \str_repeat('..'.DIRECTORY_SEPARATOR, \count($tmpMy));
+        $relPath  = \str_repeat('..' . DIRECTORY_SEPARATOR, \count($tmpMy));
         $relPath .= \implode(DIRECTORY_SEPARATOR, $tmpYml);
-        $ymlPath  = $relPath.DIRECTORY_SEPARATOR.self::CONFIG_FILE_NAME;
+        $ymlPath  = $relPath . DIRECTORY_SEPARATOR . self::CONFIG_FILE_NAME;
 
         $tmp = ['config_path' => $ymlPath];
 
-        \file_put_contents($myDir.
-                          DIRECTORY_SEPARATOR.'..'.
-                          DIRECTORY_SEPARATOR.'config'.
-                          DIRECTORY_SEPARATOR.'config.yml', Yaml::dump($tmp, 4)
-        );
+        \file_put_contents($myDir .
+                          DIRECTORY_SEPARATOR . '..' .
+                          DIRECTORY_SEPARATOR . 'config' .
+                          DIRECTORY_SEPARATOR . 'config.yml', Yaml::dump($tmp, 4));
 
         return true;
     }

@@ -1,4 +1,5 @@
 <?php
+
 namespace GCWorld\ORM\Exceptions;
 
 use Exception;
@@ -24,7 +25,7 @@ class ModelOtherException extends Exception implements FieldException
         $this->field_name = $field_name;
 
         if (empty($message)) {
-            $message = \ucwords(\implode(' ', \explode('_', $field_name))).' is a required field';
+            $message = \ucwords(\implode(' ', \explode('_', $field_name))) . ' is a required field';
         }
 
         parent::__construct($message, $code, $previous);
