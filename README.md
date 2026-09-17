@@ -17,7 +17,7 @@ application remains responsible for database connections, its Common and user
 implementations, schema migrations, configuration, and when generation runs.
 
 ### Version
-6.4.34
+6.5.0
 
 ## Requirements
 
