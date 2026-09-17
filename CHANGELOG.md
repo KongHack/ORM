@@ -37,6 +37,11 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 - Expanded the README with installation, configuration, generation, runtime,
   caching, auditing, development, and release documentation.
 
+### Fixed
+
+- Removed Composer lifecycle references to the deleted Git hook setup script,
+  restoring clean dependency installation in CI and fresh checkouts.
+
 
 
 ## [6.4.34](https://github.com/KongHack/ORM/releases/tag/6.4.34)

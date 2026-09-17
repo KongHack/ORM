@@ -37,11 +37,7 @@
   },
   "scripts": {
     "post-autoload-dump": [
-      "bash contrib/setup.sh",
       "GCWorld\\ORM\\ComposerInstaller::setupConfig"
-    ],
-    "post-install-cmd": [
-      "bash contrib/setup.sh"
     ],
     "lint": "find src tests -name '*.php' -print0 | xargs -0 -n1 php -l",
     "phpstan": "phpstan analyse --no-progress --memory-limit=1G",
