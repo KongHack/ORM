@@ -147,7 +147,7 @@ must not be retained in change logs.
 
 ## Local development
 
-The supported local environment uses the public KongHack PHP 8.4 image:
+The supported local environment uses the public KongHack PHP 8.5 image:
 
 ```console
 ./dc up -d
